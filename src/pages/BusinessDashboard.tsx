@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { mockCashFlow2025, getBusinessLevel } from "@/data/mockData";
 import { formatCurrency } from "@/lib/formatters";
-import { DollarSign, TrendingUp, TrendingDown, Award, BarChart2 } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Award, Target, BarChart2 } from "lucide-react";
 import { 
   BarChart, 
   Bar, 
@@ -16,19 +16,14 @@ import {
   PieChart,
   Pie,
   Cell,
+  Legend
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { useData } from "@/contexts/DataContext";
-import { Skeleton } from "@/components/ui/skeleton";
 
-const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89% 48%)'];
-
-// NOTE: Since we don't have the logic to calculate mockCashFlow2025 from the fetched data yet, 
-// we will temporarily use the mock data structure but wrap the content in a loading check.
+const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89%, 48%)'];
 
 export default function BusinessDashboard() {
-  const { isLoading } = useData();
-  const data = mockCashFlow2025; // Temporary mock data usage until calculation logic is implemented
+  const data = mockCashFlow2025;
   const businessLevel = getBusinessLevel(data.totalProfit);
 
   const monthlyData = data.months.map(m => ({
@@ -59,33 +54,6 @@ export default function BusinessDashboard() {
     info: 'bg-info/10 border-info/30 text-info',
     success: 'bg-success/10 border-success/30 text-success',
   };
-
-  if (isLoading) {
-    return (
-      <div className="animate-fade-in space-y-6">
-        <PageHeader 
-          title="Dashboard do Negócio" 
-          description="Visão geral da performance do seu negócio"
-        >
-          <Skeleton className="w-32 h-9" />
-          <Skeleton className="w-40 h-9" />
-        </PageHeader>
-        <div className="space-y-4">
-          <Skeleton className="h-24 w-full" />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Skeleton className="h-96 w-full" />
-            <Skeleton className="h-96 w-full" />
-          </div>
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="animate-fade-in space-y-6">

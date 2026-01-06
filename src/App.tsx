@@ -2,10 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { DataProvider } from "@/contexts/DataContext";
-import { SessionContextProvider, ProtectedRoute } from "@/integrations/supabase/auth";
 import ProductsPage from "@/pages/ProductsPage";
 import CampaignsPage from "@/pages/CampaignsPage";
 import WeeklyResultsPage from "@/pages/WeeklyResultsPage";
@@ -16,21 +15,18 @@ import CampaignDashboard from "@/pages/CampaignDashboard";
 import BusinessDashboard from "@/pages/BusinessDashboard";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <SessionContextProvider>
-        <DataProvider>
-          <Toaster />
-          <Sonner />
+      <DataProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
-            
-            <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+            <Route path="/" element={<AppLayout />}>
               <Route index element={<Navigate to="/dashboard/negocio" replace />} />
               <Route path="produtos" element={<ProductsPage />} />
               <Route path="campanhas" element={<CampaignsPage />} />
@@ -44,8 +40,8 @@ const App = () => (
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </DataProvider>
-      </SessionContextProvider>
+        </BrowserRouter>
+      </DataProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
