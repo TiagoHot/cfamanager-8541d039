@@ -3,9 +3,10 @@ export interface Product {
   date: string;
   productNumber: number;
   name: string;
+  niche?: string;
   platform: string;
-  country: 'Brasil' | 'Gringa';
-  currency: 'Real' | 'Dólar' | 'Euro';
+  country: string;
+  currency: string;
   averageTicket: number;
   commissionPercent: number;
   commissionBRL: number;
@@ -20,8 +21,9 @@ export interface CampaignResult {
   endDate: string;
   daysRunning: number;
   productName: string;
-  location: 'Brasil' | 'Gringa';
-  strategy: 'Pesquisa' | 'Display';
+  niche?: string;
+  location: string;
+  strategy: string;
   commissionBRL: number;
   impressions: number;
   clicks: number;

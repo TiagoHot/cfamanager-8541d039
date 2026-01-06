@@ -2,10 +2,11 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download } from "lucide-react";
-import { mockProducts } from "@/data/mockData";
+import { Plus, Download, Upload } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { Product } from "@/types";
+import { useData } from "@/contexts/DataContext";
+import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 
 const columns = [
   {
@@ -79,12 +80,20 @@ const columns = [
 ];
 
 export default function ProductsPage() {
+  const { products, importData } = useData();
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
         title="Produtos" 
         description="Gerencie seu catálogo de produtos afiliados"
       >
+        <ImportExcelDialog onImportComplete={importData}>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Excel
+          </Button>
+        </ImportExcelDialog>
         <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
           Exportar
@@ -96,7 +105,7 @@ export default function ProductsPage() {
       </PageHeader>
 
       <DataTable 
-        data={mockProducts} 
+        data={products} 
         columns={columns}
       />
     </div>

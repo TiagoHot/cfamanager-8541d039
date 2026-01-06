@@ -3,10 +3,11 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { mockIncomeExpenses } from "@/data/mockData";
+import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { IncomeExpense } from "@/types";
+import { useData } from "@/contexts/DataContext";
+import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 
 const incomeColumns = [
   {
@@ -87,8 +88,9 @@ const expenseColumns = [
 ];
 
 export default function FinancialPage() {
-  const incomes = mockIncomeExpenses.filter(item => item.type === 'income');
-  const expenses = mockIncomeExpenses.filter(item => item.type === 'expense');
+  const { incomeExpenses, importData } = useData();
+  const incomes = incomeExpenses.filter(item => item.type === 'income');
+  const expenses = incomeExpenses.filter(item => item.type === 'expense');
 
   return (
     <div className="animate-fade-in">
@@ -96,6 +98,12 @@ export default function FinancialPage() {
         title="Receitas & Despesas" 
         description="Gerencie todas as suas entradas e saídas financeiras"
       >
+        <ImportExcelDialog onImportComplete={importData}>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Excel
+          </Button>
+        </ImportExcelDialog>
         <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
           Exportar

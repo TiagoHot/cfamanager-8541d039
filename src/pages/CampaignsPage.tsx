@@ -2,12 +2,13 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Filter } from "lucide-react";
-import { mockCampaignResults } from "@/data/mockData";
+import { Plus, Download, Filter, Upload } from "lucide-react";
 import { formatCurrency, formatNumber, formatPercent, getProfitLossColor, getROIColor } from "@/lib/formatters";
 import { CampaignResult } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useData } from "@/contexts/DataContext";
+import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 
 const columns = [
   {
@@ -116,6 +117,8 @@ const columns = [
 ];
 
 export default function CampaignsPage() {
+  const { campaigns, importData } = useData();
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
@@ -132,6 +135,12 @@ export default function CampaignsPage() {
             <SelectItem value="2023">2023</SelectItem>
           </SelectContent>
         </Select>
+        <ImportExcelDialog onImportComplete={importData}>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Excel
+          </Button>
+        </ImportExcelDialog>
         <Button variant="outline" size="sm">
           <Filter className="w-4 h-4 mr-2" />
           Filtros
@@ -147,7 +156,7 @@ export default function CampaignsPage() {
       </PageHeader>
 
       <DataTable 
-        data={mockCampaignResults} 
+        data={campaigns} 
         columns={columns}
       />
     </div>
