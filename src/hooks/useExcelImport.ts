@@ -194,38 +194,75 @@ export const useExcelImport = () => {
   };
 
   // Page 1: Análise de Produtos
-  // Columns: Data | Produto N° | Nome do Produto | Plataforma | País | Moeda | Ticket Médio | Comissão % | Comissão em R$
+  // Based on log: "data produto n° ... nome do produto plataforma país moeda ticket médio comissão % comissão em r$"
+  // Actual columns: Data | Produto N° | Nome do Produto | Plataforma | País | Moeda | Ticket Médio | Comissão % | Comissão em R$
+  // Index:           0   |     1      |        2        |     3      |   4  |   5   |      6       |     7      |       8
   const parseProducts = (sheet: XLSX.WorkSheet): Product[] => {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
     const products: Product[] = [];
     
-    const headerRowIndex = findHeaderRow(data, ['nome do produto', 'ticket médio', 'comissão']);
-    console.log('Products - Header row index:', headerRowIndex);
+    // Find header row - look for "nome do produto" or "ticket médio"
+    let headerRowIndex = -1;
+    let colMap: { [key: string]: number } = {};
+    
+    for (let i = 0; i < Math.min(15, data.length); i++) {
+      const row = data[i];
+      if (!row) continue;
+      
+      for (let j = 0; j < row.length; j++) {
+        const cell = String(row[j] || '').toLowerCase().trim();
+        if (cell.includes('nome do produto')) {
+          headerRowIndex = i;
+          // Map column indices based on this row
+          for (let k = 0; k < row.length; k++) {
+            const header = String(row[k] || '').toLowerCase().trim();
+            if (header.includes('data')) colMap['date'] = k;
+            if (header.includes('produto n')) colMap['productNumber'] = k;
+            if (header.includes('nome do produto')) colMap['name'] = k;
+            if (header.includes('plataforma')) colMap['platform'] = k;
+            if (header.includes('país')) colMap['country'] = k;
+            if (header.includes('moeda')) colMap['currency'] = k;
+            if (header.includes('ticket médio')) colMap['averageTicket'] = k;
+            if (header.includes('comissão %')) colMap['commissionPercent'] = k;
+            if (header.includes('comissão em r$')) colMap['commissionBRL'] = k;
+          }
+          break;
+        }
+      }
+      if (headerRowIndex >= 0) break;
+    }
+    
+    console.log('Products - Header row index:', headerRowIndex, 'Column map:', colMap);
+    
+    if (headerRowIndex < 0) {
+      console.log('Products - Could not find header row');
+      return products;
+    }
     
     for (let i = headerRowIndex + 1; i < data.length; i++) {
       const row = data[i];
       if (!row) continue;
       
-      // Skip empty rows or rows without product number
-      const productNumber = parseNumber(row[1]);
+      // Get product number
+      const productNumber = parseNumber(row[colMap['productNumber'] ?? 1]);
       if (!productNumber || productNumber === 0) continue;
       
-      const name = String(row[2] || '').trim();
+      const name = String(row[colMap['name'] ?? 2] || '').trim();
       if (!name) continue;
       
-      const currency = String(row[5] || 'Real').trim();
-      const averageTicket = parseNumber(row[6]);
-      const commissionPercent = parsePercentage(row[7]);
-      const commissionBRL = parseNumber(row[8]) || calculateCommissionBRL(averageTicket, commissionPercent, currency);
+      const currency = String(row[colMap['currency'] ?? 5] || 'Real').trim();
+      const averageTicket = parseNumber(row[colMap['averageTicket'] ?? 6]);
+      const commissionPercent = parsePercentage(row[colMap['commissionPercent'] ?? 7]);
+      const commissionBRL = parseNumber(row[colMap['commissionBRL'] ?? 8]) || calculateCommissionBRL(averageTicket, commissionPercent, currency);
       
       products.push({
         id: `prod-${i}`,
-        date: parseExcelDate(row[0]),
+        date: parseExcelDate(row[colMap['date'] ?? 0]),
         productNumber,
         name,
         niche: '',
-        platform: String(row[3] || '').trim(),
-        country: String(row[4] || 'Brasil').trim(),
+        platform: String(row[colMap['platform'] ?? 3] || '').trim(),
+        country: String(row[colMap['country'] ?? 4] || 'Brasil').trim(),
         currency,
         averageTicket,
         commissionPercent,
@@ -238,43 +275,86 @@ export const useExcelImport = () => {
   };
 
   // Page 2: Controle dos Resultados
-  // Columns: Mês | Início | Fim | Dias | Produto | Local | Estratégia | Comissão R$ | Impressões | Cliques | Vendas | CPC | Ganhos | Custos | Lucro | ROI
-  // Index:    0  |   1    |  2  |  3   |    4    |   5   |     6      |      7      |     8      |    9    |   10   |  11 |   12   |   13   |  14   |  15
+  // Based on log: "ano mês 2 mês início da campanha fim da campanha nº de dias rodando nome do produto local estratégia comissão em r$ impressões cliques nº de vendas cpc"
+  // Actual columns: Ano | Mês 2 | Mês | Início | Fim | Dias | Nome do Produto | Local | Estratégia | Comissão R$ | Impressões | Cliques | Vendas | CPC | Ganhos | Custos | Lucro | ROI
   const parseCampaigns = (sheet: XLSX.WorkSheet): CampaignResult[] => {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
     const campaigns: CampaignResult[] = [];
     
-    const headerRowIndex = findHeaderRow(data, ['mês', 'início', 'impressões', 'cliques', 'roi']);
-    console.log('Campaigns - Header row index:', headerRowIndex);
+    // Find header row and map columns dynamically
+    let headerRowIndex = -1;
+    let colMap: { [key: string]: number } = {};
+    
+    for (let i = 0; i < Math.min(15, data.length); i++) {
+      const row = data[i];
+      if (!row) continue;
+      
+      const rowText = row.map((cell: any) => String(cell || '').toLowerCase().trim()).join(' ');
+      if (rowText.includes('nome do produto') && rowText.includes('impressões')) {
+        headerRowIndex = i;
+        // Map column indices
+        for (let k = 0; k < row.length; k++) {
+          const header = String(row[k] || '').toLowerCase().trim();
+          if (header === 'ano') colMap['year'] = k;
+          if (header === 'mês' && !colMap['month']) colMap['month'] = k;
+          if (header.includes('início')) colMap['startDate'] = k;
+          if (header.includes('fim')) colMap['endDate'] = k;
+          if (header.includes('dias')) colMap['days'] = k;
+          if (header.includes('nome do produto') || header === 'produto') colMap['productName'] = k;
+          if (header === 'local') colMap['location'] = k;
+          if (header.includes('estratégia')) colMap['strategy'] = k;
+          if (header.includes('comissão')) colMap['commission'] = k;
+          if (header.includes('impressões')) colMap['impressions'] = k;
+          if (header.includes('cliques')) colMap['clicks'] = k;
+          if (header.includes('vendas')) colMap['sales'] = k;
+          if (header === 'cpc') colMap['cpc'] = k;
+          if (header.includes('ganhos') || header.includes('receita')) colMap['earnings'] = k;
+          if (header.includes('custos') || header.includes('despesa')) colMap['costs'] = k;
+          if (header.includes('lucro') || header.includes('prejuízo')) colMap['profitLoss'] = k;
+          if (header === 'roi' || header === 'roi %') colMap['roi'] = k;
+        }
+        break;
+      }
+    }
+    
+    console.log('Campaigns - Header row index:', headerRowIndex, 'Column map:', colMap);
+    
+    if (headerRowIndex < 0) {
+      console.log('Campaigns - Could not find header row');
+      return campaigns;
+    }
     
     for (let i = headerRowIndex + 1; i < data.length; i++) {
       const row = data[i];
       if (!row) continue;
       
-      // Get month from first column
-      const monthStr = String(row[0] || '').toLowerCase().trim();
-      const monthNumber = getMonthNumber(monthStr);
-      if (!monthNumber) continue; // Skip if not a valid month
-      
-      // Get product name from column 4
-      const productName = String(row[4] || '').trim();
-      if (!productName) continue; // Skip if no product name
-      
-      // Parse dates and extract year
-      const startDateStr = parseExcelDate(row[1]);
-      const endDateStr = parseExcelDate(row[2]);
-      
-      // Extract year from start date
-      let year = 2024;
-      if (startDateStr && startDateStr.includes('-')) {
-        year = parseInt(startDateStr.substring(0, 4));
+      // Get year - try year column first, then extract from date
+      let year = parseNumber(row[colMap['year'] ?? 0]);
+      if (!year || year < 2000 || year > 2100) {
+        const startDateStr = parseExcelDate(row[colMap['startDate']]);
+        if (startDateStr && startDateStr.includes('-')) {
+          year = parseInt(startDateStr.substring(0, 4));
+        }
       }
+      if (!year || year < 2000) continue;
       
-      const earnings = parseNumber(row[12]);
-      const costs = parseNumber(row[13]);
-      const clicks = parseNumber(row[9]);
-      const profitLoss = parseNumber(row[14]) || (earnings - costs);
-      const roi = parsePercentage(row[15]) || (costs > 0 ? ((earnings - costs) / costs) * 100 : 0);
+      // Get month
+      const monthStr = String(row[colMap['month'] ?? 2] || '').toLowerCase().trim();
+      const monthNumber = getMonthNumber(monthStr);
+      if (!monthNumber) continue;
+      
+      // Get product name
+      const productName = String(row[colMap['productName']] || '').trim();
+      if (!productName) continue;
+      
+      const startDateStr = parseExcelDate(row[colMap['startDate']]);
+      const endDateStr = parseExcelDate(row[colMap['endDate']]);
+      
+      const earnings = parseNumber(row[colMap['earnings']]);
+      const costs = parseNumber(row[colMap['costs']]);
+      const clicks = parseNumber(row[colMap['clicks']]);
+      const profitLoss = parseNumber(row[colMap['profitLoss']]) || (earnings - costs);
+      const roi = parsePercentage(row[colMap['roi']]) || (costs > 0 ? ((earnings - costs) / costs) * 100 : 0);
       
       campaigns.push({
         id: `camp-${campaigns.length + 1}`,
@@ -283,16 +363,16 @@ export const useExcelImport = () => {
         month: capitalize(monthStr.split('/')[0]),
         startDate: startDateStr,
         endDate: endDateStr,
-        daysRunning: parseNumber(row[3]),
+        daysRunning: parseNumber(row[colMap['days']]),
         productName,
         niche: '',
-        location: String(row[5] || 'Brasil').trim(),
-        strategy: String(row[6] || 'Pesquisa').trim(),
-        commissionBRL: parseNumber(row[7]),
-        impressions: parseNumber(row[8]),
+        location: String(row[colMap['location']] || 'Brasil').trim(),
+        strategy: String(row[colMap['strategy']] || 'Pesquisa').trim(),
+        commissionBRL: parseNumber(row[colMap['commission']]),
+        impressions: parseNumber(row[colMap['impressions']]),
         clicks,
-        sales: parseNumber(row[10]),
-        cpc: parseNumber(row[11]) || (clicks > 0 ? costs / clicks : 0),
+        sales: parseNumber(row[colMap['sales']]),
+        cpc: parseNumber(row[colMap['cpc']]) || (clicks > 0 ? costs / clicks : 0),
         earnings,
         costs,
         profitLoss,
@@ -354,69 +434,110 @@ export const useExcelImport = () => {
   };
 
   // Page 4: Receitas e Despesas
-  // Layout: Receitas (cols 0-4) | gap | Despesas (cols 6-10)
-  // Receitas: Mês | Data | Fonte da Receita | Detalhamento | Valor R$
-  // Index:     0  |  1   |        2         |       3      |    4
-  // Despesas: Mês | Data | Fonte da Despesa | Detalhamento | Valor R$
-  // Index:     6  |  7   |        8         |       9      |   10
+  // Based on log: "ano mês 2 mês data fonte da receita detalhamento valor r$ ano mês 2 mês data fonte da despesa detalhamento valor r$"
+  // Layout: Receitas (Ano | Mês2 | Mês | Data | Fonte | Detalhes | Valor) | gap | Despesas (Ano | Mês2 | Mês | Data | Fonte | Detalhes | Valor)
   const parseIncomeExpenses = (sheet: XLSX.WorkSheet): IncomeExpense[] => {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
     const items: IncomeExpense[] = [];
     
-    const headerRowIndex = findHeaderRow(data, ['fonte da receita', 'fonte da despesa']);
-    console.log('IncomeExpenses - Header row index:', headerRowIndex);
+    // Find header row and map columns
+    let headerRowIndex = -1;
+    let incomeColStart = -1;
+    let expenseColStart = -1;
     
+    for (let i = 0; i < Math.min(15, data.length); i++) {
+      const row = data[i];
+      if (!row) continue;
+      
+      for (let j = 0; j < row.length; j++) {
+        const cell = String(row[j] || '').toLowerCase().trim();
+        if (cell.includes('fonte da receita') && incomeColStart < 0) {
+          headerRowIndex = i;
+          // Find the start of income columns (look backwards for "ano" or "mês")
+          for (let k = j - 1; k >= 0; k--) {
+            const prevCell = String(row[k] || '').toLowerCase().trim();
+            if (prevCell === 'ano' || prevCell.includes('mês')) {
+              incomeColStart = k;
+              break;
+            }
+          }
+          if (incomeColStart < 0) incomeColStart = j - 3; // fallback
+        }
+        if (cell.includes('fonte da despesa') && expenseColStart < 0) {
+          // Find the start of expense columns
+          for (let k = j - 1; k >= 0; k--) {
+            const prevCell = String(row[k] || '').toLowerCase().trim();
+            if (prevCell === 'ano' || prevCell.includes('mês')) {
+              expenseColStart = k;
+              break;
+            }
+          }
+          if (expenseColStart < 0) expenseColStart = j - 3; // fallback
+        }
+      }
+      if (headerRowIndex >= 0) break;
+    }
+    
+    console.log('IncomeExpenses - Header row index:', headerRowIndex, 'Income start:', incomeColStart, 'Expense start:', expenseColStart);
+    
+    if (headerRowIndex < 0) {
+      console.log('IncomeExpenses - Could not find header row');
+      return items;
+    }
+    
+    // Based on structure: Ano(0) | Mês2(1) | Mês(2) | Data(3) | Fonte(4) | Detalhamento(5) | Valor(6)
+    // Offset columns from each section start
     for (let i = headerRowIndex + 1; i < data.length; i++) {
       const row = data[i];
       if (!row) continue;
       
-      // Parse income (left side: columns 0-4)
-      const incomeMonthStr = String(row[0] || '').toLowerCase().trim();
-      const incomeMonthNum = getMonthNumber(incomeMonthStr);
-      if (incomeMonthNum) {
-        const incomeAmount = parseNumber(row[4]);
-        if (incomeAmount > 0) {
-          const dateStr = parseExcelDate(row[1]);
-          let year = 2024;
-          if (dateStr && dateStr.includes('-')) {
-            year = parseInt(dateStr.substring(0, 4));
-          }
+      // Parse income (left side)
+      if (incomeColStart >= 0) {
+        const incomeYear = parseNumber(row[incomeColStart]);
+        const incomeMonthStr = String(row[incomeColStart + 2] || '').toLowerCase().trim();
+        const incomeMonthNum = getMonthNumber(incomeMonthStr);
+        
+        if (incomeYear >= 2000 && incomeMonthNum) {
+          const incomeAmount = parseNumber(row[incomeColStart + 6]);
+          const source = String(row[incomeColStart + 4] || '').trim();
           
-          items.push({
-            id: `income-${items.length + 1}`,
-            type: 'income',
-            year,
-            month: capitalize(incomeMonthStr.split('/')[0]),
-            date: dateStr,
-            source: String(row[2] || '').trim(),
-            details: String(row[3] || '').trim(),
-            amount: incomeAmount,
-          });
+          if (incomeAmount > 0 && source) {
+            items.push({
+              id: `income-${items.length + 1}`,
+              type: 'income',
+              year: incomeYear,
+              month: capitalize(incomeMonthStr.split('/')[0]),
+              date: parseExcelDate(row[incomeColStart + 3]),
+              source,
+              details: String(row[incomeColStart + 5] || '').trim(),
+              amount: incomeAmount,
+            });
+          }
         }
       }
       
-      // Parse expenses (right side: columns 6-10)
-      const expenseMonthStr = String(row[6] || '').toLowerCase().trim();
-      const expenseMonthNum = getMonthNumber(expenseMonthStr);
-      if (expenseMonthNum) {
-        const expenseAmount = parseNumber(row[10]);
-        if (expenseAmount > 0) {
-          const dateStr = parseExcelDate(row[7]);
-          let year = 2024;
-          if (dateStr && dateStr.includes('-')) {
-            year = parseInt(dateStr.substring(0, 4));
-          }
+      // Parse expenses (right side)
+      if (expenseColStart >= 0) {
+        const expenseYear = parseNumber(row[expenseColStart]);
+        const expenseMonthStr = String(row[expenseColStart + 2] || '').toLowerCase().trim();
+        const expenseMonthNum = getMonthNumber(expenseMonthStr);
+        
+        if (expenseYear >= 2000 && expenseMonthNum) {
+          const expenseAmount = parseNumber(row[expenseColStart + 6]);
+          const source = String(row[expenseColStart + 4] || '').trim();
           
-          items.push({
-            id: `expense-${items.length + 1}`,
-            type: 'expense',
-            year,
-            month: capitalize(expenseMonthStr.split('/')[0]),
-            date: dateStr,
-            source: String(row[8] || '').trim(),
-            details: String(row[9] || '').trim(),
-            amount: expenseAmount,
-          });
+          if (expenseAmount > 0 && source) {
+            items.push({
+              id: `expense-${items.length + 1}`,
+              type: 'expense',
+              year: expenseYear,
+              month: capitalize(expenseMonthStr.split('/')[0]),
+              date: parseExcelDate(row[expenseColStart + 3]),
+              source,
+              details: String(row[expenseColStart + 5] || '').trim(),
+              amount: expenseAmount,
+            });
+          }
         }
       }
     }
