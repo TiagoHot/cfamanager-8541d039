@@ -1,11 +1,12 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Plus, Download } from "lucide-react";
-import { mockWeeklyResults } from "@/data/mockData";
+import { Plus, Download, Upload } from "lucide-react";
 import { formatCurrency, getProfitLossColor } from "@/lib/formatters";
 import { WeeklyResult } from "@/types";
 import { cn } from "@/lib/utils";
+import { useData } from "@/contexts/DataContext";
+import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 
 const columns = [
   {
@@ -95,12 +96,20 @@ const columns = [
 ];
 
 export default function WeeklyResultsPage() {
+  const { weeklyResults, importData } = useData();
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
         title="Resultados Semanais" 
         description="Acompanhe seus resultados semana a semana"
       >
+        <ImportExcelDialog onImportComplete={importData}>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Excel
+          </Button>
+        </ImportExcelDialog>
         <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
           Exportar
@@ -112,7 +121,7 @@ export default function WeeklyResultsPage() {
       </PageHeader>
 
       <DataTable 
-        data={mockWeeklyResults} 
+        data={weeklyResults} 
         columns={columns}
       />
     </div>
