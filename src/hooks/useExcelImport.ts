@@ -324,42 +324,45 @@ export const useExcelImport = () => {
   const detectSheetType = (sheet: XLSX.WorkSheet): 'products' | 'campaigns' | 'weekly' | 'incomeExpenses' | 'unknown' => {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
     
-    // Check first 15 rows for identifying headers
-    for (let i = 0; i < Math.min(15, data.length); i++) {
+    // Combine all text from first 20 rows for analysis
+    let allText = '';
+    for (let i = 0; i < Math.min(20, data.length); i++) {
       const row = data[i];
       if (!row) continue;
-      
-      const rowText = row.map((cell: any) => String(cell || '').toLowerCase()).join(' ');
-      
-      // Income/Expenses: Has "Fonte da Receita" or "Fonte da Despesa" (check first - most specific)
-      if (rowText.includes('fonte da receita') || rowText.includes('fonte da despesa') || 
-          rowText.includes('receitas e despesas')) {
-        return 'incomeExpenses';
-      }
-      
-      // Weekly: Has "Semana" column with "Ano", "Período", "Custo Campanhas" or "Ganhos Orgânico"
-      if ((rowText.includes('semana') && rowText.includes('ano') && rowText.includes('período')) ||
-          (rowText.includes('custo campanhas') || rowText.includes('ganhos orgânico') || rowText.includes('adsense'))) {
-        return 'weekly';
-      }
-      
-      // Products: Has "Ticket Médio", "Comissão %", or "Análise de Produtos"
-      if (rowText.includes('ticket médio') || rowText.includes('comissão %') || 
-          rowText.includes('análise de produtos') ||
-          (rowText.includes('nome do produto') && rowText.includes('plataforma') && !rowText.includes('início'))) {
-        return 'products';
-      }
-      
-      // Campaigns: Has "Início" + "Fim" + "Estratégia" OR "Impressões" + "Cliques" + "ROI"
-      // Also check for "Controle dos Resultados"
-      if (rowText.includes('controle dos resultados') ||
-          (rowText.includes('início') && rowText.includes('fim') && rowText.includes('estratégia')) ||
-          (rowText.includes('impressões') && rowText.includes('cliques') && rowText.includes('roi')) ||
-          (rowText.includes('mês') && rowText.includes('produto') && rowText.includes('local') && rowText.includes('estratégia'))) {
-        return 'campaigns';
-      }
+      allText += ' ' + row.map((cell: any) => String(cell || '').toLowerCase()).join(' ');
     }
     
+    console.log('Sheet detection - analyzing text sample:', allText.substring(0, 500));
+    
+    // Income/Expenses: Has "Fonte da Receita" or "Fonte da Despesa" or title "Receitas e Despesas"
+    if (allText.includes('fonte da receita') || allText.includes('fonte da despesa')) {
+      console.log('Detected: incomeExpenses (found fonte da receita/despesa)');
+      return 'incomeExpenses';
+    }
+    
+    // Weekly: Has "Resultados da Semana" title OR specific weekly columns
+    if (allText.includes('resultados da semana') || 
+        (allText.includes('semana') && allText.includes('custo campanhas') && allText.includes('ganhos campanhas'))) {
+      console.log('Detected: weekly (found resultados da semana or weekly columns)');
+      return 'weekly';
+    }
+    
+    // Products: Has "Análise de Produtos" title OR "Ticket Médio" + "Comissão"
+    if (allText.includes('análise de produtos') || 
+        (allText.includes('ticket médio') && allText.includes('comissão'))) {
+      console.log('Detected: products (found análise de produtos or ticket médio)');
+      return 'products';
+    }
+    
+    // Campaigns: Has "Controle dos Resultados" title OR campaign-specific columns
+    if (allText.includes('controle dos resultados') ||
+        (allText.includes('impressões') && allText.includes('cliques') && allText.includes('roi')) ||
+        (allText.includes('início') && allText.includes('fim') && allText.includes('estratégia') && allText.includes('custos'))) {
+      console.log('Detected: campaigns (found controle dos resultados or campaign columns)');
+      return 'campaigns';
+    }
+    
+    console.log('Detected: unknown');
     return 'unknown';
   };
 
