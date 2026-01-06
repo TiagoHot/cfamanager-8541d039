@@ -16,7 +16,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend // Adicionado Legend
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
@@ -106,7 +105,7 @@ export default function BusinessDashboard() {
         <Select defaultValue="all">
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Mês" />
-            </SelectTrigger>
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os Meses</SelectItem>
             <SelectItem value="12">Dezembro</SelectItem>
@@ -308,7 +307,7 @@ export default function BusinessDashboard() {
                   <td className="py-3 px-4">Todos os Meses</td>
                   <td className="py-3 px-4 text-right font-mono text-success">{formatCurrency(data.totalIncome)}</td>
                   <td className="py-3 px-4 text-right font-mono text-destructive">{formatCurrency(data.totalExpenses)}</td>
-                    <td className={cn("py-3 px-4 text-right font-mono", data.totalProfit >= 0 ? 'text-success' : 'text-destructive')}>
+                  <td className={cn("py-3 px-4 text-right font-mono", data.totalProfit >= 0 ? 'text-success' : 'text-destructive')}>
                     {formatCurrency(data.totalProfit)}
                   </td>
                 </tr>
