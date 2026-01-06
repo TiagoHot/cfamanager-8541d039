@@ -320,38 +320,43 @@ export const useExcelImport = () => {
     return items;
   };
 
-  // Detect sheet type by analyzing headers
+  // Detect sheet type by analyzing headers and content
   const detectSheetType = (sheet: XLSX.WorkSheet): 'products' | 'campaigns' | 'weekly' | 'incomeExpenses' | 'unknown' => {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
     
-    // Check first 10 rows for identifying headers
-    for (let i = 0; i < Math.min(10, data.length); i++) {
+    // Check first 15 rows for identifying headers
+    for (let i = 0; i < Math.min(15, data.length); i++) {
       const row = data[i];
       if (!row) continue;
       
       const rowText = row.map((cell: any) => String(cell || '').toLowerCase()).join(' ');
       
-      // Products: Has "Nome do Produto", "Plataforma", "Ticket Médio", "Comissão %"
-      if (rowText.includes('ticket médio') || rowText.includes('comissão %') || 
-          (rowText.includes('nome do produto') && rowText.includes('plataforma'))) {
-        return 'products';
+      // Income/Expenses: Has "Fonte da Receita" or "Fonte da Despesa" (check first - most specific)
+      if (rowText.includes('fonte da receita') || rowText.includes('fonte da despesa') || 
+          rowText.includes('receitas e despesas')) {
+        return 'incomeExpenses';
       }
       
-      // Campaigns: Has "Mês", "Impressões", "Cliques", "ROI", "Estratégia"
-      if ((rowText.includes('impressões') && rowText.includes('cliques')) ||
-          (rowText.includes('roi') && rowText.includes('estratégia')) ||
-          (rowText.includes('mês') && rowText.includes('ganhos') && rowText.includes('custos'))) {
-        return 'campaigns';
-      }
-      
-      // Weekly: Has "Semana", "Custo Campanhas", "Ganhos Orgânico", "Adsense"
-      if (rowText.includes('semana') && (rowText.includes('custo campanhas') || rowText.includes('ganhos orgânico') || rowText.includes('adsense'))) {
+      // Weekly: Has "Semana" column with "Ano", "Período", "Custo Campanhas" or "Ganhos Orgânico"
+      if ((rowText.includes('semana') && rowText.includes('ano') && rowText.includes('período')) ||
+          (rowText.includes('custo campanhas') || rowText.includes('ganhos orgânico') || rowText.includes('adsense'))) {
         return 'weekly';
       }
       
-      // Income/Expenses: Has "Fonte da Receita", "Fonte da Despesa"
-      if (rowText.includes('fonte da receita') || rowText.includes('fonte da despesa')) {
-        return 'incomeExpenses';
+      // Products: Has "Ticket Médio", "Comissão %", or "Análise de Produtos"
+      if (rowText.includes('ticket médio') || rowText.includes('comissão %') || 
+          rowText.includes('análise de produtos') ||
+          (rowText.includes('nome do produto') && rowText.includes('plataforma') && !rowText.includes('início'))) {
+        return 'products';
+      }
+      
+      // Campaigns: Has "Início" + "Fim" + "Estratégia" OR "Impressões" + "Cliques" + "ROI"
+      // Also check for "Controle dos Resultados"
+      if (rowText.includes('controle dos resultados') ||
+          (rowText.includes('início') && rowText.includes('fim') && rowText.includes('estratégia')) ||
+          (rowText.includes('impressões') && rowText.includes('cliques') && rowText.includes('roi')) ||
+          (rowText.includes('mês') && rowText.includes('produto') && rowText.includes('local') && rowText.includes('estratégia'))) {
+        return 'campaigns';
       }
     }
     
