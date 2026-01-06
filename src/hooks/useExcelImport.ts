@@ -320,6 +320,44 @@ export const useExcelImport = () => {
     return items;
   };
 
+  // Detect sheet type by analyzing headers
+  const detectSheetType = (sheet: XLSX.WorkSheet): 'products' | 'campaigns' | 'weekly' | 'incomeExpenses' | 'unknown' => {
+    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
+    
+    // Check first 10 rows for identifying headers
+    for (let i = 0; i < Math.min(10, data.length); i++) {
+      const row = data[i];
+      if (!row) continue;
+      
+      const rowText = row.map((cell: any) => String(cell || '').toLowerCase()).join(' ');
+      
+      // Products: Has "Nome do Produto", "Plataforma", "Ticket Médio", "Comissão %"
+      if (rowText.includes('ticket médio') || rowText.includes('comissão %') || 
+          (rowText.includes('nome do produto') && rowText.includes('plataforma'))) {
+        return 'products';
+      }
+      
+      // Campaigns: Has "Mês", "Impressões", "Cliques", "ROI", "Estratégia"
+      if ((rowText.includes('impressões') && rowText.includes('cliques')) ||
+          (rowText.includes('roi') && rowText.includes('estratégia')) ||
+          (rowText.includes('mês') && rowText.includes('ganhos') && rowText.includes('custos'))) {
+        return 'campaigns';
+      }
+      
+      // Weekly: Has "Semana", "Custo Campanhas", "Ganhos Orgânico", "Adsense"
+      if (rowText.includes('semana') && (rowText.includes('custo campanhas') || rowText.includes('ganhos orgânico') || rowText.includes('adsense'))) {
+        return 'weekly';
+      }
+      
+      // Income/Expenses: Has "Fonte da Receita", "Fonte da Despesa"
+      if (rowText.includes('fonte da receita') || rowText.includes('fonte da despesa')) {
+        return 'incomeExpenses';
+      }
+    }
+    
+    return 'unknown';
+  };
+
   const importFromFile = async (file: File): Promise<ImportResult> => {
     setIsImporting(true);
     setError(null);
@@ -342,36 +380,54 @@ export const useExcelImport = () => {
       const sheetNames = workbook.SheetNames;
       console.log('Sheet names found:', sheetNames);
       
-      // Sheet 1: Análise de Produtos (Products)
-      if (sheetNames[0]) {
-        console.log('Parsing products from sheet:', sheetNames[0]);
-        result.products = parseProducts(workbook.Sheets[sheetNames[0]]);
-        console.log('Products parsed:', result.products.length);
-        setProgress(50);
-      }
+      const progressPerSheet = 50 / sheetNames.length;
       
-      // Sheet 2: Controle dos Resultados (Campaign Results)
-      if (sheetNames[1]) {
-        console.log('Parsing campaigns from sheet:', sheetNames[1]);
-        result.campaigns = parseCampaigns(workbook.Sheets[sheetNames[1]]);
-        console.log('Campaigns parsed:', result.campaigns.length);
-        setProgress(60);
-      }
-      
-      // Sheet 3: Resultados da Semana (Weekly Results)
-      if (sheetNames[2]) {
-        console.log('Parsing weekly from sheet:', sheetNames[2]);
-        result.weekly = parseWeekly(workbook.Sheets[sheetNames[2]]);
-        console.log('Weekly results parsed:', result.weekly.length);
-        setProgress(70);
-      }
-      
-      // Sheet 4: Receitas e Despesas (Income & Expenses)
-      if (sheetNames[3]) {
-        console.log('Parsing income/expenses from sheet:', sheetNames[3]);
-        result.incomeExpenses = parseIncomeExpenses(workbook.Sheets[sheetNames[3]]);
-        console.log('Income/Expenses parsed:', result.incomeExpenses.length);
-        setProgress(90);
+      // Process each sheet by detecting its type from headers
+      for (let i = 0; i < sheetNames.length; i++) {
+        const sheetName = sheetNames[i];
+        const sheet = workbook.Sheets[sheetName];
+        const sheetType = detectSheetType(sheet);
+        
+        console.log(`Sheet "${sheetName}" detected as: ${sheetType}`);
+        
+        switch (sheetType) {
+          case 'products':
+            const products = parseProducts(sheet);
+            if (products.length > 0) {
+              result.products = [...result.products, ...products];
+              console.log(`Products parsed from "${sheetName}":`, products.length);
+            }
+            break;
+            
+          case 'campaigns':
+            const campaigns = parseCampaigns(sheet);
+            if (campaigns.length > 0) {
+              result.campaigns = [...result.campaigns, ...campaigns];
+              console.log(`Campaigns parsed from "${sheetName}":`, campaigns.length);
+            }
+            break;
+            
+          case 'weekly':
+            const weekly = parseWeekly(sheet);
+            if (weekly.length > 0) {
+              result.weekly = [...result.weekly, ...weekly];
+              console.log(`Weekly results parsed from "${sheetName}":`, weekly.length);
+            }
+            break;
+            
+          case 'incomeExpenses':
+            const incomeExpenses = parseIncomeExpenses(sheet);
+            if (incomeExpenses.length > 0) {
+              result.incomeExpenses = [...result.incomeExpenses, ...incomeExpenses];
+              console.log(`Income/Expenses parsed from "${sheetName}":`, incomeExpenses.length);
+            }
+            break;
+            
+          default:
+            console.log(`Sheet "${sheetName}" type not recognized, skipping`);
+        }
+        
+        setProgress(40 + (i + 1) * progressPerSheet);
       }
       
       setProgress(100);
