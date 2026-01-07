@@ -3,6 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Product, CampaignResult, WeeklyResult, IncomeExpense } from '@/types';
 
+// Helper to format dates to ISO format (YYYY-MM-DD)
+function formatDateToISO(dateValue: string | Date | null | undefined): string | null {
+  if (!dateValue) return null;
+  
+  try {
+    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString().split('T')[0];
+  } catch {
+    return null;
+  }
+}
+
 export function useSupabaseData() {
   const { user } = useAuth();
 
@@ -169,8 +182,8 @@ export function useSupabaseData() {
         year: c.year,
         month_number: c.monthNumber,
         month: c.month,
-        start_date: c.startDate || null,
-        end_date: c.endDate || null,
+        start_date: formatDateToISO(c.startDate),
+        end_date: formatDateToISO(c.endDate),
         days_running: c.daysRunning || null,
         product_name: c.productName,
         location: c.location || null,
@@ -240,7 +253,7 @@ export function useSupabaseData() {
         type: i.type,
         year: i.year,
         month: i.month,
-        date: i.date,
+        date: formatDateToISO(i.date) || new Date().toISOString().split('T')[0],
         source: i.source || null,
         details: i.details || null,
         amount: i.amount,
