@@ -66,12 +66,15 @@ export function ImportExcelDialog({ onImportComplete, children }: ImportExcelDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="import-dialog-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-primary" />
             Importar Planilha Excel
           </DialogTitle>
+          <p id="import-dialog-description" className="text-sm text-muted-foreground">
+            Importe seus dados de produtos, campanhas, resultados semanais e receitas/despesas.
+          </p>
         </DialogHeader>
 
         <div className="space-y-4">
