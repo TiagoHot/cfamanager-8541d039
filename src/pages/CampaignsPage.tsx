@@ -14,7 +14,6 @@ import { AddCampaignDialog } from "@/components/dialogs/AddCampaignDialog";
 import { exportCampaigns } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 const columns = [
   {
@@ -168,101 +167,101 @@ export default function CampaignsPage() {
   };
 
   return (
-    <div className="animate-fade-in">
-      <PageHeader 
-        title="Resultados de Campanhas" 
-        description="Acompanhe o desempenho de todas as suas campanhas"
-      >
-        <Select value={yearFilter} onValueChange={setYearFilter}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Ano" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Anos</SelectItem>
-            {years.map(y => (
-              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
+    <div className="animate-fade-in space-y-4 pt-6 pb-6">
+      <div className="sticky top-0 z-20 bg-background pt-0 pb-4 -mt-6">
+        <PageHeader 
+          title="Resultados de Campanhas" 
+          description="Acompanhe o desempenho de todas as suas campanhas"
+        >
+          <Select value={yearFilter} onValueChange={setYearFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Ano" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Anos</SelectItem>
+              {years.map(y => (
+                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
+                <Filter className="w-4 h-4 mr-2" />
+                Filtros
+                {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Filtros</h4>
+                  {hasFilters && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters}>
+                      <X className="w-4 h-4 mr-1" />
+                      Limpar
+                    </Button>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Mês</label>
+                  <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Meses</SelectItem>
+                      {MONTHS.map(m => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Produto</label>
+                  <Select value={productFilter} onValueChange={setProductFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Produtos</SelectItem>
+                      {uniqueProducts.map(p => (
+                        <SelectItem key={p} value={p}>{p}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <ImportExcelDialog onImportComplete={importData}>
+            <Button variant="outline" size="sm">
+              <Upload className="w-4 h-4 mr-2" />
+              Importar Excel
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80" align="end">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Filtros</h4>
-                {hasFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    <X className="w-4 h-4 mr-1" />
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mês</label>
-                <Select value={monthFilter} onValueChange={setMonthFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Meses</SelectItem>
-                    {MONTHS.map(m => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Produto</label>
-                <Select value={productFilter} onValueChange={setProductFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Produtos</SelectItem>
-                    {uniqueProducts.map(p => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        <ImportExcelDialog onImportComplete={importData}>
-          <Button variant="outline" size="sm">
-            <Upload className="w-4 h-4 mr-2" />
-            Importar Excel
+          </ImportExcelDialog>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="w-4 h-4 mr-2" />
+            Exportar
           </Button>
-        </ImportExcelDialog>
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="w-4 h-4 mr-2" />
-          Exportar
-        </Button>
-        <AddCampaignDialog onAdd={addCampaign} products={products}>
-          <Button size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Nova Campanha
-          </Button>
-        </AddCampaignDialog>
-      </PageHeader>
+          <AddCampaignDialog onAdd={addCampaign} products={products}>
+            <Button size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Campanha
+            </Button>
+          </AddCampaignDialog>
+        </PageHeader>
+      </div>
 
-      <PageContent>
-        <DataTable 
-          data={filteredCampaigns} 
-          columns={columns}
-          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
-        />
-      </PageContent>
+      <DataTable 
+        data={filteredCampaigns} 
+        columns={columns}
+        headerClassName="sticky top-[5rem] z-10 bg-background shadow-sm"
+      />
     </div>
   );
 }

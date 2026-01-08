@@ -28,7 +28,7 @@ export function AppLayout() {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+          <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
             <SidebarTrigger className="-ml-2" />
             <div className="flex-1" />
             
@@ -68,7 +68,7 @@ export function AppLayout() {
               </DropdownMenu>
             )}
           </header>
-          <main className="flex-1 p-6">
+          <main className="flex-1 px-6 py-0"> {/* Removed vertical padding here */}
             <Outlet />
           </main>
         </SidebarInset>
