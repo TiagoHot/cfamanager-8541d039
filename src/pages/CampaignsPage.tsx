@@ -1,14 +1,19 @@
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Filter, Upload } from "lucide-react";
+import { Plus, Download, Filter, Upload, X } from "lucide-react";
 import { formatCurrency, formatNumber, formatPercent, getProfitLossColor, getROIColor } from "@/lib/formatters";
-import { CampaignResult } from "@/types";
+import { CampaignResult, MONTHS } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
+import { AddCampaignDialog } from "@/components/dialogs/AddCampaignDialog";
+import { exportCampaigns } from "@/lib/exportData";
+import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const columns = [
   {
@@ -117,7 +122,49 @@ const columns = [
 ];
 
 export default function CampaignsPage() {
-  const { campaigns, importData } = useData();
+  const { campaigns, products, importData, addCampaign } = useData();
+  const currentYear = new Date().getFullYear();
+  
+  const [yearFilter, setYearFilter] = useState<string>("all");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
+  const [productFilter, setProductFilter] = useState<string>("all");
+
+  // Get unique years and products for filters
+  const years = useMemo(() => {
+    const uniqueYears = [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
+    return uniqueYears;
+  }, [campaigns]);
+
+  const uniqueProducts = useMemo(() => {
+    return [...new Set(campaigns.map(c => c.productName))].sort();
+  }, [campaigns]);
+
+  // Filter campaigns
+  const filteredCampaigns = useMemo(() => {
+    return campaigns.filter(c => {
+      if (yearFilter !== "all" && c.year !== parseInt(yearFilter)) return false;
+      if (monthFilter !== "all" && c.month !== monthFilter) return false;
+      if (productFilter !== "all" && c.productName !== productFilter) return false;
+      return true;
+    });
+  }, [campaigns, yearFilter, monthFilter, productFilter]);
+
+  const hasFilters = yearFilter !== "all" || monthFilter !== "all" || productFilter !== "all";
+
+  const clearFilters = () => {
+    setYearFilter("all");
+    setMonthFilter("all");
+    setProductFilter("all");
+  };
+
+  const handleExport = () => {
+    if (filteredCampaigns.length === 0) {
+      toast.error('Nenhuma campanha para exportar');
+      return;
+    }
+    exportCampaigns(filteredCampaigns);
+    toast.success('Campanhas exportadas com sucesso!');
+  };
 
   return (
     <div className="animate-fade-in">
@@ -125,38 +172,91 @@ export default function CampaignsPage() {
         title="Resultados de Campanhas" 
         description="Acompanhe o desempenho de todas as suas campanhas"
       >
-        <Select defaultValue="2025">
+        <Select value={yearFilter} onValueChange={setYearFilter}>
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Ano" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="2025">2025</SelectItem>
-            <SelectItem value="2024">2024</SelectItem>
-            <SelectItem value="2023">2023</SelectItem>
+            <SelectItem value="all">Todos os Anos</SelectItem>
+            {years.map(y => (
+              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
+        
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
+              <Filter className="w-4 h-4 mr-2" />
+              Filtros
+              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Filtros</h4>
+                {hasFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <X className="w-4 h-4 mr-1" />
+                    Limpar
+                  </Button>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Mês</label>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Meses</SelectItem>
+                    {MONTHS.map(m => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Produto</label>
+                <Select value={productFilter} onValueChange={setProductFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Produtos</SelectItem>
+                    {uniqueProducts.map(p => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
         <ImportExcelDialog onImportComplete={importData}>
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
             Importar Excel
           </Button>
         </ImportExcelDialog>
-        <Button variant="outline" size="sm">
-          <Filter className="w-4 h-4 mr-2" />
-          Filtros
-        </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="w-4 h-4 mr-2" />
           Exportar
         </Button>
-        <Button size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Campanha
-        </Button>
+        <AddCampaignDialog onAdd={addCampaign} products={products}>
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Campanha
+          </Button>
+        </AddCampaignDialog>
       </PageHeader>
 
       <DataTable 
-        data={campaigns} 
+        data={filteredCampaigns} 
         columns={columns}
       />
     </div>

@@ -14,6 +14,10 @@ interface DataContextType {
   setCampaigns: (campaigns: CampaignResult[]) => void;
   setWeeklyResults: (results: WeeklyResult[]) => void;
   setIncomeExpenses: (items: IncomeExpense[]) => void;
+  addProduct: (product: Product) => void;
+  addCampaign: (campaign: CampaignResult) => void;
+  addWeeklyResult: (result: WeeklyResult) => void;
+  addIncomeExpense: (item: IncomeExpense) => void;
   importData: (data: {
     products: Product[];
     campaigns: CampaignResult[];
@@ -119,6 +123,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [user, saveIncomeExpenses]);
 
+  const addProduct = useCallback((product: Product) => {
+    const newProducts = [...products, product];
+    setProducts(newProducts);
+  }, [products, setProducts]);
+
+  const addCampaign = useCallback((campaign: CampaignResult) => {
+    const newCampaigns = [...campaigns, campaign];
+    setCampaigns(newCampaigns);
+  }, [campaigns, setCampaigns]);
+
+  const addWeeklyResult = useCallback((result: WeeklyResult) => {
+    const newResults = [...weeklyResults, result];
+    setWeeklyResults(newResults);
+  }, [weeklyResults, setWeeklyResults]);
+
+  const addIncomeExpense = useCallback((item: IncomeExpense) => {
+    const newItems = [...incomeExpenses, item];
+    setIncomeExpenses(newItems);
+  }, [incomeExpenses, setIncomeExpenses]);
+
   const importData = useCallback(async (data: {
     products: Product[];
     campaigns: CampaignResult[];
@@ -176,6 +200,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCampaigns,
         setWeeklyResults,
         setIncomeExpenses,
+        addProduct,
+        addCampaign,
+        addWeeklyResult,
+        addIncomeExpense,
         importData,
         refreshData,
       }}
