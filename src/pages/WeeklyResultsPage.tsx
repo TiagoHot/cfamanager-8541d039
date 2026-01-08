@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -169,86 +170,86 @@ export default function WeeklyResultsPage() {
   };
 
   return (
-    <div className="animate-fade-in space-y-4 pt-6 pb-6">
-      <div className="sticky top-0 z-20 bg-background pt-0 pb-4 -mt-6">
-        <PageHeader 
-          title="Resultados Semanais" 
-          description="Acompanhe seus resultados semana a semana"
-        >
-          <Select value={yearFilter} onValueChange={setYearFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Ano" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Anos</SelectItem>
-              {years.map(y => (
-                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="animate-fade-in">
+      <PageHeader 
+        title="Resultados Semanais" 
+        description="Acompanhe seus resultados semana a semana"
+      >
+        <Select value={yearFilter} onValueChange={setYearFilter}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Anos</SelectItem>
+            {years.map(y => (
+              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
-                <Filter className="w-4 h-4 mr-2" />
-                Filtros
-                {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64" align="end">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Filtros</h4>
-                  {hasFilters && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters}>
-                      <X className="w-4 h-4 mr-1" />
-                      Limpar
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Mês</label>
-                  <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Meses</SelectItem>
-                      {MONTHS.map(m => (
-                        <SelectItem key={m} value={m}>{m}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
+              <Filter className="w-4 h-4 mr-2" />
+              Filtros
+              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Filtros</h4>
+                {hasFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <X className="w-4 h-4 mr-1" />
+                    Limpar
+                  </Button>
+                )}
               </div>
-            </PopoverContent>
-          </Popover>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Mês</label>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Meses</SelectItem>
+                    {MONTHS.map(m => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
 
-          <ImportExcelDialog onImportComplete={importData}>
-            <Button variant="outline" size="sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Importar Excel
-            </Button>
-          </ImportExcelDialog>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
+        <ImportExcelDialog onImportComplete={importData}>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Excel
           </Button>
-          <AddWeeklyResultDialog onAdd={addWeeklyResult}>
-            <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Semana
-            </Button>
-          </AddWeeklyResultDialog>
-        </PageHeader>
-      </div>
+        </ImportExcelDialog>
+        <Button variant="outline" size="sm" onClick={handleExport}>
+          <Download className="w-4 h-4 mr-2" />
+          Exportar
+        </Button>
+        <AddWeeklyResultDialog onAdd={addWeeklyResult}>
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Semana
+          </Button>
+        </AddWeeklyResultDialog>
+      </PageHeader>
 
-      <DataTable 
-        data={filteredAndSortedResults} 
-        columns={columns}
-        headerClassName="sticky top-[5rem] z-10 bg-background shadow-sm"
-      />
+      <PageContent>
+        <DataTable 
+          data={filteredAndSortedResults} 
+          columns={columns}
+          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
+        />
+      </PageContent>
     </div>
   );
 }

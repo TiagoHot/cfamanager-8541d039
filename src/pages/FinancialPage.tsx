@@ -14,6 +14,7 @@ import { exportIncomeExpenses } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 const incomeColumns = [
   {
@@ -148,131 +149,127 @@ export default function FinancialPage() {
   const balance = totalIncome - totalExpense;
 
   return (
-    <div className="animate-fade-in space-y-4 pt-6 pb-6">
-      {/* PageHeader sticky top-0 */}
-      <div className="sticky top-0 z-20 bg-background pt-0 pb-4 -mt-6">
-        <PageHeader 
-          title="Receitas & Despesas" 
-          description="Gerencie todas as suas entradas e saídas financeiras"
-        >
-          <Select value={yearFilter} onValueChange={setYearFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Ano" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Anos</SelectItem>
-              {years.map(y => (
-                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="animate-fade-in">
+      <PageHeader 
+        title="Receitas & Despesas" 
+        description="Gerencie todas as suas entradas e saídas financeiras"
+      >
+        <Select value={yearFilter} onValueChange={setYearFilter}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Anos</SelectItem>
+            {years.map(y => (
+              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
-                <Filter className="w-4 h-4 mr-2" />
-                Filtros
-                {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64" align="end">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Filtros</h4>
-                  {hasFilters && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters}>
-                      <X className="w-4 h-4 mr-1" />
-                      Limpar
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Mês</label>
-                  <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os Meses</SelectItem>
-                      {MONTHS.map(m => (
-                        <SelectItem key={m} value={m}>{m}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
+              <Filter className="w-4 h-4 mr-2" />
+              Filtros
+              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Filtros</h4>
+                {hasFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <X className="w-4 h-4 mr-1" />
+                    Limpar
+                  </Button>
+                )}
               </div>
-            </PopoverContent>
-          </Popover>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Mês</label>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Meses</SelectItem>
+                    {MONTHS.map(m => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
 
-          <ImportExcelDialog onImportComplete={importData}>
-            <Button variant="outline" size="sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Importar Excel
-            </Button>
-          </ImportExcelDialog>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
+        <ImportExcelDialog onImportComplete={importData}>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Excel
           </Button>
-          <AddIncomeExpenseDialog onAdd={addIncomeExpense}>
-            <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Registro
-            </Button>
-          </AddIncomeExpenseDialog>
-        </PageHeader>
-      </div>
+        </ImportExcelDialog>
+        <Button variant="outline" size="sm" onClick={handleExport}>
+          <Download className="w-4 h-4 mr-2" />
+          Exportar
+        </Button>
+        <AddIncomeExpenseDialog onAdd={addIncomeExpense}>
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Registro
+          </Button>
+        </AddIncomeExpenseDialog>
+      </PageHeader>
 
-      {/* Summary Cards (Scrollable) */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-          <p className="text-sm text-muted-foreground">Total Receitas</p>
-          <p className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</p>
+      <PageContent className="h-[calc(100vh-4rem-24px-120px)]"> {/* Ajustando altura para acomodar o summary e tabs */}
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-4 mb-6 flex-shrink-0">
+          <div className="p-4 rounded-lg bg-success/10 border border-success/20">
+            <p className="text-sm text-muted-foreground">Total Receitas</p>
+            <p className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</p>
+          </div>
+          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-muted-foreground">Total Despesas</p>
+            <p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpense)}</p>
+          </div>
+          <div className={`p-4 rounded-lg ${balance >= 0 ? 'bg-success/10 border border-success/20' : 'bg-destructive/10 border border-destructive/20'}`}>
+            <p className="text-sm text-muted-foreground">Saldo</p>
+            <p className={`text-2xl font-bold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
+              {formatCurrency(balance)}
+            </p>
+          </div>
         </div>
-        <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-          <p className="text-sm text-muted-foreground">Total Despesas</p>
-          <p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpense)}</p>
-        </div>
-        <div className={`p-4 rounded-lg ${balance >= 0 ? 'bg-success/10 border border-success/20' : 'bg-destructive/10 border border-destructive/20'}`}>
-          <p className="text-sm text-muted-foreground">Saldo</p>
-          <p className={`text-2xl font-bold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {formatCurrency(balance)}
-          </p>
-        </div>
-      </div>
 
-      <Tabs defaultValue="income" className="space-y-6">
-        {/* TabsList sticky right below PageHeader wrapper (top ~5rem) */}
-        <TabsList className="bg-muted/50 sticky top-[5rem] z-10">
-          <TabsTrigger value="income" className="data-[state=active]:bg-success/10 data-[state=active]:text-success">
-            <ArrowUpRight className="w-4 h-4 mr-2" />
-            Receitas ({incomes.length})
-          </TabsTrigger>
-          <TabsTrigger value="expenses" className="data-[state=active]:bg-destructive/10 data-[state=active]:text-destructive">
-            <ArrowDownRight className="w-4 h-4 mr-2" />
-            Despesas ({expenses.length})
-          </TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue="income" className="space-y-6 flex flex-col flex-1 min-h-0">
+          <TabsList className="bg-muted/50 flex-shrink-0">
+            <TabsTrigger value="income" className="data-[state=active]:bg-success/10 data-[state=active]:text-success">
+              <ArrowUpRight className="w-4 h-4 mr-2" />
+              Receitas ({incomes.length})
+            </TabsTrigger>
+            <TabsTrigger value="expenses" className="data-[state=active]:bg-destructive/10 data-[state=active]:text-destructive">
+              <ArrowDownRight className="w-4 h-4 mr-2" />
+              Despesas ({expenses.length})
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Table Header needs to stick right below TabsList. TabsList is approx 2.5rem tall. 
-            Offset = 5rem (PageHeader) + 2.5rem (TabsList) = 7.5rem. */}
-        <TabsContent value="income">
-          <DataTable 
-            data={incomes} 
-            columns={incomeColumns}
-            headerClassName="sticky top-[7.5rem] z-10 bg-background shadow-sm"
-          />
-        </TabsContent>
+          <TabsContent value="income" className="flex-1 min-h-0 overflow-y-auto">
+            <DataTable 
+              data={incomes} 
+              columns={incomeColumns}
+              headerClassName="sticky top-0 z-10 bg-background shadow-sm"
+            />
+          </TabsContent>
 
-        <TabsContent value="expenses">
-          <DataTable 
-            data={expenses} 
-            columns={expenseColumns}
-            headerClassName="sticky top-[7.5rem] z-10 bg-background shadow-sm"
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="expenses" className="flex-1 min-h-0 overflow-y-auto">
+            <DataTable 
+              data={expenses} 
+              columns={expenseColumns}
+              headerClassName="sticky top-0 z-10 bg-background shadow-sm"
+            />
+          </TabsContent>
+        </Tabs>
+      </PageContent>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 import { AddProductDialog } from "@/components/dialogs/AddProductDialog";
 import { exportProducts } from "@/lib/exportData";
 import { toast } from "sonner";
+import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 const columns = [
   {
@@ -103,38 +104,37 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="animate-fade-in space-y-4 pt-6 pb-6">
-      {/* PageHeader sticky top-0 (relative to main content area) */}
-      <div className="sticky top-0 z-20 bg-background pt-0 pb-4 -mt-6">
-        <PageHeader 
-          title="Produtos" 
-          description="Gerencie seu catálogo de produtos afiliados"
-        >
-          <ImportExcelDialog onImportComplete={importData}>
-            <Button variant="outline" size="sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Importar Excel
-            </Button>
-          </ImportExcelDialog>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
+    <div className="animate-fade-in">
+      <PageHeader 
+        title="Produtos" 
+        description="Gerencie seu catálogo de produtos afiliados"
+      >
+        <ImportExcelDialog onImportComplete={importData}>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4 mr-2" />
+            Importar Excel
           </Button>
-          <AddProductDialog onAdd={addProduct} existingProductsCount={products.length}>
-            <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Produto
-            </Button>
-          </AddProductDialog>
-        </PageHeader>
-      </div>
+        </ImportExcelDialog>
+        <Button variant="outline" size="sm" onClick={handleExport}>
+          <Download className="w-4 h-4 mr-2" />
+          Exportar
+        </Button>
+        <AddProductDialog onAdd={addProduct} existingProductsCount={products.length}>
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Produto
+          </Button>
+        </AddProductDialog>
+      </PageHeader>
 
-      <DataTable 
-        data={sortedProducts} 
-        columns={columns}
-        // The DataTable header needs to stick right below the PageHeader wrapper (~5rem from viewport top)
-        headerClassName="sticky top-[5rem] z-10 bg-background shadow-sm"
-      />
+      <PageContent>
+        <DataTable 
+          data={sortedProducts} 
+          columns={columns}
+          // Adicionando classe sticky ao cabeçalho da tabela
+          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
+        />
+      </PageContent>
     </div>
   );
 }
