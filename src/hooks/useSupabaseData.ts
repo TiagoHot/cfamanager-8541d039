@@ -34,7 +34,7 @@ export function useSupabaseData() {
 
     return data.map((p) => ({
       id: p.id,
-      date: p.created_at || '',
+      date: p.date || '',
       productNumber: p.product_number,
       name: p.name,
       platform: p.platform || '',
@@ -152,6 +152,7 @@ export function useSupabaseData() {
         user_id: user.id,
         product_number: p.productNumber,
         name: p.name,
+        date: formatDateToISO(p.date),
         platform: p.platform || null,
         country: p.country || 'Brasil',
         currency: p.currency || 'Real',
