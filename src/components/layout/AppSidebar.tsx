@@ -32,17 +32,17 @@ import {
 import { cn } from "@/lib/utils";
 
 const dataItems = [
-  { title: "Produtos", url: "/produtos", icon: Package },
-  { title: "Resultados de Campanhas", url: "/campanhas", icon: Target },
-  { title: "Resultados Semanais", url: "/semanal", icon: Calendar },
-  { title: "Receitas & Despesas", url: "/financeiro", icon: DollarSign },
-  { title: "Fluxo de Caixa", url: "/fluxo-caixa", icon: TrendingUp },
+  { title: "Produtos", url: "/produtos", icon: Package, color: "text-chart-1" },
+  { title: "Resultados de Campanhas", url: "/campanhas", icon: Target, color: "text-chart-2" },
+  { title: "Resultados Semanais", url: "/semanal", icon: Calendar, color: "text-chart-3" },
+  { title: "Receitas & Despesas", url: "/financeiro", icon: DollarSign, color: "text-chart-4" },
+  { title: "Fluxo de Caixa", url: "/fluxo-caixa", icon: TrendingUp, color: "text-chart-5" },
 ];
 
 const dashboardItems = [
-  { title: "Dashboard de Produtos", url: "/dashboard/produtos", icon: BarChart3 },
-  { title: "Dashboard de Campanhas", url: "/dashboard/campanhas", icon: PieChart },
-  { title: "Dashboard do Negócio", url: "/dashboard/negocio", icon: LayoutDashboard },
+  { title: "Dashboard de Produtos", url: "/dashboard/produtos", icon: BarChart3, color: "text-chart-1" },
+  { title: "Dashboard de Campanhas", url: "/dashboard/campanhas", icon: PieChart, color: "text-chart-2" },
+  { title: "Dashboard do Negócio", url: "/dashboard/negocio", icon: LayoutDashboard, color: "text-chart-3" },
 ];
 
 export function AppSidebar() {
@@ -51,8 +51,6 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   
   const isActive = (path: string) => location.pathname === path;
-  const isInDataSection = dataItems.some(item => isActive(item.url));
-  const isInDashboardSection = dashboardItems.some(item => isActive(item.url));
 
   return (
     <Sidebar className="border-r-0">
@@ -72,7 +70,8 @@ export function AppSidebar() {
 
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
-          <Collapsible defaultOpen={isInDataSection || !isInDashboardSection}>
+          {/* Mantendo o Collapsible aberto por padrão para visibilidade total */}
+          <Collapsible defaultOpen={true}>
             <CollapsibleTrigger className="w-full">
               <SidebarGroupLabel className="flex items-center justify-between px-2 text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors cursor-pointer">
                 <span>Dados</span>
@@ -94,7 +93,7 @@ export function AppSidebar() {
                               : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                           )}
                         >
-                          <item.icon className="w-5 h-5" />
+                          <item.icon className={cn("w-5 h-5", isActive(item.url) ? "text-sidebar-primary-foreground" : item.color)} />
                           {!collapsed && <span className="font-medium">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
@@ -107,7 +106,8 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-4">
-          <Collapsible defaultOpen={isInDashboardSection}>
+          {/* Mantendo o Collapsible aberto por padrão para visibilidade total */}
+          <Collapsible defaultOpen={true}>
             <CollapsibleTrigger className="w-full">
               <SidebarGroupLabel className="flex items-center justify-between px-2 text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors cursor-pointer">
                 <span>Dashboards</span>
@@ -129,7 +129,7 @@ export function AppSidebar() {
                               : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                           )}
                         >
-                          <item.icon className="w-5 h-5" />
+                          <item.icon className={cn("w-5 h-5", isActive(item.url) ? "text-sidebar-primary-foreground" : item.color)} />
                           {!collapsed && <span className="font-medium">{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
@@ -152,7 +152,7 @@ export function AppSidebar() {
               : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           )}
         >
-          <Settings className="w-5 h-5" />
+          <Settings className={cn("w-5 h-5", isActive("/configuracoes") ? "text-sidebar-primary-foreground" : "text-chart-6")} />
           {!collapsed && <span className="font-medium">Parâmetros</span>}
         </NavLink>
       </SidebarFooter>
