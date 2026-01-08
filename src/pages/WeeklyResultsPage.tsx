@@ -1,13 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Plus, Download, Upload } from "lucide-react";
+import { Plus, Download, Upload, Filter, X } from "lucide-react";
 import { formatCurrency, getProfitLossColor } from "@/lib/formatters";
 import { WeeklyResult, MONTHS } from "@/types";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
+import { AddWeeklyResultDialog } from "@/components/dialogs/AddWeeklyResultDialog";
+import { exportWeeklyResults } from "@/lib/exportData";
+import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -110,11 +116,29 @@ const columns = [
 ];
 
 export default function WeeklyResultsPage() {
-  const { weeklyResults, importData } = useData();
+  const { weeklyResults, importData, addWeeklyResult } = useData();
+  
+  const [yearFilter, setYearFilter] = useState<string>("all");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
 
-  // Sort weekly results by year DESC, then by month DESC, then by week number DESC
-  const sortedWeeklyResults = useMemo(() => {
-    return [...weeklyResults].sort((a, b) => {
+  // Get unique years for filters
+  const years = useMemo(() => {
+    const uniqueYears = [...new Set(weeklyResults.map(r => r.year))].sort((a, b) => b - a);
+    return uniqueYears;
+  }, [weeklyResults]);
+
+  // Filter and sort weekly results
+  const filteredAndSortedResults = useMemo(() => {
+    let filtered = weeklyResults;
+    
+    if (yearFilter !== "all") {
+      filtered = filtered.filter(r => r.year === parseInt(yearFilter));
+    }
+    if (monthFilter !== "all") {
+      filtered = filtered.filter(r => r.month.toLowerCase().includes(monthFilter.toLowerCase()));
+    }
+
+    return [...filtered].sort((a, b) => {
       // First, compare by year (descending)
       if (b.year !== a.year) return b.year - a.year;
       
@@ -126,7 +150,23 @@ export default function WeeklyResultsPage() {
       // Finally by week number (descending)
       return getWeekNumber(b.week) - getWeekNumber(a.week);
     });
-  }, [weeklyResults]);
+  }, [weeklyResults, yearFilter, monthFilter]);
+
+  const hasFilters = yearFilter !== "all" || monthFilter !== "all";
+
+  const clearFilters = () => {
+    setYearFilter("all");
+    setMonthFilter("all");
+  };
+
+  const handleExport = () => {
+    if (filteredAndSortedResults.length === 0) {
+      toast.error('Nenhum resultado para exportar');
+      return;
+    }
+    exportWeeklyResults(filteredAndSortedResults);
+    toast.success('Resultados exportados com sucesso!');
+  };
 
   return (
     <div className="animate-fade-in">
@@ -134,24 +174,76 @@ export default function WeeklyResultsPage() {
         title="Resultados Semanais" 
         description="Acompanhe seus resultados semana a semana"
       >
+        <Select value={yearFilter} onValueChange={setYearFilter}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Anos</SelectItem>
+            {years.map(y => (
+              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
+              <Filter className="w-4 h-4 mr-2" />
+              Filtros
+              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Filtros</h4>
+                {hasFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <X className="w-4 h-4 mr-1" />
+                    Limpar
+                  </Button>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Mês</label>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Meses</SelectItem>
+                    {MONTHS.map(m => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
         <ImportExcelDialog onImportComplete={importData}>
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
             Importar Excel
           </Button>
         </ImportExcelDialog>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="w-4 h-4 mr-2" />
           Exportar
         </Button>
-        <Button size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Semana
-        </Button>
+        <AddWeeklyResultDialog onAdd={addWeeklyResult}>
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Semana
+          </Button>
+        </AddWeeklyResultDialog>
       </PageHeader>
 
       <DataTable 
-        data={sortedWeeklyResults} 
+        data={filteredAndSortedResults} 
         columns={columns}
       />
     </div>

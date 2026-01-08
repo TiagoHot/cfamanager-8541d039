@@ -7,6 +7,9 @@ import { formatCurrency, formatDate } from "@/lib/formatters";
 import { Product } from "@/types";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
+import { AddProductDialog } from "@/components/dialogs/AddProductDialog";
+import { exportProducts } from "@/lib/exportData";
+import { toast } from "sonner";
 
 const columns = [
   {
@@ -80,17 +83,24 @@ const columns = [
 ];
 
 export default function ProductsPage() {
-  const { products, importData } = useData();
+  const { products, importData, addProduct } = useData();
 
   // Sort products by date descending (most recent first), then by productNumber descending
   const sortedProducts = [...products].sort((a, b) => {
-    // First, compare by date
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     if (dateB !== dateA) return dateB - dateA;
-    // If same date, sort by product number descending
     return b.productNumber - a.productNumber;
   });
+
+  const handleExport = () => {
+    if (products.length === 0) {
+      toast.error('Nenhum produto para exportar');
+      return;
+    }
+    exportProducts(products);
+    toast.success('Produtos exportados com sucesso!');
+  };
 
   return (
     <div className="animate-fade-in">
@@ -104,14 +114,16 @@ export default function ProductsPage() {
             Importar Excel
           </Button>
         </ImportExcelDialog>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="w-4 h-4 mr-2" />
           Exportar
         </Button>
-        <Button size="sm">
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Produto
-        </Button>
+        <AddProductDialog onAdd={addProduct} existingProductsCount={products.length}>
+          <Button size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Produto
+          </Button>
+        </AddProductDialog>
       </PageHeader>
 
       <DataTable 
