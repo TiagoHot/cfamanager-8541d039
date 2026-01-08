@@ -33,7 +33,7 @@ const columns = [
     key: 'week',
     header: 'Semana',
     render: (item: WeeklyResult) => (
-      <span className="font-mono font-bold">{item.week}</span>
+      <span className="font-bold">{item.week}</span>
     ),
   },
   {
@@ -58,7 +58,7 @@ const columns = [
     header: 'Custo Campanhas',
     className: 'text-right',
     render: (item: WeeklyResult) => (
-      <span className="font-mono text-destructive">{formatCurrency(item.campaignCosts)}</span>
+      <span className="text-destructive">{formatCurrency(item.campaignCosts)}</span>
     ),
   },
   {
@@ -66,7 +66,7 @@ const columns = [
     header: 'Vendas',
     className: 'text-center',
     render: (item: WeeklyResult) => (
-      <span className={cn("font-mono font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
+      <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
         {item.sales}
       </span>
     ),
@@ -76,7 +76,7 @@ const columns = [
     header: 'Ganhos Campanhas',
     className: 'text-right',
     render: (item: WeeklyResult) => (
-      <span className="font-mono">{formatCurrency(item.campaignEarnings)}</span>
+      <span>{formatCurrency(item.campaignEarnings)}</span>
     ),
   },
   {
@@ -84,7 +84,7 @@ const columns = [
     header: 'Ganhos Orgânico',
     className: 'text-right',
     render: (item: WeeklyResult) => (
-      <span className="font-mono">{formatCurrency(item.organicEarnings)}</span>
+      <span>{formatCurrency(item.organicEarnings)}</span>
     ),
   },
   {
@@ -92,7 +92,7 @@ const columns = [
     header: 'Adsense',
     className: 'text-right',
     render: (item: WeeklyResult) => (
-      <span className="font-mono">{formatCurrency(item.adsenseEarnings)}</span>
+      <span>{formatCurrency(item.adsenseEarnings)}</span>
     ),
   },
   {
@@ -100,7 +100,7 @@ const columns = [
     header: 'Faturamento',
     className: 'text-right',
     render: (item: WeeklyResult) => (
-      <span className="font-mono font-medium text-primary">{formatCurrency(item.revenue)}</span>
+      <span className="font-medium text-primary">{formatCurrency(item.revenue)}</span>
     ),
   },
   {
@@ -108,7 +108,7 @@ const columns = [
     header: 'Lucro/Prejuízo',
     className: 'text-right',
     render: (item: WeeklyResult) => (
-      <span className={cn("font-mono font-bold", getProfitLossColor(item.profitLoss))}>
+      <span className={cn("font-bold", getProfitLossColor(item.profitLoss))}>
         {formatCurrency(item.profitLoss)}
       </span>
     ),

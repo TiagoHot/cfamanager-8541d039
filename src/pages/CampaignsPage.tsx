@@ -54,7 +54,7 @@ const columns = [
     header: 'Dias',
     className: 'text-center',
     render: (item: CampaignResult) => (
-      <span className="font-mono">{item.daysRunning}</span>
+      <span>{item.daysRunning}</span>
     ),
   },
   {
@@ -62,7 +62,7 @@ const columns = [
     header: 'Impressões',
     className: 'text-right',
     render: (item: CampaignResult) => (
-      <span className="font-mono">{formatNumber(item.impressions)}</span>
+      <span>{formatNumber(item.impressions)}</span>
     ),
   },
   {
@@ -70,7 +70,7 @@ const columns = [
     header: 'Cliques',
     className: 'text-right',
     render: (item: CampaignResult) => (
-      <span className="font-mono">{formatNumber(item.clicks)}</span>
+      <span>{formatNumber(item.clicks)}</span>
     ),
   },
   {
@@ -78,7 +78,7 @@ const columns = [
     header: 'Vendas',
     className: 'text-center',
     render: (item: CampaignResult) => (
-      <span className={cn("font-mono font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
+      <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
         {item.sales}
       </span>
     ),
@@ -88,7 +88,7 @@ const columns = [
     header: 'Ganhos',
     className: 'text-right',
     render: (item: CampaignResult) => (
-      <span className="font-mono text-success">{formatCurrency(item.earnings)}</span>
+      <span className="text-success">{formatCurrency(item.earnings)}</span>
     ),
   },
   {
@@ -96,7 +96,7 @@ const columns = [
     header: 'Custos',
     className: 'text-right',
     render: (item: CampaignResult) => (
-      <span className="font-mono text-destructive">{formatCurrency(item.costs)}</span>
+      <span className="text-destructive">{formatCurrency(item.costs)}</span>
     ),
   },
   {
@@ -104,7 +104,7 @@ const columns = [
     header: 'Lucro/Prejuízo',
     className: 'text-right',
     render: (item: CampaignResult) => (
-      <span className={cn("font-mono font-medium", getProfitLossColor(item.profitLoss))}>
+      <span className={cn("font-medium", getProfitLossColor(item.profitLoss))}>
         {formatCurrency(item.profitLoss)}
       </span>
     ),
@@ -114,7 +114,7 @@ const columns = [
     header: 'ROI',
     className: 'text-right',
     render: (item: CampaignResult) => (
-      <span className={cn("font-mono font-bold", getROIColor(item.roi))}>
+      <span className={cn("font-bold", getROIColor(item.roi))}>
         {formatPercent(item.roi)}
       </span>
     ),

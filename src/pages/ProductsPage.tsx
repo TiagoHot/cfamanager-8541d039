@@ -17,7 +17,7 @@ const columns = [
     header: 'N°',
     className: 'w-16',
     render: (item: Product) => (
-      <span className="font-mono text-sm">{item.productNumber}</span>
+      <span className="text-sm">{item.productNumber}</span>
     ),
   },
   {
@@ -52,7 +52,7 @@ const columns = [
     header: 'Ticket Médio',
     className: 'text-right',
     render: (item: Product) => (
-      <span className="font-mono">
+      <span>
         {item.currency === 'Real' ? 'R$' : item.currency === 'Dólar' ? '$' : '€'} {item.averageTicket.toFixed(2)}
       </span>
     ),
@@ -62,7 +62,7 @@ const columns = [
     header: 'Comissão %',
     className: 'text-right',
     render: (item: Product) => (
-      <span className="font-mono">{item.commissionPercent}%</span>
+      <span>{item.commissionPercent}%</span>
     ),
   },
   {
@@ -70,7 +70,7 @@ const columns = [
     header: 'Comissão R$',
     className: 'text-right',
     render: (item: Product) => (
-      <span className="font-mono font-medium text-success">
+      <span className="font-medium text-success">
         {formatCurrency(item.commissionBRL)}
       </span>
     ),

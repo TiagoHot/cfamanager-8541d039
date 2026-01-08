@@ -216,16 +216,16 @@ export default function CampaignDashboard() {
                 <div className="grid grid-cols-2 gap-3 mb-2">
                   <div>
                     <p className="text-xs text-muted-foreground">Receitas</p>
-                    <p className="text-sm font-mono">{formatCurrency(0)}</p>
+                    <p className="text-sm">{formatCurrency(0)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Despesas</p>
-                    <p className="text-sm font-mono">{formatCurrency(194.60)}</p>
+                    <p className="text-sm">{formatCurrency(194.60)}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t">
                   <span className="text-sm text-muted-foreground">Prejuízo</span>
-                  <span className="font-mono text-destructive">{formatCurrency(-194.60)}</span>
+                  <span className="text-destructive">{formatCurrency(-194.60)}</span>
                 </div>
               </div>
 
@@ -240,16 +240,16 @@ export default function CampaignDashboard() {
                 <div className="grid grid-cols-2 gap-3 mb-2">
                   <div>
                     <p className="text-xs text-muted-foreground">Receitas</p>
-                    <p className="text-sm font-mono text-success">{formatCurrency(17571.78)}</p>
+                    <p className="text-sm text-success">{formatCurrency(17571.78)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Despesas</p>
-                    <p className="text-sm font-mono">{formatCurrency(13568.41)}</p>
+                    <p className="text-sm">{formatCurrency(13568.41)}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-success/20">
                   <span className="text-sm text-muted-foreground">Lucro</span>
-                  <span className="font-mono font-bold text-success">{formatCurrency(4003.37)}</span>
+                  <span className="font-bold text-success">{formatCurrency(4003.37)}</span>
                 </div>
                 <div className="flex justify-between text-xs mt-2 text-muted-foreground">
                   <span>26 vendas</span>

@@ -160,7 +160,7 @@ export default function BusinessDashboard() {
                     <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
                     <span>{item.name}</span>
                   </div>
-                  <span className="font-mono">{formatCurrency(item.value)}</span>
+                  <span className="font-medium">{formatCurrency(item.value)}</span>
                 </div>
               ))}
             </div>
@@ -203,7 +203,7 @@ export default function BusinessDashboard() {
                     <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
                     <span>{item.name}</span>
                   </div>
-                  <span className="font-mono">{formatCurrency(item.value)}</span>
+                  <span className="font-medium">{formatCurrency(item.value)}</span>
                 </div>
               ))}
             </div>
@@ -264,18 +264,18 @@ export default function BusinessDashboard() {
                 {data.months.map((month) => (
                   <tr key={month.month} className="border-b hover:bg-muted/50 transition-colors">
                     <td className="py-3 px-4 font-medium">{month.month}</td>
-                    <td className="py-3 px-4 text-right font-mono text-success">{formatCurrency(month.income)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-destructive">{formatCurrency(month.expenses)}</td>
-                    <td className={cn("py-3 px-4 text-right font-mono font-medium", month.balance >= 0 ? 'text-success' : 'text-destructive')}>
+                    <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(month.income)}</td>
+                    <td className="py-3 px-4 text-right font-medium text-destructive">{formatCurrency(month.expenses)}</td>
+                    <td className={cn("py-3 px-4 text-right font-medium", month.balance >= 0 ? 'text-success' : 'text-destructive')}>
                       {formatCurrency(month.balance)}
                     </td>
                   </tr>
                 ))}
                 <tr className="bg-muted/50 font-bold">
                   <td className="py-3 px-4">Todos os Meses</td>
-                  <td className="py-3 px-4 text-right font-mono text-success">{formatCurrency(data.totalIncome)}</td>
-                  <td className="py-3 px-4 text-right font-mono text-destructive">{formatCurrency(data.totalExpenses)}</td>
-                  <td className={cn("py-3 px-4 text-right font-mono", data.totalProfit >= 0 ? 'text-success' : 'text-destructive')}>
+                  <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(data.totalIncome)}</td>
+                  <td className="py-3 px-4 text-right font-medium text-destructive">{formatCurrency(data.totalExpenses)}</td>
+                  <td className={cn("py-3 px-4 text-right font-medium", data.totalProfit >= 0 ? 'text-success' : 'text-destructive')}>
                     {formatCurrency(data.totalProfit)}
                   </td>
                 </tr>

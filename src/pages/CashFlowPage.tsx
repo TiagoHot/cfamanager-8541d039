@@ -153,7 +153,7 @@ export default function CashFlowPage() {
               {Object.entries(data.incomeBreakdown).map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-success/5">
                   <span className="capitalize font-medium">{key}</span>
-                  <span className="font-mono text-success">{formatCurrency(value)}</span>
+                  <span className="font-medium text-success">{formatCurrency(value)}</span>
                 </div>
               ))}
             </div>
@@ -169,7 +169,7 @@ export default function CashFlowPage() {
               {Object.entries(data.expenseBreakdown).map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-destructive/5">
                   <span className="capitalize font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                  <span className="font-mono text-destructive">{formatCurrency(value)}</span>
+                  <span className="font-medium text-destructive">{formatCurrency(value)}</span>
                 </div>
               ))}
             </div>
@@ -198,12 +198,12 @@ export default function CashFlowPage() {
                 {data.months.map((month) => (
                   <tr key={month.month} className="border-b hover:bg-muted/50 transition-colors">
                     <td className="py-3 px-4 font-medium">{month.month}</td>
-                    <td className="py-3 px-4 text-right font-mono text-success">{formatCurrency(month.income)}</td>
-                    <td className="py-3 px-4 text-right font-mono text-destructive">{formatCurrency(month.expenses)}</td>
-                    <td className={`py-3 px-4 text-right font-mono font-medium ${month.balance >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(month.income)}</td>
+                    <td className="py-3 px-4 text-right font-medium text-destructive">{formatCurrency(month.expenses)}</td>
+                    <td className={`py-3 px-4 text-right font-medium ${month.balance >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {formatCurrency(month.balance)}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono font-medium text-accent">{formatCurrency(month.accumulatedBalance)}</td>
+                    <td className="py-3 px-4 text-right font-medium text-accent">{formatCurrency(month.accumulatedBalance)}</td>
                   </tr>
                 ))}
               </tbody>

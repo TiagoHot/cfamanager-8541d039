@@ -48,7 +48,7 @@ const incomeColumns = [
     render: (item: IncomeExpense) => (
       <div className="flex items-center justify-end gap-2">
         <ArrowUpRight className="w-4 h-4 text-success" />
-        <span className="font-mono font-medium text-success">{formatCurrency(item.amount)}</span>
+        <span className="font-medium text-success">{formatCurrency(item.amount)}</span>
       </div>
     ),
   },
@@ -87,7 +87,7 @@ const expenseColumns = [
     render: (item: IncomeExpense) => (
       <div className="flex items-center justify-end gap-2">
         <ArrowDownRight className="w-4 h-4 text-destructive" />
-        <span className="font-mono font-medium text-destructive">{formatCurrency(item.amount)}</span>
+        <span className="font-medium text-destructive">{formatCurrency(item.amount)}</span>
       </div>
     ),
   },
