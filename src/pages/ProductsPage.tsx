@@ -82,6 +82,16 @@ const columns = [
 export default function ProductsPage() {
   const { products, importData } = useData();
 
+  // Sort products by date descending (most recent first), then by productNumber descending
+  const sortedProducts = [...products].sort((a, b) => {
+    // First, compare by date
+    const dateA = a.date ? new Date(a.date).getTime() : 0;
+    const dateB = b.date ? new Date(b.date).getTime() : 0;
+    if (dateB !== dateA) return dateB - dateA;
+    // If same date, sort by product number descending
+    return b.productNumber - a.productNumber;
+  });
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
@@ -105,7 +115,7 @@ export default function ProductsPage() {
       </PageHeader>
 
       <DataTable 
-        data={products} 
+        data={sortedProducts} 
         columns={columns}
       />
     </div>

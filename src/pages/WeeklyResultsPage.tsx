@@ -1,12 +1,26 @@
+import { useMemo } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, Upload } from "lucide-react";
 import { formatCurrency, getProfitLossColor } from "@/lib/formatters";
-import { WeeklyResult } from "@/types";
+import { WeeklyResult, MONTHS } from "@/types";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
+
+// Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
+const getWeekNumber = (week: string): number => {
+  const match = week.match(/S(\d+)/i);
+  return match ? parseInt(match[1], 10) : 0;
+};
+
+// Get month number from month name
+const getMonthNumber = (month: string): number => {
+  const normalized = month.toLowerCase().split('/')[0].trim();
+  const index = MONTHS.findIndex(m => m.toLowerCase() === normalized);
+  return index >= 0 ? index + 1 : 0;
+};
 
 const columns = [
   {
@@ -98,6 +112,22 @@ const columns = [
 export default function WeeklyResultsPage() {
   const { weeklyResults, importData } = useData();
 
+  // Sort weekly results by year DESC, then by month DESC, then by week number DESC
+  const sortedWeeklyResults = useMemo(() => {
+    return [...weeklyResults].sort((a, b) => {
+      // First, compare by year (descending)
+      if (b.year !== a.year) return b.year - a.year;
+      
+      // Then by month (descending)
+      const monthA = getMonthNumber(a.month);
+      const monthB = getMonthNumber(b.month);
+      if (monthB !== monthA) return monthB - monthA;
+      
+      // Finally by week number (descending)
+      return getWeekNumber(b.week) - getWeekNumber(a.week);
+    });
+  }, [weeklyResults]);
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
@@ -121,7 +151,7 @@ export default function WeeklyResultsPage() {
       </PageHeader>
 
       <DataTable 
-        data={weeklyResults} 
+        data={sortedWeeklyResults} 
         columns={columns}
       />
     </div>
