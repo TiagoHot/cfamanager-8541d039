@@ -10,6 +10,7 @@ import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 import { AddProductDialog } from "@/components/dialogs/AddProductDialog";
 import { exportProducts } from "@/lib/exportData";
 import { toast } from "sonner";
+import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 const columns = [
   {
@@ -126,10 +127,14 @@ export default function ProductsPage() {
         </AddProductDialog>
       </PageHeader>
 
-      <DataTable 
-        data={sortedProducts} 
-        columns={columns}
-      />
+      <PageContent>
+        <DataTable 
+          data={sortedProducts} 
+          columns={columns}
+          // Adicionando classe sticky ao cabeçalho da tabela
+          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
+        />
+      </PageContent>
     </div>
   );
 }

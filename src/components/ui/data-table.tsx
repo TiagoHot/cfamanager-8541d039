@@ -7,73 +7,54 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 interface Column<T> {
   key: keyof T | string;
   header: string;
-  render?: (item: T) => React.ReactNode;
   className?: string;
+  render?: (item: T) => React.ReactNode;
 }
 
 interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
-  onRowClick?: (item: T) => void;
-  emptyMessage?: string;
+  headerClassName?: string;
 }
 
-export function DataTable<T extends { id: string }>({ 
-  data, 
-  columns, 
-  onRowClick,
-  emptyMessage = "Nenhum dado encontrado" 
-}: DataTableProps<T>) {
+export function DataTable<T>({ data, columns, headerClassName }: DataTableProps<T>) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        Nenhum dado encontrado.
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-xl border bg-card overflow-hidden">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/50 hover:bg-muted/50">
+        <TableHeader className={cn(headerClassName)}>
+          <TableRow>
             {columns.map((column) => (
-              <TableHead 
-                key={String(column.key)} 
-                className={cn("font-semibold", column.className)}
-              >
+              <TableHead key={String(column.key)} className={cn(column.className)}>
                 {column.header}
               </TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.length === 0 ? (
-            <TableRow>
-              <TableCell 
-                colSpan={columns.length} 
-                className="text-center py-10 text-muted-foreground"
-              >
-                {emptyMessage}
-              </TableCell>
+          {data.map((item, index) => (
+            <TableRow key={index}>
+              {columns.map((column) => (
+                <TableCell key={String(column.key)} className={cn(column.className)}>
+                  {column.render
+                    ? column.render(item)
+                    : (item as any)[column.key]}
+                </TableCell>
+              ))}
             </TableRow>
-          ) : (
-            data.map((item) => (
-              <TableRow 
-                key={item.id}
-                onClick={() => onRowClick?.(item)}
-                className={cn(
-                  "transition-colors",
-                  onRowClick && "cursor-pointer hover:bg-muted/50"
-                )}
-              >
-                {columns.map((column) => (
-                  <TableCell key={String(column.key)} className={column.className}>
-                    {column.render 
-                      ? column.render(item) 
-                      : String(item[column.key as keyof T] ?? '-')
-                    }
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

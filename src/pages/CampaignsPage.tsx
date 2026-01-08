@@ -14,6 +14,7 @@ import { AddCampaignDialog } from "@/components/dialogs/AddCampaignDialog";
 import { exportCampaigns } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 const columns = [
   {
@@ -255,10 +256,13 @@ export default function CampaignsPage() {
         </AddCampaignDialog>
       </PageHeader>
 
-      <DataTable 
-        data={filteredCampaigns} 
-        columns={columns}
-      />
+      <PageContent>
+        <DataTable 
+          data={filteredCampaigns} 
+          columns={columns}
+          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
+        />
+      </PageContent>
     </div>
   );
 }

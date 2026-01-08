@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -242,10 +243,13 @@ export default function WeeklyResultsPage() {
         </AddWeeklyResultDialog>
       </PageHeader>
 
-      <DataTable 
-        data={filteredAndSortedResults} 
-        columns={columns}
-      />
+      <PageContent>
+        <DataTable 
+          data={filteredAndSortedResults} 
+          columns={columns}
+          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
+        />
+      </PageContent>
     </div>
   );
 }
