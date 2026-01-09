@@ -268,7 +268,8 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
               />
             </div>
             
-            <div className="col-span-2">
+            {/* Dias Rodando e Estratégia na mesma linha (col-span-2 removido) */}
+            <div>
               <Label htmlFor="daysRunningDisplay">Dias Rodando</Label>
               <Input
                 id="daysRunningDisplay"
@@ -279,7 +280,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
               />
             </div>
 
-            <div className="col-span-2">
+            <div>
               <Label htmlFor="strategy">Estratégia</Label>
               <Select value={formData.strategy} onValueChange={(v) => setFormData(prev => ({ ...prev, strategy: v }))}>
                 <SelectTrigger>
