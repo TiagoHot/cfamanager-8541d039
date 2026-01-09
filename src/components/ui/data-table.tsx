@@ -32,12 +32,12 @@ export function DataTable<T>({ data, columns, headerClassName }: DataTableProps<
   }
 
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="rounded-md border overflow-auto max-h-[600px]">
       <Table>
-        <TableHeader className={cn(headerClassName)}>
+        <TableHeader className={cn("sticky top-0 z-10 bg-background", headerClassName)}>
           <TableRow>
             {columns.map((column) => (
-              <TableHead key={String(column.key)} className={cn(column.className)}>
+              <TableHead key={String(column.key)} className={cn("bg-background", column.className)}>
                 {column.header}
               </TableHead>
             ))}
