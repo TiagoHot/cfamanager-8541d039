@@ -2,8 +2,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
-import { DollarSign, TrendingUp, TrendingDown, Target, ShoppingCart, Percent } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
 import { 
   BarChart, 
   Bar, 
@@ -16,37 +17,128 @@ import {
   Line,
   Legend
 } from "recharts";
+import { useState, useMemo } from "react";
+
+const MONTH_ORDER = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 export default function CampaignDashboard() {
-  const monthlyData = [
-    { month: 'Jan', receita: 4820.4, despesa: 3931.0 },
-    { month: 'Fev', receita: 3326.9, despesa: 2414.8 },
-    { month: 'Mar', receita: 3139.8, despesa: 2007.7 },
-    { month: 'Abr', receita: 950.7, despesa: 149.4 },
-    { month: 'Mai', receita: 950.7, despesa: 846.9 },
-    { month: 'Jun', receita: 4202.4, despesa: 2070.6 },
-    { month: 'Jul', receita: 8977.4, despesa: 5119.6 },
-    { month: 'Ago', receita: 14284.2, despesa: 5450.2 },
-    { month: 'Set', receita: 11609.3, despesa: 7136.0 },
-    { month: 'Out', receita: 13542.1, despesa: 13847.0 },
-    { month: 'Nov', receita: 12512.6, despesa: 9848.1 },
-    { month: 'Dez', receita: 17571.8, despesa: 13763.0 },
-  ];
+  const { campaigns } = useData();
+  
+  const years = useMemo(() => {
+    return [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
+  }, [campaigns]);
+  
+  const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "2025");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  
+  const filteredCampaigns = useMemo(() => {
+    const year = parseInt(selectedYear);
+    return campaigns.filter(c => {
+      if (c.year !== year) return false;
+      if (selectedMonth !== "all" && c.month !== selectedMonth) return false;
+      return true;
+    });
+  }, [campaigns, selectedYear, selectedMonth]);
+  
+  const stats = useMemo(() => {
+    const totalEarnings = filteredCampaigns.reduce((sum, c) => sum + c.earnings, 0);
+    const totalCosts = filteredCampaigns.reduce((sum, c) => sum + c.costs, 0);
+    const totalSales = filteredCampaigns.reduce((sum, c) => sum + c.sales, 0);
+    const profit = totalEarnings - totalCosts;
+    const roi = totalCosts > 0 ? ((totalEarnings - totalCosts) / totalCosts) * 100 : 0;
+    
+    return { totalEarnings, totalCosts, totalSales, profit, roi };
+  }, [filteredCampaigns]);
+  
+  const monthlyData = useMemo(() => {
+    const year = parseInt(selectedYear);
+    const yearCampaigns = campaigns.filter(c => c.year === year);
+    
+    const monthlyMap = new Map<string, { earnings: number; costs: number }>();
+    yearCampaigns.forEach(c => {
+      const current = monthlyMap.get(c.month) || { earnings: 0, costs: 0 };
+      monthlyMap.set(c.month, {
+        earnings: current.earnings + c.earnings,
+        costs: current.costs + c.costs,
+      });
+    });
+    
+    return MONTH_ORDER
+      .filter(month => monthlyMap.has(month))
+      .map(month => {
+        const data = monthlyMap.get(month)!;
+        return {
+          month: month.substring(0, 3),
+          receita: data.earnings,
+          despesa: data.costs,
+        };
+      });
+  }, [campaigns, selectedYear]);
+  
+  const strategyData = useMemo(() => {
+    const strategyMap = new Map<string, { earnings: number; costs: number; sales: number }>();
+    filteredCampaigns.forEach(c => {
+      const strategy = c.strategy || 'Outros';
+      const current = strategyMap.get(strategy) || { earnings: 0, costs: 0, sales: 0 };
+      strategyMap.set(strategy, {
+        earnings: current.earnings + c.earnings,
+        costs: current.costs + c.costs,
+        sales: current.sales + c.sales,
+      });
+    });
+    
+    return Array.from(strategyMap.entries()).map(([name, data]) => ({
+      name,
+      earnings: data.earnings,
+      costs: data.costs,
+      sales: data.sales,
+      profit: data.earnings - data.costs,
+      roi: data.costs > 0 ? ((data.earnings - data.costs) / data.costs) * 100 : 0,
+    }));
+  }, [filteredCampaigns]);
+  
+  const locationData = useMemo(() => {
+    const locationMap = new Map<string, { earnings: number; costs: number; sales: number }>();
+    filteredCampaigns.forEach(c => {
+      const location = c.location || 'Outros';
+      const current = locationMap.get(location) || { earnings: 0, costs: 0, sales: 0 };
+      locationMap.set(location, {
+        earnings: current.earnings + c.earnings,
+        costs: current.costs + c.costs,
+        sales: current.sales + c.sales,
+      });
+    });
+    
+    return Array.from(locationMap.entries()).map(([name, data]) => ({
+      name,
+      earnings: data.earnings,
+      costs: data.costs,
+      sales: data.sales,
+      profit: data.earnings - data.costs,
+      roi: data.costs > 0 ? ((data.earnings - data.costs) / data.costs) * 100 : 0,
+    }));
+  }, [filteredCampaigns]);
+  
+  const monthsWithData = useMemo(() => {
+    const year = parseInt(selectedYear);
+    return [...new Set(campaigns.filter(c => c.year === year).map(c => c.month))];
+  }, [campaigns, selectedYear]);
 
-  const strategyData = [
-    { month: 'Jan', pesquisa: 4820.4 },
-    { month: 'Fev', pesquisa: 3326.9 },
-    { month: 'Mar', pesquisa: 3139.8 },
-    { month: 'Abr', pesquisa: 950.7 },
-    { month: 'Mai', pesquisa: 950.7 },
-    { month: 'Jun', pesquisa: 4202.4 },
-    { month: 'Jul', pesquisa: 8977.4 },
-    { month: 'Ago', pesquisa: 14284.2 },
-    { month: 'Set', pesquisa: 11609.3 },
-    { month: 'Out', pesquisa: 13542.1 },
-    { month: 'Nov', pesquisa: 12512.6 },
-    { month: 'Dez', pesquisa: 17571.8 },
-  ];
+  if (campaigns.length === 0) {
+    return (
+      <div className="animate-fade-in space-y-6">
+        <PageHeader 
+          title="Dashboard de Campanhas" 
+          description="Análise de desempenho das campanhas de marketing"
+        />
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p>Nenhum dado encontrado. Adicione campanhas para visualizar o dashboard.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -54,24 +146,25 @@ export default function CampaignDashboard() {
         title="Dashboard de Campanhas" 
         description="Análise de desempenho das campanhas de marketing"
       >
-        <Select defaultValue="2025">
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Ano" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="2025">2025</SelectItem>
-            <SelectItem value="2024">2024</SelectItem>
+            {years.map(year => (
+              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <Select defaultValue="12">
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Mês" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os Meses</SelectItem>
-            <SelectItem value="12">Dezembro</SelectItem>
-            <SelectItem value="11">Novembro</SelectItem>
-            <SelectItem value="10">Outubro</SelectItem>
+            {monthsWithData.map(month => (
+              <SelectItem key={month} value={month}>{month}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </PageHeader>
@@ -80,185 +173,165 @@ export default function CampaignDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard 
           title="Lucro" 
-          value={formatCurrency(3808.77)} 
+          value={formatCurrency(stats.profit)} 
           icon={TrendingUp} 
-          variant="success" 
+          variant={stats.profit >= 0 ? "success" : "danger"} 
         />
         <StatCard 
           title="Despesa" 
-          value={formatCurrency(13763.01)} 
+          value={formatCurrency(stats.totalCosts)} 
           icon={TrendingDown} 
           variant="danger" 
         />
         <StatCard 
           title="Receita" 
-          value={formatCurrency(17571.78)} 
+          value={formatCurrency(stats.totalEarnings)} 
           icon={DollarSign} 
           variant="info" 
         />
         <StatCard 
           title="Nº de Vendas" 
-          value={26} 
+          value={stats.totalSales} 
           icon={ShoppingCart} 
         />
         <StatCard 
           title="ROI" 
-          value={formatPercent(27.7)} 
+          value={formatPercent(stats.roi)} 
           icon={Percent} 
-          variant="success" 
+          variant={stats.roi >= 0 ? "success" : "danger"} 
         />
       </div>
 
       {/* Evolution Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Evolução Mensal - Receita vs Despesa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
-                <Tooltip 
-                  formatter={(value: number) => formatCurrency(value)}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="receita" 
-                  name="Receita"
-                  stroke="hsl(var(--success))" 
-                  strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--success))' }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="despesa" 
-                  name="Despesa"
-                  stroke="hsl(var(--destructive))" 
-                  strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--destructive))' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Analysis By Strategy & Location */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {monthlyData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Análise por Estratégia - Pesquisa</CardTitle>
+            <CardTitle className="text-lg">Evolução Mensal - Receita vs Despesa</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-                  <p className="text-sm text-muted-foreground">Receitas</p>
-                  <p className="text-xl font-bold text-success">{formatCurrency(17571.78)}</p>
-                </div>
-                <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                  <p className="text-sm text-muted-foreground">Despesas</p>
-                  <p className="text-xl font-bold text-destructive">{formatCurrency(13763.01)}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="p-3 rounded-lg bg-muted">
-                  <p className="text-xs text-muted-foreground">Lucro</p>
-                  <p className="text-lg font-bold text-success">{formatCurrency(3808.77)}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted">
-                  <p className="text-xs text-muted-foreground">ROI</p>
-                  <p className="text-lg font-bold">{formatPercent(27.7)}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted">
-                  <p className="text-xs text-muted-foreground">Vendas</p>
-                  <p className="text-lg font-bold">26</p>
-                </div>
-              </div>
-            </div>
-            <div className="h-48">
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={strategyData}>
+                <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="month" className="text-xs" />
                   <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                  <Bar dataKey="pesquisa" name="Pesquisa" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                  <Tooltip 
+                    formatter={(value: number) => formatCurrency(value)}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="receita" 
+                    name="Receita"
+                    stroke="hsl(var(--success))" 
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--success))' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="despesa" 
+                    name="Despesa"
+                    stroke="hsl(var(--destructive))" 
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--destructive))' }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
+      )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Análise por Local</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Brasil */}
-              <div className="p-4 rounded-lg border">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-primary" />
-                    Brasil
-                  </h4>
-                </div>
-                <div className="grid grid-cols-2 gap-3 mb-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Receitas</p>
-                    <p className="text-sm">{formatCurrency(0)}</p>
+      {/* Analysis By Strategy & Location */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {strategyData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Análise por Estratégia</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {strategyData.map(strategy => (
+                  <div key={strategy.name} className={`p-4 rounded-lg border ${strategy.profit >= 0 ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full ${strategy.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
+                        {strategy.name}
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mb-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Receitas</p>
+                        <p className="text-sm text-success">{formatCurrency(strategy.earnings)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Despesas</p>
+                        <p className="text-sm text-destructive">{formatCurrency(strategy.costs)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="text-sm text-muted-foreground">{strategy.profit >= 0 ? 'Lucro' : 'Prejuízo'}</span>
+                      <span className={strategy.profit >= 0 ? 'text-success font-bold' : 'text-destructive font-bold'}>
+                        {formatCurrency(strategy.profit)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs mt-2 text-muted-foreground">
+                      <span>{strategy.sales} vendas</span>
+                      <span>ROI: {formatPercent(strategy.roi)}</span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Despesas</p>
-                    <p className="text-sm">{formatCurrency(194.60)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <span className="text-sm text-muted-foreground">Prejuízo</span>
-                  <span className="text-destructive">{formatCurrency(-194.60)}</span>
-                </div>
+                ))}
               </div>
+            </CardContent>
+          </Card>
+        )}
 
-              {/* Gringa */}
-              <div className="p-4 rounded-lg border border-success/30 bg-success/5">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-success" />
-                    Gringa
-                  </h4>
-                </div>
-                <div className="grid grid-cols-2 gap-3 mb-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Receitas</p>
-                    <p className="text-sm text-success">{formatCurrency(17571.78)}</p>
+        {locationData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Análise por Local</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {locationData.map(location => (
+                  <div key={location.name} className={`p-4 rounded-lg border ${location.profit >= 0 ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <span className={`w-3 h-3 rounded-full ${location.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
+                        {location.name}
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mb-2">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Receitas</p>
+                        <p className="text-sm text-success">{formatCurrency(location.earnings)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Despesas</p>
+                        <p className="text-sm text-destructive">{formatCurrency(location.costs)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="text-sm text-muted-foreground">{location.profit >= 0 ? 'Lucro' : 'Prejuízo'}</span>
+                      <span className={location.profit >= 0 ? 'text-success font-bold' : 'text-destructive font-bold'}>
+                        {formatCurrency(location.profit)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs mt-2 text-muted-foreground">
+                      <span>{location.sales} vendas</span>
+                      <span>ROI: {formatPercent(location.roi)}</span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Despesas</p>
-                    <p className="text-sm">{formatCurrency(13568.41)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t border-success/20">
-                  <span className="text-sm text-muted-foreground">Lucro</span>
-                  <span className="font-bold text-success">{formatCurrency(4003.37)}</span>
-                </div>
-                <div className="flex justify-between text-xs mt-2 text-muted-foreground">
-                  <span>26 vendas</span>
-                  <span>ROI: {formatPercent(29.5)}</span>
-                </div>
+                ))}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
