@@ -9,6 +9,7 @@ import { CampaignResult, MONTHS, Product } from '@/types';
 import { toast } from 'sonner';
 import { Globe, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { differenceInDays, parseISO } from 'date-fns';
 
 interface AddCampaignDialogProps {
   onAdd: (campaign: CampaignResult) => void;
@@ -31,7 +32,6 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     monthNumber: currentMonth + 1,
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
-    daysRunning: '',
     location: 'Brasil', // Default location
     strategy: 'Pesquisa',
     impressions: '',
@@ -40,6 +40,22 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     earnings: '',
     costs: '',
   });
+
+  // Calculate daysRunning dynamically
+  const daysRunning = useMemo(() => {
+    if (formData.startDate && formData.endDate) {
+      try {
+        const start = parseISO(formData.startDate);
+        const end = parseISO(formData.endDate);
+        // Add 1 day because the calculation should be inclusive (e.g., 01/01 to 01/01 is 1 day)
+        const days = differenceInDays(end, start) + 1;
+        return days > 0 ? days : 0;
+      } catch {
+        return 0;
+      }
+    }
+    return 0;
+  }, [formData.startDate, formData.endDate]);
 
   // Filter products based on selected location
   const filteredProducts = useMemo(() => {
@@ -68,6 +84,17 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
       toast.error('Nome do produto é obrigatório');
       return;
     }
+    
+    if (!formData.endDate) {
+      toast.error('Data Fim é obrigatória para calcular os dias rodando');
+      return;
+    }
+
+    const calculatedDaysRunning = daysRunning;
+    if (calculatedDaysRunning <= 0) {
+      toast.error('A Data Fim deve ser igual ou posterior à Data Início');
+      return;
+    }
 
     const earnings = parseFloat(formData.earnings) || 0;
     const costs = parseFloat(formData.costs) || 0;
@@ -87,7 +114,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
       month: formData.month,
       startDate: formData.startDate,
       endDate: formData.endDate,
-      daysRunning: parseInt(formData.daysRunning) || 0,
+      daysRunning: calculatedDaysRunning,
       productName: formData.productName,
       niche: product?.niche || '',
       location: formData.location,
@@ -117,7 +144,6 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
       monthNumber: currentMonth + 1,
       startDate: new Date().toISOString().split('T')[0],
       endDate: '',
-      daysRunning: '',
       location: 'Brasil',
       strategy: 'Pesquisa',
       impressions: '',
@@ -221,37 +247,39 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
             </div>
 
             <div>
-              <Label htmlFor="startDate">Data Início</Label>
+              <Label htmlFor="startDate">Data Início *</Label>
               <Input
                 id="startDate"
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                required
               />
             </div>
 
             <div>
-              <Label htmlFor="endDate">Data Fim</Label>
+              <Label htmlFor="endDate">Data Fim *</Label>
               <Input
                 id="endDate"
                 type="date"
                 value={formData.endDate}
                 onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                required
               />
             </div>
-
-            <div>
-              <Label htmlFor="daysRunning">Dias Rodando</Label>
+            
+            <div className="col-span-2">
+              <Label htmlFor="daysRunningDisplay">Dias Rodando</Label>
               <Input
-                id="daysRunning"
-                type="number"
-                value={formData.daysRunning}
-                onChange={(e) => setFormData(prev => ({ ...prev, daysRunning: e.target.value }))}
-                placeholder="0"
+                id="daysRunningDisplay"
+                value={daysRunning > 0 ? daysRunning : '-'}
+                readOnly
+                disabled
+                className="bg-muted/50 text-center font-bold"
               />
             </div>
 
-            <div>
+            <div className="col-span-2">
               <Label htmlFor="strategy">Estratégia</Label>
               <Select value={formData.strategy} onValueChange={(v) => setFormData(prev => ({ ...prev, strategy: v }))}>
                 <SelectTrigger>
