@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Upload, Pencil } from "lucide-react";
+import { Plus, Download, Upload, Pencil, MessageSquare } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { Product } from "@/types";
 import { useData } from "@/contexts/DataContext";
@@ -14,6 +14,7 @@ import { exportProducts } from "@/lib/exportData";
 import { toast } from "sonner";
 import { PageContent } from "@/components/PageContent";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function ProductsPage() {
   const { products, importData, addProduct, updateProduct } = useData();
@@ -73,6 +74,23 @@ export default function ProductsPage() {
           </Badge>
         );
       },
+    },
+    {
+      key: 'notes',
+      header: 'Notas',
+      className: 'w-20 text-center',
+      render: (item: Product) => item.notes ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <MessageSquare className="w-4 h-4 text-muted-foreground mx-auto cursor-pointer hover:text-primary" />
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            <p>{item.notes}</p>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      ),
     },
     {
       key: 'date',

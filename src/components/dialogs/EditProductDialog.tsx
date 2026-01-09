@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product, PLATFORMS, CURRENCY_RATES, PRODUCT_TYPES } from '@/types';
+import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { Pencil, Save } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
+import { Textarea } from '@/components/ui/textarea';
 
 interface EditProductDialogProps {
   product: Product;
@@ -16,11 +17,11 @@ interface EditProductDialogProps {
 }
 
 export function EditProductDialog({ product, onUpdate, children }: EditProductDialogProps) {
-  const { niches } = useSettings();
+  const { niches, productTypes } = useSettings();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: product.name,
-    type: product.type || PRODUCT_TYPES[0], // Ensure default if type is missing
+    type: product.type || productTypes[0] || '', // Ensure default if type is missing
     niche: product.niche || niches[0] || '',
     platform: product.platform,
     country: product.country,
@@ -28,6 +29,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
     averageTicket: product.averageTicket.toString(),
     commissionPercent: product.commissionPercent.toString(),
     date: product.date,
+    notes: product.notes || '', // New field
   });
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
       // Reset form data when dialog opens, ensuring it reflects the current product state
       setFormData({
         name: product.name,
-        type: product.type || PRODUCT_TYPES[0],
+        type: product.type || productTypes[0] || '',
         niche: product.niche || niches[0] || '',
         platform: product.platform,
         country: product.country,
@@ -43,9 +45,10 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
         averageTicket: product.averageTicket.toString(),
         commissionPercent: product.commissionPercent.toString(),
         date: product.date,
+        notes: product.notes || '',
       });
     }
-  }, [open, product, niches]);
+  }, [open, product, niches, productTypes]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +75,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
       averageTicket,
       commissionPercent,
       commissionBRL,
+      notes: formData.notes.trim(),
     };
 
     onUpdate(updatedProduct);
@@ -108,7 +112,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PRODUCT_TYPES.map(t => (
+                  {productTypes.map(t => (
                     <SelectItem key={t} value={t}>{t}</SelectItem>
                   ))}
                 </SelectContent>
@@ -201,6 +205,16 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
                 value={formData.commissionPercent}
                 onChange={(e) => setFormData(prev => ({ ...prev, commissionPercent: e.target.value }))}
                 placeholder="0"
+              />
+            </div>
+            
+            <div className="col-span-2">
+              <Label htmlFor="notes">Notas</Label>
+              <Textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Anotações rápidas sobre o produto..."
               />
             </div>
           </div>

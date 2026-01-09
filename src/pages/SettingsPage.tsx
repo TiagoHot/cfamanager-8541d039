@@ -12,8 +12,19 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
-  const { niches, addNiche, removeNiche, resetNiches } = useSettings();
+  const { 
+    niches, 
+    addNiche, 
+    removeNiche, 
+    resetNiches,
+    productTypes,
+    addProductType,
+    removeProductType,
+    resetProductTypes
+  } = useSettings();
+  
   const [newNiche, setNewNiche] = useState('');
+  const [newProductType, setNewProductType] = useState('');
   const [newPlatform, setNewPlatform] = useState('');
   const [newStrategy, setNewStrategy] = useState('');
 
@@ -28,6 +39,25 @@ export default function SettingsPage() {
   const handleRemoveNiche = (niche: string) => {
     removeNiche(niche);
     toast.info(`Nicho "${niche}" removido.`);
+  };
+  
+  const handleAddProductType = () => {
+    if (newProductType.trim()) {
+      addProductType(newProductType.trim());
+      setNewProductType('');
+      toast.success(`Tipo de Produto "${newProductType.trim()}" adicionado.`);
+    }
+  };
+
+  const handleRemoveProductType = (type: string) => {
+    removeProductType(type);
+    toast.info(`Tipo de Produto "${type}" removido.`);
+  };
+
+  const handleResetAll = () => {
+    resetNiches();
+    resetProductTypes();
+    toast.success('Configurações restauradas para o padrão.');
   };
 
   // Placeholder functions for other settings management (Platforms, Strategies)
@@ -53,7 +83,7 @@ export default function SettingsPage() {
         title="Parâmetros Auxiliares" 
         description="Configure as taxas de câmbio e parâmetros do sistema"
       >
-        <Button variant="outline" size="sm" onClick={resetNiches}>
+        <Button variant="outline" size="sm" onClick={handleResetAll}>
           <RefreshCw className="w-4 h-4 mr-2" />
           Restaurar Padrões
         </Button>
@@ -152,6 +182,34 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
         
+        {/* Product Types */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Tipos de Produto</CardTitle>
+            <CardDescription>Gerencie a lista de tipos de produtos (Nutra, Digital, etc.).</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2 min-h-10">
+              {productTypes.map(type => (
+                <Badge key={type} variant="secondary" className="text-sm cursor-pointer hover:bg-destructive/10 transition-colors" onClick={() => handleRemoveProductType(type)}>
+                  {type} <X className="w-3 h-3 ml-1" />
+                </Badge>
+              ))}
+            </div>
+            <Separator className="my-4" />
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Novo tipo de produto..." 
+                className="flex-1" 
+                value={newProductType}
+                onChange={(e) => setNewProductType(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddProductType()}
+              />
+              <Button variant="outline" size="sm" onClick={handleAddProductType}>Adicionar</Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Niches */}
         <Card>
           <CardHeader>

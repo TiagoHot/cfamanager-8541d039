@@ -11,6 +11,7 @@ export interface Product {
   averageTicket: number;
   commissionPercent: number;
   commissionBRL: number;
+  notes: string; // New field for quick notes
 }
 
 export interface CampaignResult {
@@ -119,5 +120,5 @@ export const NICHES = [
 ];
 
 export const PRODUCT_TYPES = [
-  'Nutra', 'Infoproduto', 'Físico', 'Serviço', 'SaaS', 'Outros'
+  'Nutra', 'Infoproduto', 'E-commerce', 'Serviço', 'SaaS', 'Outros'
 ];

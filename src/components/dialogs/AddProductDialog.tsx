@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product, PLATFORMS, CURRENCY_RATES, PRODUCT_TYPES } from '@/types';
+import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
+import { Textarea } from '@/components/ui/textarea';
 
 interface AddProductDialogProps {
   onAdd: (product: Product) => void;
@@ -15,11 +16,11 @@ interface AddProductDialogProps {
 }
 
 export function AddProductDialog({ onAdd, children, existingProductsCount }: AddProductDialogProps) {
-  const { niches } = useSettings();
+  const { niches, productTypes } = useSettings();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: PRODUCT_TYPES[0], // Default to first type
+    type: productTypes[0] || '',
     niche: niches[0] || '',
     platform: 'Hotmart',
     country: 'Brasil',
@@ -27,6 +28,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
     averageTicket: '',
     commissionPercent: '',
     date: new Date().toISOString().split('T')[0],
+    notes: '', // New field
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -55,6 +57,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       averageTicket,
       commissionPercent,
       commissionBRL,
+      notes: formData.notes.trim(),
     };
 
     onAdd(newProduct);
@@ -62,7 +65,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
     setOpen(false);
     setFormData({
       name: '',
-      type: PRODUCT_TYPES[0],
+      type: productTypes[0] || '',
       niche: niches[0] || '',
       platform: 'Hotmart',
       country: 'Brasil',
@@ -70,6 +73,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       averageTicket: '',
       commissionPercent: '',
       date: new Date().toISOString().split('T')[0],
+      notes: '',
     });
   };
 
@@ -99,7 +103,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PRODUCT_TYPES.map(t => (
+                  {productTypes.map(t => (
                     <SelectItem key={t} value={t}>{t}</SelectItem>
                   ))}
                 </SelectContent>
@@ -192,6 +196,16 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
                 value={formData.commissionPercent}
                 onChange={(e) => setFormData(prev => ({ ...prev, commissionPercent: e.target.value }))}
                 placeholder="0"
+              />
+            </div>
+            
+            <div className="col-span-2">
+              <Label htmlFor="notes">Notas</Label>
+              <Textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Anotações rápidas sobre o produto..."
               />
             </div>
           </div>
