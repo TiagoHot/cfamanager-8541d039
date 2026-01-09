@@ -37,11 +37,18 @@ const columns = [
   {
     key: 'location',
     header: 'Local',
-    render: (item: CampaignResult) => (
-      <Badge variant={item.location === 'Brasil' ? 'default' : 'secondary'}>
-        {item.location}
-      </Badge>
-    ),
+    render: (item: CampaignResult) => {
+      const isBrasil = item.location === 'Brasil';
+      const variantClass = isBrasil 
+        ? "bg-success/10 text-success border-success/20 hover:bg-success/20" 
+        : "bg-info/10 text-info border-info/20 hover:bg-info/20";
+      
+      return (
+        <Badge className={cn("text-xs font-medium", variantClass)}>
+          {item.location}
+        </Badge>
+      );
+    },
   },
   {
     key: 'strategy',
