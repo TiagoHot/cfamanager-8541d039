@@ -15,6 +15,7 @@ interface DataContextType {
   setWeeklyResults: (results: WeeklyResult[]) => void;
   setIncomeExpenses: (items: IncomeExpense[]) => void;
   addProduct: (product: Product) => void;
+  updateProduct: (product: Product) => void;
   addCampaign: (campaign: CampaignResult) => void;
   addWeeklyResult: (result: WeeklyResult) => void;
   addIncomeExpense: (item: IncomeExpense) => void;
@@ -86,6 +87,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const setProducts = useCallback(async (newProducts: Product[]) => {
     setProductsState(newProducts);
     if (user) {
+      // Note: saveProducts currently overwrites all data. This is acceptable for now based on existing implementation.
       const success = await saveProducts(newProducts);
       if (!success) {
         toast.error('Erro ao salvar produtos');
@@ -125,6 +127,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const addProduct = useCallback((product: Product) => {
     const newProducts = [...products, product];
+    setProducts(newProducts);
+  }, [products, setProducts]);
+
+  const updateProduct = useCallback((updatedProduct: Product) => {
+    const newProducts = products.map(p => 
+      p.id === updatedProduct.id ? updatedProduct : p
+    );
     setProducts(newProducts);
   }, [products, setProducts]);
 
@@ -201,6 +210,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setWeeklyResults,
         setIncomeExpenses,
         addProduct,
+        updateProduct,
         addCampaign,
         addWeeklyResult,
         addIncomeExpense,
