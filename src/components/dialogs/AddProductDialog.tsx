@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
+import { Product, PLATFORMS, CURRENCY_RATES, PRODUCT_TYPES } from '@/types';
 import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
 
@@ -19,6 +19,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    type: PRODUCT_TYPES[0], // Default to first type
     niche: niches[0] || '',
     platform: 'Hotmart',
     country: 'Brasil',
@@ -46,6 +47,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       date: formData.date,
       productNumber: existingProductsCount + 1,
       name: formData.name,
+      type: formData.type,
       niche: formData.niche,
       platform: formData.platform,
       country: formData.country,
@@ -60,6 +62,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
     setOpen(false);
     setFormData({
       name: '',
+      type: PRODUCT_TYPES[0],
       niche: niches[0] || '',
       platform: 'Hotmart',
       country: 'Brasil',
@@ -89,6 +92,20 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
               />
             </div>
             
+            <div>
+              <Label htmlFor="type">Tipo</Label>
+              <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_TYPES.map(t => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label htmlFor="niche">Nicho</Label>
               <Select value={formData.niche} onValueChange={(v) => setFormData(prev => ({ ...prev, niche: v }))}>

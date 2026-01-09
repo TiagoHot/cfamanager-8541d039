@@ -3,6 +3,7 @@ export interface Product {
   date: string;
   productNumber: number;
   name: string;
+  type: string; // New field for product type (e.g., Nutra, Infoproduto)
   niche: string; // Changed from optional to required string
   platform: string;
   country: string;
@@ -115,4 +116,8 @@ export const NICHES = [
   'Saúde & Bem-Estar', 'Finanças & Investimentos', 'Desenvolvimento Pessoal', 
   'Marketing Digital', 'Culinária & Receitas', 'Hobbies & Artesanato', 
   'Relacionamentos', 'Idiomas', 'Tecnologia', 'Outros'
+];
+
+export const PRODUCT_TYPES = [
+  'Nutra', 'Infoproduto', 'Físico', 'Serviço', 'SaaS', 'Outros'
 ];

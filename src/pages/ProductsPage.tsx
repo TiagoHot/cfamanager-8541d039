@@ -36,6 +36,13 @@ export default function ProductsPage() {
       ),
     },
     {
+      key: 'type',
+      header: 'Tipo',
+      render: (item: Product) => (
+        <Badge variant="secondary">{item.type || 'Não Definido'}</Badge>
+      ),
+    },
+    {
       key: 'niche',
       header: 'Nicho',
       render: (item: Product) => (

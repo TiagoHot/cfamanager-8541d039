@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
+import { Product, PLATFORMS, CURRENCY_RATES, PRODUCT_TYPES } from '@/types';
 import { toast } from 'sonner';
 import { Pencil, Save } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
@@ -20,6 +20,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: product.name,
+    type: product.type || PRODUCT_TYPES[0], // Ensure default if type is missing
     niche: product.niche || niches[0] || '',
     platform: product.platform,
     country: product.country,
@@ -34,6 +35,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
       // Reset form data when dialog opens, ensuring it reflects the current product state
       setFormData({
         name: product.name,
+        type: product.type || PRODUCT_TYPES[0],
         niche: product.niche || niches[0] || '',
         platform: product.platform,
         country: product.country,
@@ -62,6 +64,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
       ...product,
       date: formData.date,
       name: formData.name,
+      type: formData.type,
       niche: formData.niche,
       platform: formData.platform,
       country: formData.country,
@@ -98,6 +101,20 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
               />
             </div>
             
+            <div>
+              <Label htmlFor="type">Tipo</Label>
+              <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_TYPES.map(t => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label htmlFor="niche">Nicho</Label>
               <Select value={formData.niche} onValueChange={(v) => setFormData(prev => ({ ...prev, niche: v }))}>
