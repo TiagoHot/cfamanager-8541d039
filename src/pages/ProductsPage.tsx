@@ -13,6 +13,7 @@ import { EditProductDialog } from "@/components/dialogs/EditProductDialog";
 import { exportProducts } from "@/lib/exportData";
 import { toast } from "sonner";
 import { PageContent } from "@/components/PageContent";
+import { cn } from "@/lib/utils"; // Importando cn para classes customizadas
 
 export default function ProductsPage() {
   const { products, importData, addProduct, updateProduct } = useData();
@@ -44,11 +45,20 @@ export default function ProductsPage() {
     {
       key: 'country',
       header: 'País',
-      render: (item: Product) => (
-        <Badge variant={item.country === 'Brasil' ? 'default' : 'outline'}>
-          {item.country}
-        </Badge>
-      ),
+      render: (item: Product) => {
+        const isBrasil = item.country === 'Brasil';
+        const badgeClasses = cn(
+          "text-xs font-medium",
+          isBrasil 
+            ? "bg-success/10 text-success border-success/20 hover:bg-success/20" 
+            : "bg-info/10 text-info border-info/20 hover:bg-info/20"
+        );
+        return (
+          <Badge className={badgeClasses}>
+            {item.country}
+          </Badge>
+        );
+      },
     },
     {
       key: 'currency',
