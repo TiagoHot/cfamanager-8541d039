@@ -134,16 +134,13 @@ export default function CampaignsPage() {
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
-  const [productFilter, setProductFilter] = useState<string>("all");
+  // Mantendo o estado do filtro de produto, mas ele não será exposto na UI
+  const [productFilter, setProductFilter] = useState<string>("all"); 
 
   // Get unique years and products for filters
   const years = useMemo(() => {
     const uniqueYears = [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
     return uniqueYears;
-  }, [campaigns]);
-
-  const uniqueProducts = useMemo(() => {
-    return [...new Set(campaigns.map(c => c.productName))].sort();
   }, [campaigns]);
 
   // Filter campaigns
@@ -156,14 +153,6 @@ export default function CampaignsPage() {
     });
   }, [campaigns, yearFilter, monthFilter, productFilter]);
 
-  const hasFilters = yearFilter !== "all" || monthFilter !== "all" || productFilter !== "all";
-
-  const clearFilters = () => {
-    setYearFilter("all");
-    setMonthFilter("all");
-    setProductFilter("all");
-  };
-
   const handleExport = () => {
     if (filteredCampaigns.length === 0) {
       toast.error('Nenhuma campanha para exportar');
@@ -172,9 +161,6 @@ export default function CampaignsPage() {
     exportCampaigns(filteredCampaigns);
     toast.success('Campanhas exportadas com sucesso!');
   };
-
-  // Check if only the product filter is active (to decide if the Popover button needs the 'Ativos' badge)
-  const isProductFilterActive = productFilter !== "all";
 
   return (
     <div className="animate-fade-in">
@@ -208,44 +194,7 @@ export default function CampaignsPage() {
           </SelectContent>
         </Select>
         
-        {/* Popover para Filtro de Produto e Limpar Tudo */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={isProductFilterActive ? "border-primary" : ""}>
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-              {isProductFilterActive && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80" align="end">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Filtros Adicionais</h4>
-                {hasFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    <X className="w-4 h-4 mr-1" />
-                    Limpar Todos
-                  </Button>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Produto</label>
-                <Select value={productFilter} onValueChange={setProductFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Produtos</SelectItem>
-                    {uniqueProducts.map(p => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        {/* O Popover de Filtros foi removido daqui */}
 
         <ImportExcelDialog onImportComplete={importData}>
           <Button variant="outline" size="sm">
