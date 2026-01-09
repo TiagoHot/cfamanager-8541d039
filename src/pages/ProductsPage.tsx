@@ -59,7 +59,7 @@ export default function ProductsPage() {
     },
     {
       key: 'country',
-      header: 'País',
+      header: 'Local', // Renomeado de 'País' para 'Local'
       render: (item: Product) => {
         const isBrasil = item.country === 'Brasil';
         const badgeClasses = cn(
