@@ -131,7 +131,6 @@ const columns = [
 
 export default function CampaignsPage() {
   const { campaigns, products, importData, addCampaign } = useData();
-  const currentYear = new Date().getFullYear();
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
@@ -180,17 +179,7 @@ export default function CampaignsPage() {
         title="Resultados de Campanhas" 
         description="Acompanhe o desempenho de todas as suas campanhas"
       >
-        <Select value={yearFilter} onValueChange={setYearFilter}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Ano" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Anos</SelectItem>
-            {years.map(y => (
-              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* O filtro de ano foi movido para dentro do Popover */}
         
         <Popover>
           <PopoverTrigger asChild>
@@ -212,6 +201,21 @@ export default function CampaignsPage() {
                 )}
               </div>
               
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Ano</label>
+                <Select value={yearFilter} onValueChange={setYearFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Anos</SelectItem>
+                    {years.map(y => (
+                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mês</label>
                 <Select value={monthFilter} onValueChange={setMonthFilter}>
