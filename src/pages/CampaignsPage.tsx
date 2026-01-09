@@ -28,6 +28,14 @@ const columns = [
     ),
   },
   {
+    key: 'daysRunning',
+    header: 'Dias',
+    className: 'text-center',
+    render: (item: CampaignResult) => (
+      <span>{item.daysRunning}</span>
+    ),
+  },
+  {
     key: 'productName',
     header: 'Produto',
     render: (item: CampaignResult) => (
@@ -55,14 +63,6 @@ const columns = [
     header: 'Estratégia',
     render: (item: CampaignResult) => (
       <Badge variant="outline">{item.strategy}</Badge>
-    ),
-  },
-  {
-    key: 'daysRunning',
-    header: 'Dias',
-    className: 'text-center',
-    render: (item: CampaignResult) => (
-      <span>{item.daysRunning}</span>
     ),
   },
   {
@@ -194,8 +194,6 @@ export default function CampaignsPage() {
           </SelectContent>
         </Select>
         
-        {/* O Popover de Filtros foi removido daqui */}
-
         <ImportExcelDialog onImportComplete={importData}>
           <Button variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
