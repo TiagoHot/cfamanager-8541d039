@@ -173,62 +173,60 @@ export default function CampaignsPage() {
     toast.success('Campanhas exportadas com sucesso!');
   };
 
+  // Check if only the product filter is active (to decide if the Popover button needs the 'Ativos' badge)
+  const isProductFilterActive = productFilter !== "all";
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
         title="Resultados de Campanhas" 
         description="Acompanhe o desempenho de todas as suas campanhas"
       >
-        {/* O filtro de ano foi movido para dentro do Popover */}
+        {/* Filtro de Ano (Select) */}
+        <Select value={yearFilter} onValueChange={setYearFilter}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Anos</SelectItem>
+            {years.map(y => (
+              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Filtro de Mês (Select) */}
+        <Select value={monthFilter} onValueChange={setMonthFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Mês" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Meses</SelectItem>
+            {MONTHS.map(m => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         
+        {/* Popover para Filtro de Produto e Limpar Tudo */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
+            <Button variant="outline" size="sm" className={isProductFilterActive ? "border-primary" : ""}>
               <Filter className="w-4 h-4 mr-2" />
               Filtros
-              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
+              {isProductFilterActive && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80" align="end">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Filtros</h4>
+                <h4 className="font-medium">Filtros Adicionais</h4>
                 {hasFilters && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     <X className="w-4 h-4 mr-1" />
-                    Limpar
+                    Limpar Todos
                   </Button>
                 )}
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Ano</label>
-                <Select value={yearFilter} onValueChange={setYearFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Anos</SelectItem>
-                    {years.map(y => (
-                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mês</label>
-                <Select value={monthFilter} onValueChange={setMonthFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Meses</SelectItem>
-                    {MONTHS.map(m => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               
               <div className="space-y-2">
