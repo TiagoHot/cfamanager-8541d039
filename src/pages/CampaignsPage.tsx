@@ -14,23 +14,21 @@ import { AddCampaignDialog } from "@/components/dialogs/AddCampaignDialog";
 import { exportCampaigns } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { PageContent } from "@/components/PageContent"; // Importando PageContent
+import { PageContent } from "@/components/PageContent";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Mapeamento para ordenação correta dos meses
+const MONTH_ORDER_MAP = MONTHS.reduce((acc, month, index) => {
+    acc[month] = index;
+    return acc;
+}, {} as Record<string, number>);
+
+// Colunas da tabela (sem a coluna Mês/Ano, que agora está no Card Header)
 const columns = [
-  {
-    key: 'month',
-    header: 'Mês',
-    render: (item: CampaignResult) => (
-      <div>
-        <span className="font-medium">{item.month}</span>
-        <span className="text-muted-foreground text-sm ml-1">{item.year}</span>
-      </div>
-    ),
-  },
   {
     key: 'daysRunning',
     header: 'Dias',
-    className: 'text-center',
+    className: 'w-16 text-center',
     render: (item: CampaignResult) => (
       <span>{item.daysRunning}</span>
     ),
@@ -134,10 +132,9 @@ export default function CampaignsPage() {
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
-  // Mantendo o estado do filtro de produto, mas ele não será exposto na UI
   const [productFilter, setProductFilter] = useState<string>("all"); 
 
-  // Get unique years and products for filters
+  // Get unique years for filters
   const years = useMemo(() => {
     const uniqueYears = [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
     return uniqueYears;
@@ -150,8 +147,54 @@ export default function CampaignsPage() {
       if (monthFilter !== "all" && c.month !== monthFilter) return false;
       if (productFilter !== "all" && c.productName !== productFilter) return false;
       return true;
+    }).sort((a, b) => {
+      // Sort by date descending for consistent display order within groups
+      const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+      const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+      return dateB - dateA;
     });
   }, [campaigns, yearFilter, monthFilter, productFilter]);
+
+  // Group campaigns by Year and Month
+  const groupedCampaigns = useMemo(() => {
+    const groups = new Map<number, Map<string, CampaignResult[]>>();
+    
+    for (const campaign of filteredCampaigns) {
+        if (!groups.has(campaign.year)) {
+            groups.set(campaign.year, new Map<string, CampaignResult[]>());
+        }
+        const monthMap = groups.get(campaign.year)!;
+        
+        if (!monthMap.has(campaign.month)) {
+            monthMap.set(campaign.month, []);
+        }
+        monthMap.get(campaign.month)!.push(campaign);
+    }
+
+    // Sort years descending
+    const sortedYears = Array.from(groups.keys()).sort((a, b) => b - a);
+
+    // Prepare final structure, sorting months within each year (descending month number)
+    const finalGroups: { year: number; month: string; campaigns: CampaignResult[] }[] = [];
+    
+    for (const year of sortedYears) {
+        const monthMap = groups.get(year)!;
+        const sortedMonths = Array.from(monthMap.keys()).sort((a, b) => 
+            (MONTH_ORDER_MAP[b] ?? 0) - (MONTH_ORDER_MAP[a] ?? 0)
+        );
+        
+        for (const month of sortedMonths) {
+            finalGroups.push({
+                year,
+                month,
+                campaigns: monthMap.get(month)!
+            });
+        }
+    }
+    
+    return finalGroups;
+  }, [filteredCampaigns]);
+
 
   const handleExport = () => {
     if (filteredCampaigns.length === 0) {
@@ -212,12 +255,34 @@ export default function CampaignsPage() {
         </AddCampaignDialog>
       </PageHeader>
 
-      <PageContent>
-        <DataTable 
-          data={filteredCampaigns} 
-          columns={columns}
-          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
-        />
+      <PageContent className="space-y-6">
+        {groupedCampaigns.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p>Nenhuma campanha encontrada com os filtros selecionados.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          groupedCampaigns.map(({ year, month, campaigns }) => (
+            <Card key={`${year}-${month}`}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl">
+                  {month} de {year}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {campaigns.length} campanhas registradas
+                </p>
+              </CardHeader>
+              <CardContent className="p-0">
+                <DataTable 
+                  data={campaigns} 
+                  columns={columns}
+                  // Removendo sticky header, pois o PageContent já gerencia a rolagem
+                />
+              </CardContent>
+            </Card>
+          ))
+        )}
       </PageContent>
     </div>
   );
