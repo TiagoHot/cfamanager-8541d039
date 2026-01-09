@@ -1,20 +1,23 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CampaignResult, MONTHS } from '@/types';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { CampaignResult, MONTHS, Product } from '@/types';
 import { toast } from 'sonner';
+import { Globe, Flag } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AddCampaignDialogProps {
   onAdd: (campaign: CampaignResult) => void;
   children: React.ReactNode;
-  products: { name: string }[];
+  products: Product[]; // Using Product interface now
 }
 
 const STRATEGIES = ['Pesquisa', 'Display', 'YouTube', 'Shopping', 'Performance Max', 'Discovery'];
-const LOCATIONS = ['Brasil', 'Gringa', 'ES', 'MX', 'US', 'PT'];
+const LOCATIONS = ['Brasil', 'Gringa'];
 
 export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDialogProps) {
   const [open, setOpen] = useState(false);
@@ -29,7 +32,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     daysRunning: '',
-    location: 'Brasil',
+    location: 'Brasil', // Default location
     strategy: 'Pesquisa',
     impressions: '',
     clicks: '',
@@ -37,6 +40,26 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     earnings: '',
     costs: '',
   });
+
+  // Filter products based on selected location
+  const filteredProducts = useMemo(() => {
+    const location = formData.location;
+    return products
+      .filter(p => p.country === location)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [products, formData.location]);
+
+  // Reset product name if the selected location changes and the current product is no longer valid
+  const handleLocationChange = (newLocation: string) => {
+    setFormData(prev => {
+      const isCurrentProductValid = filteredProducts.some(p => p.name === prev.productName);
+      return {
+        ...prev,
+        location: newLocation,
+        productName: isCurrentProductValid ? prev.productName : '', // Clear product if invalid
+      };
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +75,10 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     const profitLoss = earnings - costs;
     const roi = costs > 0 ? ((earnings - costs) / costs) * 100 : 0;
     const cpc = clicks > 0 ? costs / clicks : 0;
+    
+    // Find commission BRL from the product list
+    const product = products.find(p => p.name === formData.productName);
+    const commissionBRL = product?.commissionBRL || 0;
 
     const newCampaign: CampaignResult = {
       id: `camp-new-${Date.now()}`,
@@ -62,10 +89,10 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
       endDate: formData.endDate,
       daysRunning: parseInt(formData.daysRunning) || 0,
       productName: formData.productName,
-      niche: '',
+      niche: product?.niche || '',
       location: formData.location,
       strategy: formData.strategy,
-      commissionBRL: 0,
+      commissionBRL,
       impressions: parseInt(formData.impressions) || 0,
       clicks,
       sales: parseInt(formData.sales) || 0,
@@ -118,15 +145,47 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
           <DialogTitle>Adicionar Nova Campanha</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Location Selector */}
+          <div className="space-y-2">
+            <Label>Localização da Campanha *</Label>
+            <ToggleGroup 
+              type="single" 
+              value={formData.location} 
+              onValueChange={(v) => v && handleLocationChange(v)}
+              className="grid grid-cols-2 gap-2"
+            >
+              {LOCATIONS.map(loc => (
+                <ToggleGroupItem 
+                  key={loc} 
+                  value={loc} 
+                  className={cn(
+                    "py-3 px-4 rounded-lg border transition-all duration-200",
+                    formData.location === loc 
+                      ? "bg-warning/10 border-warning text-warning shadow-md" 
+                      : "bg-secondary/50 border-secondary text-secondary-foreground hover:bg-secondary"
+                  )}
+                >
+                  {loc === 'Brasil' ? <Flag className="w-4 h-4 mr-2" /> : <Globe className="w-4 h-4 mr-2" />}
+                  {loc}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <Label htmlFor="productName">Nome do Produto *</Label>
-              <Select value={formData.productName} onValueChange={(v) => setFormData(prev => ({ ...prev, productName: v }))}>
+              <Select 
+                value={formData.productName} 
+                onValueChange={(v) => setFormData(prev => ({ ...prev, productName: v }))}
+                disabled={filteredProducts.length === 0}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um produto" />
+                  <SelectValue placeholder={filteredProducts.length > 0 ? "Selecione um produto" : `Nenhum produto em ${formData.location}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map(p => (
+                  {filteredProducts.map(p => (
                     <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -190,20 +249,6 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
                 onChange={(e) => setFormData(prev => ({ ...prev, daysRunning: e.target.value }))}
                 placeholder="0"
               />
-            </div>
-
-            <div>
-              <Label htmlFor="location">Local</Label>
-              <Select value={formData.location} onValueChange={(v) => setFormData(prev => ({ ...prev, location: v }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {LOCATIONS.map(l => (
-                    <SelectItem key={l} value={l}>{l}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div>
