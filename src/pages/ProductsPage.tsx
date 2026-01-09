@@ -13,7 +13,7 @@ import { EditProductDialog } from "@/components/dialogs/EditProductDialog";
 import { exportProducts } from "@/lib/exportData";
 import { toast } from "sonner";
 import { PageContent } from "@/components/PageContent";
-import { cn } from "@/lib/utils"; // Importando cn para classes customizadas
+import { cn } from "@/lib/utils";
 
 export default function ProductsPage() {
   const { products, importData, addProduct, updateProduct } = useData();
@@ -33,6 +33,13 @@ export default function ProductsPage() {
       header: 'Produto',
       render: (item: Product) => (
         <span className="font-medium">{item.name}</span>
+      ),
+    },
+    {
+      key: 'niche',
+      header: 'Nicho',
+      render: (item: Product) => (
+        <Badge variant="outline">{item.niche || 'Não Definido'}</Badge>
       ),
     },
     {
@@ -59,38 +66,6 @@ export default function ProductsPage() {
           </Badge>
         );
       },
-    },
-    {
-      key: 'currency',
-      header: 'Moeda',
-    },
-    {
-      key: 'averageTicket',
-      header: 'Ticket Médio',
-      className: 'text-right',
-      render: (item: Product) => (
-        <span>
-          {item.currency === 'Real' ? 'R$' : item.currency === 'Dólar' ? '$' : '€'} {item.averageTicket.toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      key: 'commissionPercent',
-      header: 'Comissão %',
-      className: 'text-right',
-      render: (item: Product) => (
-        <span>{item.commissionPercent}%</span>
-      ),
-    },
-    {
-      key: 'commissionBRL',
-      header: 'Comissão R$',
-      className: 'text-right',
-      render: (item: Product) => (
-        <span className="font-medium text-success">
-          {formatCurrency(item.commissionBRL)}
-        </span>
-      ),
     },
     {
       key: 'date',

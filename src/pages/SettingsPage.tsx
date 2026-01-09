@@ -5,21 +5,59 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Save, RefreshCw } from "lucide-react";
+import { Save, RefreshCw, X } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
+import { useSettings } from "@/hooks/useSettings";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
+  const { niches, addNiche, removeNiche, resetNiches } = useSettings();
+  const [newNiche, setNewNiche] = useState('');
+  const [newPlatform, setNewPlatform] = useState('');
+  const [newStrategy, setNewStrategy] = useState('');
+
+  const handleAddNiche = () => {
+    if (newNiche.trim()) {
+      addNiche(newNiche.trim());
+      setNewNiche('');
+      toast.success(`Nicho "${newNiche.trim()}" adicionado.`);
+    }
+  };
+
+  const handleRemoveNiche = (niche: string) => {
+    removeNiche(niche);
+    toast.info(`Nicho "${niche}" removido.`);
+  };
+
+  // Placeholder functions for other settings management (Platforms, Strategies)
+  const handleAddPlatform = () => {
+    if (newPlatform.trim()) {
+      // Logic to add platform (currently hardcoded in types/index.ts)
+      toast.info(`Plataforma "${newPlatform.trim()}" adicionada (Apenas visual, lista fixa no código).`);
+      setNewPlatform('');
+    }
+  };
+
+  const handleAddStrategy = () => {
+    if (newStrategy.trim()) {
+      // Logic to add strategy (currently hardcoded in dialogs)
+      toast.info(`Estratégia "${newStrategy.trim()}" adicionada (Apenas visual, lista fixa no código).`);
+      setNewStrategy('');
+    }
+  };
+
   return (
     <div className="animate-fade-in space-y-6">
       <PageHeader 
         title="Parâmetros Auxiliares" 
         description="Configure as taxas de câmbio e parâmetros do sistema"
       >
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={resetNiches}>
           <RefreshCw className="w-4 h-4 mr-2" />
           Restaurar Padrões
         </Button>
-        <Button size="sm">
+        <Button size="sm" disabled>
           <Save className="w-4 h-4 mr-2" />
           Salvar Alterações
         </Button>
@@ -43,6 +81,7 @@ export default function SettingsPage() {
                   step="0.0001" 
                   defaultValue={CURRENCY_RATES['Dólar']} 
                   className="w-32"
+                  disabled // Disable editing since we don't have persistence for this yet
                 />
                 <span className="text-muted-foreground">R$</span>
               </div>
@@ -57,6 +96,7 @@ export default function SettingsPage() {
                   step="0.0001" 
                   defaultValue={CURRENCY_RATES['Euro']} 
                   className="w-32"
+                  disabled // Disable editing since we don't have persistence for this yet
                 />
                 <span className="text-muted-foreground">R$</span>
               </div>
@@ -104,14 +144,43 @@ export default function SettingsPage() {
                     type="number" 
                     defaultValue={60000} 
                     className="w-28"
+                    disabled // Disable editing since we don't have persistence for this yet
                   />
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
+        
+        {/* Niches */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Nichos de Produtos</CardTitle>
+            <CardDescription>Gerencie a lista de nichos disponíveis para categorização de produtos.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2 min-h-10">
+              {niches.map(niche => (
+                <Badge key={niche} variant="secondary" className="text-sm cursor-pointer hover:bg-destructive/10 transition-colors" onClick={() => handleRemoveNiche(niche)}>
+                  {niche} <X className="w-3 h-3 ml-1" />
+                </Badge>
+              ))}
+            </div>
+            <Separator className="my-4" />
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Novo nicho..." 
+                className="flex-1" 
+                value={newNiche}
+                onChange={(e) => setNewNiche(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddNiche()}
+              />
+              <Button variant="outline" size="sm" onClick={handleAddNiche}>Adicionar</Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Platforms */}
+        {/* Platforms (Placeholder for future dynamic management) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Plataformas de Afiliados</CardTitle>
@@ -127,27 +196,13 @@ export default function SettingsPage() {
             </div>
             <Separator className="my-4" />
             <div className="flex gap-2">
-              <Input placeholder="Nova plataforma..." className="flex-1" />
-              <Button variant="outline" size="sm">Adicionar</Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Strategies */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Estratégias de Campanha</CardTitle>
-            <CardDescription>Tipos de estratégias para campanhas</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="text-sm">Pesquisa</Badge>
-              <Badge variant="outline" className="text-sm">Display</Badge>
-            </div>
-            <Separator className="my-4" />
-            <div className="flex gap-2">
-              <Input placeholder="Nova estratégia..." className="flex-1" />
-              <Button variant="outline" size="sm">Adicionar</Button>
+              <Input 
+                placeholder="Nova plataforma..." 
+                className="flex-1" 
+                value={newPlatform}
+                onChange={(e) => setNewPlatform(e.target.value)}
+              />
+              <Button variant="outline" size="sm" onClick={handleAddPlatform}>Adicionar</Button>
             </div>
           </CardContent>
         </Card>

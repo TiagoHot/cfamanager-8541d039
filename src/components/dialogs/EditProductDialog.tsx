@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { Pencil, Save } from 'lucide-react';
+import { useSettings } from '@/hooks/useSettings';
 
 interface EditProductDialogProps {
   product: Product;
@@ -15,9 +16,11 @@ interface EditProductDialogProps {
 }
 
 export function EditProductDialog({ product, onUpdate, children }: EditProductDialogProps) {
+  const { niches } = useSettings();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: product.name,
+    niche: product.niche || niches[0] || '',
     platform: product.platform,
     country: product.country,
     currency: product.currency,
@@ -31,6 +34,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
       // Reset form data when dialog opens, ensuring it reflects the current product state
       setFormData({
         name: product.name,
+        niche: product.niche || niches[0] || '',
         platform: product.platform,
         country: product.country,
         currency: product.currency,
@@ -39,7 +43,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
         date: product.date,
       });
     }
-  }, [open, product]);
+  }, [open, product, niches]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +62,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
       ...product,
       date: formData.date,
       name: formData.name,
+      niche: formData.niche,
       platform: formData.platform,
       country: formData.country,
       currency: formData.currency,
@@ -93,6 +98,20 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
               />
             </div>
             
+            <div>
+              <Label htmlFor="niche">Nicho</Label>
+              <Select value={formData.niche} onValueChange={(v) => setFormData(prev => ({ ...prev, niche: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o nicho" />
+                </SelectTrigger>
+                <SelectContent>
+                  {niches.map(n => (
+                    <SelectItem key={n} value={n}>{n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label htmlFor="platform">Plataforma</Label>
               <Select value={formData.platform} onValueChange={(v) => setFormData(prev => ({ ...prev, platform: v }))}>

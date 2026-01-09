@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
+import { useSettings } from '@/hooks/useSettings';
 
 interface AddProductDialogProps {
   onAdd: (product: Product) => void;
@@ -14,9 +15,11 @@ interface AddProductDialogProps {
 }
 
 export function AddProductDialog({ onAdd, children, existingProductsCount }: AddProductDialogProps) {
+  const { niches } = useSettings();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
+    niche: niches[0] || '',
     platform: 'Hotmart',
     country: 'Brasil',
     currency: 'Real',
@@ -43,7 +46,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       date: formData.date,
       productNumber: existingProductsCount + 1,
       name: formData.name,
-      niche: '',
+      niche: formData.niche,
       platform: formData.platform,
       country: formData.country,
       currency: formData.currency,
@@ -57,6 +60,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
     setOpen(false);
     setFormData({
       name: '',
+      niche: niches[0] || '',
       platform: 'Hotmart',
       country: 'Brasil',
       currency: 'Real',
@@ -85,6 +89,20 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
               />
             </div>
             
+            <div>
+              <Label htmlFor="niche">Nicho</Label>
+              <Select value={formData.niche} onValueChange={(v) => setFormData(prev => ({ ...prev, niche: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o nicho" />
+                </SelectTrigger>
+                <SelectContent>
+                  {niches.map(n => (
+                    <SelectItem key={n} value={n}>{n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label htmlFor="platform">Plataforma</Label>
               <Select value={formData.platform} onValueChange={(v) => setFormData(prev => ({ ...prev, platform: v }))}>

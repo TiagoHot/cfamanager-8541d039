@@ -3,7 +3,7 @@ export interface Product {
   date: string;
   productNumber: number;
   name: string;
-  niche?: string;
+  niche: string; // Changed from optional to required string
   platform: string;
   country: string;
   currency: string;
@@ -109,4 +109,10 @@ export const INCOME_SOURCES = [
 export const EXPENSE_SOURCES = [
   'Tráfego Pago', 'Cursos', 'Ferramentas', 'Eventos',
   'Equipamentos', 'Contabilidade', 'Internet', 'Mentorias', 'Outras Despesas'
+];
+
+export const NICHES = [
+  'Saúde & Bem-Estar', 'Finanças & Investimentos', 'Desenvolvimento Pessoal', 
+  'Marketing Digital', 'Culinária & Receitas', 'Hobbies & Artesanato', 
+  'Relacionamentos', 'Idiomas', 'Tecnologia', 'Outros'
 ];
