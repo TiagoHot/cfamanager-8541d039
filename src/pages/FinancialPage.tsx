@@ -41,6 +41,13 @@ const incomeColumns = [
     ),
   },
   {
+    key: 'details',
+    header: 'Nota',
+    render: (item: IncomeExpense) => (
+      <span className="text-sm text-muted-foreground">{item.details || '-'}</span>
+    ),
+  },
+  {
     key: 'amount',
     header: 'Valor',
     className: 'text-right w-24',
@@ -65,6 +72,13 @@ const expenseColumns = [
       <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
         {item.source}
       </Badge>
+    ),
+  },
+  {
+    key: 'details',
+    header: 'Nota',
+    render: (item: IncomeExpense) => (
+      <span className="text-sm text-muted-foreground">{item.details || '-'}</span>
     ),
   },
   {
