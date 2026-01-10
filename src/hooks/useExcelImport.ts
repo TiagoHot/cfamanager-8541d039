@@ -169,7 +169,10 @@ const getMonthNumber = (monthStr: string): number | null => {
 // Capitalize first letter
 const capitalize = (str: string): string => {
   if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  // Handle composite months like Jan/Fev
+  const parts = str.split('/');
+  const capitalizedParts = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase());
+  return capitalizedParts.join('/');
 };
 
 export const useExcelImport = () => {
@@ -283,6 +286,8 @@ export const useExcelImport = () => {
         averageTicket,
         commissionPercent,
         commissionBRL,
+        type: '', // Assuming type is not in this sheet
+        notes: '', // Assuming notes is not in this sheet
       });
     }
     
@@ -355,8 +360,9 @@ export const useExcelImport = () => {
       if (!year || year < 2000) continue;
       
       // Get month
-      const monthStr = String(row[colMap['month'] ?? 2] || '').toLowerCase().trim();
-      const monthNumber = getMonthNumber(monthStr);
+      const rawMonthStr = String(row[colMap['month'] ?? 2] || '').trim();
+      const monthStr = capitalize(rawMonthStr); // Capitalize and handle composite months
+      const monthNumber = getMonthNumber(rawMonthStr);
       if (!monthNumber) continue;
       
       // Get product name
@@ -376,7 +382,7 @@ export const useExcelImport = () => {
         id: `camp-${campaigns.length + 1}`,
         year,
         monthNumber,
-        month: capitalize(monthStr.split('/')[0]),
+        month: monthStr,
         startDate: startDateStr,
         endDate: endDateStr,
         daysRunning: parseNumber(row[colMap['days']]),
@@ -422,6 +428,9 @@ export const useExcelImport = () => {
       const year = parseNumber(row[1]);
       if (!year || year < 2000 || year > 2100) continue;
       
+      const rawMonthStr = String(row[2] || '').trim();
+      const month = capitalize(rawMonthStr); // Capitalize and handle composite months
+      
       const campaignCosts = parseNumber(row[4]);
       const campaignEarnings = parseNumber(row[6]);
       const organicEarnings = parseNumber(row[7]);
@@ -433,7 +442,7 @@ export const useExcelImport = () => {
         id: `week-${results.length + 1}`,
         week: week.toUpperCase(),
         year,
-        month: String(row[2] || '').trim(),
+        month,
         period: String(row[3] || '').trim(),
         campaignCosts,
         sales: parseNumber(row[5]),
@@ -451,7 +460,7 @@ export const useExcelImport = () => {
 
   // Page 4: Receitas e Despesas
   // Based on log: "ano mês 2 mês data fonte da receita detalhamento valor r$ ano mês 2 mês data fonte da despesa detalhamento valor r$"
-  // Structure: Ano | Mês2 | Mês | Data | Fonte | Detalhamento | Valor
+  // Structure: Ano(-4) | Mês2(-3) | Mês(-2) | Data(-1) | Fonte(0) | Detalhamento(+1) | Valor(+2)
   const parseIncomeExpenses = (sheet: XLSX.WorkSheet): IncomeExpense[] => {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
     const items: IncomeExpense[] = [];
@@ -493,19 +502,20 @@ export const useExcelImport = () => {
       
       // Parse income using incomeFonteCol as reference
       const incomeYear = parseNumber(row[incomeFonteCol - 4]);
-      const incomeMonthStr = String(row[incomeFonteCol - 2] || '').toLowerCase().trim();
-      const incomeMonthNum = getMonthNumber(incomeMonthStr);
+      const rawIncomeMonthStr = String(row[incomeFonteCol - 2] || '').trim();
+      const incomeMonthStr = capitalize(rawIncomeMonthStr);
+      const incomeMonthNum = getMonthNumber(rawIncomeMonthStr);
       const incomeSource = String(row[incomeFonteCol] || '').trim();
       const incomeAmount = parseNumber(row[incomeFonteCol + 2]);
       
-      console.log(`Row ${i} Income: year=${incomeYear}, month=${incomeMonthStr}, source=${incomeSource}, amount=${incomeAmount}`);
+      console.log(`Row ${i} Income: year=${incomeYear}, month=${rawIncomeMonthStr}, source=${incomeSource}, amount=${incomeAmount}`);
       
       if (incomeYear >= 2000 && incomeMonthNum && incomeSource && incomeAmount > 0) {
         items.push({
           id: `income-${items.length + 1}`,
           type: 'income',
           year: incomeYear,
-          month: capitalize(incomeMonthStr.split('/')[0]),
+          month: incomeMonthStr,
           date: parseExcelDate(row[incomeFonteCol - 1]),
           source: incomeSource,
           details: String(row[incomeFonteCol + 1] || '').trim(),
@@ -516,8 +526,9 @@ export const useExcelImport = () => {
       // Parse expenses using expenseFonteCol as reference
       if (expenseFonteCol >= 0) {
         const expenseYear = parseNumber(row[expenseFonteCol - 4]);
-        const expenseMonthStr = String(row[expenseFonteCol - 2] || '').toLowerCase().trim();
-        const expenseMonthNum = getMonthNumber(expenseMonthStr);
+        const rawExpenseMonthStr = String(row[expenseFonteCol - 2] || '').trim();
+        const expenseMonthStr = capitalize(rawExpenseMonthStr);
+        const expenseMonthNum = getMonthNumber(rawExpenseMonthStr);
         const expenseSource = String(row[expenseFonteCol] || '').trim();
         const expenseAmount = parseNumber(row[expenseFonteCol + 2]);
         
@@ -526,7 +537,7 @@ export const useExcelImport = () => {
             id: `expense-${items.length + 1}`,
             type: 'expense',
             year: expenseYear,
-            month: capitalize(expenseMonthStr.split('/')[0]),
+            month: expenseMonthStr,
             date: parseExcelDate(row[expenseFonteCol - 1]),
             source: expenseSource,
             details: String(row[expenseFonteCol + 1] || '').trim(),

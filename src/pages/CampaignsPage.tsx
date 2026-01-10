@@ -144,7 +144,8 @@ export default function CampaignsPage() {
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter(c => {
       if (yearFilter !== "all" && c.year !== parseInt(yearFilter)) return false;
-      if (monthFilter !== "all" && c.month !== monthFilter) return false;
+      // Check if the month filter is contained in the potentially composite month field
+      if (monthFilter !== "all" && !c.month.toLowerCase().includes(monthFilter.toLowerCase())) return false;
       if (productFilter !== "all" && c.productName !== productFilter) return false;
       return true;
     }).sort((a, b) => {
@@ -165,6 +166,7 @@ export default function CampaignsPage() {
         }
         const monthMap = groups.get(campaign.year)!;
         
+        // Use the full month string (which might be composite like 'Jan/Fev') for grouping
         if (!monthMap.has(campaign.month)) {
             monthMap.set(campaign.month, []);
         }
@@ -174,13 +176,19 @@ export default function CampaignsPage() {
     // Sort years descending
     const sortedYears = Array.from(groups.keys()).sort((a, b) => b - a);
 
+    // Helper to get the month number of the first month in a composite string (e.g., 'Jan/Fev' -> 0)
+    const getFirstMonthIndex = (monthStr: string) => {
+        const firstMonthAbbr = monthStr.split('/')[0].trim();
+        return MONTHS.indexOf(firstMonthAbbr);
+    };
+
     // Prepare final structure, sorting months within each year (descending month number)
     const finalGroups: { year: number; month: string; campaigns: CampaignResult[] }[] = [];
     
     for (const year of sortedYears) {
         const monthMap = groups.get(year)!;
         const sortedMonths = Array.from(monthMap.keys()).sort((a, b) => 
-            (MONTH_ORDER_MAP[b] ?? 0) - (MONTH_ORDER_MAP[a] ?? 0)
+            getFirstMonthIndex(b) - getFirstMonthIndex(a)
         );
         
         for (const month of sortedMonths) {

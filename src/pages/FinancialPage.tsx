@@ -114,7 +114,8 @@ export default function FinancialPage() {
       filtered = filtered.filter(i => i.year === parseInt(yearFilter));
     }
     if (monthFilter !== "all") {
-      filtered = filtered.filter(i => i.month === monthFilter);
+      // Filter by checking if the month filter is contained in the potentially composite month field
+      filtered = filtered.filter(i => i.month.toLowerCase().includes(monthFilter.toLowerCase()));
     }
 
     return [...filtered].sort((a, b) => {
