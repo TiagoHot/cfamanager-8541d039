@@ -13,26 +13,25 @@ import { AddIncomeExpenseDialog } from "@/components/dialogs/AddIncomeExpenseDia
 import { exportIncomeExpenses } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PageContent } from "@/components/PageContent"; // Importando PageContent
+import { PageContent } from "@/components/PageContent";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-const incomeColumns = [
+// Colunas simplificadas para uso dentro dos Cards (Mês/Ano removido, pois já está no CardTitle)
+const baseColumns = [
   {
     key: 'date',
     header: 'Data',
+    className: 'w-24',
     render: (item: IncomeExpense) => formatDate(item.date),
-  },
-  {
-    key: 'month',
-    header: 'Mês',
-    render: (item: IncomeExpense) => (
-      <span className="font-medium">{item.month} {item.year}</span>
-    ),
   },
   {
     key: 'source',
     header: 'Fonte',
     render: (item: IncomeExpense) => (
-      <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+      <Badge variant="secondary" className={cn(
+        item.type === 'income' ? "bg-success/10 text-success border-success/20" : "bg-destructive/10 text-destructive border-destructive/20"
+      )}>
         {item.source}
       </Badge>
     ),
@@ -44,54 +43,27 @@ const incomeColumns = [
   {
     key: 'amount',
     header: 'Valor',
-    className: 'text-right',
+    className: 'text-right w-32',
     render: (item: IncomeExpense) => (
       <div className="flex items-center justify-end gap-2">
-        <ArrowUpRight className="w-4 h-4 text-success" />
-        <span className="font-medium text-success">{formatCurrency(item.amount)}</span>
+        {item.type === 'income' 
+          ? <ArrowUpRight className="w-4 h-4 text-success" />
+          : <ArrowDownRight className="w-4 h-4 text-destructive" />
+        }
+        <span className={cn("font-medium", item.type === 'income' ? "text-success" : "text-destructive")}>
+          {formatCurrency(item.amount)}
+        </span>
       </div>
     ),
   },
 ];
 
-const expenseColumns = [
-  {
-    key: 'date',
-    header: 'Data',
-    render: (item: IncomeExpense) => formatDate(item.date),
-  },
-  {
-    key: 'month',
-    header: 'Mês',
-    render: (item: IncomeExpense) => (
-      <span className="font-medium">{item.month} {item.year}</span>
-    ),
-  },
-  {
-    key: 'source',
-    header: 'Fonte',
-    render: (item: IncomeExpense) => (
-      <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
-        {item.source}
-      </Badge>
-    ),
-  },
-  {
-    key: 'details',
-    header: 'Detalhamento',
-  },
-  {
-    key: 'amount',
-    header: 'Valor',
-    className: 'text-right',
-    render: (item: IncomeExpense) => (
-      <div className="flex items-center justify-end gap-2">
-        <ArrowDownRight className="w-4 h-4 text-destructive" />
-        <span className="font-medium text-destructive">{formatCurrency(item.amount)}</span>
-      </div>
-    ),
-  },
-];
+// Helper para obter o número do mês para ordenação (1 para Jan, 12 para Dez)
+const getMonthNumber = (month: string): number => {
+  const normalized = month.toLowerCase().split('/')[0].trim();
+  const index = MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
+  return index >= 0 ? index + 1 : 0;
+};
 
 export default function FinancialPage() {
   const { incomeExpenses, importData, addIncomeExpense } = useData();
@@ -105,7 +77,7 @@ export default function FinancialPage() {
     return uniqueYears;
   }, [incomeExpenses]);
 
-  // Filter and sort
+  // Filter items
   const filteredItems = useMemo(() => {
     let filtered = incomeExpenses;
     
@@ -113,10 +85,10 @@ export default function FinancialPage() {
       filtered = filtered.filter(i => i.year === parseInt(yearFilter));
     }
     if (monthFilter !== "all") {
-      // Filter by checking if the month filter is contained in the potentially composite month field
       filtered = filtered.filter(i => i.month.toLowerCase().includes(monthFilter.toLowerCase()));
     }
 
+    // Sort by date descending
     return [...filtered].sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
@@ -127,6 +99,55 @@ export default function FinancialPage() {
   const incomes = filteredItems.filter(item => item.type === 'income');
   const expenses = filteredItems.filter(item => item.type === 'expense');
 
+  // Grouping logic
+  const groupedIncomes = useMemo(() => {
+    const groups = new Map<string, IncomeExpense[]>(); // Key: "Month Year"
+    incomes.forEach(item => {
+      const key = `${item.month} ${item.year}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(item);
+    });
+    
+    // Sort groups by Year (desc) then Month (desc)
+    const sortedGroups = Array.from(groups.entries()).sort(([keyA], [keyB]) => {
+      const [monthA, yearA] = keyA.split(' ');
+      const [monthB, yearB] = keyB.split(' ');
+      
+      const yearDiff = parseInt(yearB) - parseInt(yearA);
+      if (yearDiff !== 0) return yearDiff;
+      
+      return getMonthNumber(monthB) - getMonthNumber(monthA);
+    });
+    
+    return sortedGroups;
+  }, [incomes]);
+
+  const groupedExpenses = useMemo(() => {
+    const groups = new Map<string, IncomeExpense[]>(); // Key: "Month Year"
+    expenses.forEach(item => {
+      const key = `${item.month} ${item.year}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(item);
+    });
+    
+    // Sort groups by Year (desc) then Month (desc)
+    const sortedGroups = Array.from(groups.entries()).sort(([keyA], [keyB]) => {
+      const [monthA, yearA] = keyA.split(' ');
+      const [monthB, yearB] = keyB.split(' ');
+      
+      const yearDiff = parseInt(yearB) - parseInt(yearA);
+      if (yearDiff !== 0) return yearDiff;
+      
+      return getMonthNumber(monthB) - getMonthNumber(monthA);
+    });
+    
+    return sortedGroups;
+  }, [expenses]);
+
   const handleExport = () => {
     if (filteredItems.length === 0) {
       toast.error('Nenhum registro para exportar');
@@ -136,7 +157,7 @@ export default function FinancialPage() {
     toast.success('Receitas e despesas exportadas com sucesso!');
   };
 
-  // Calculate totals
+  // Calculate totals for summary cards
   const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
   const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
   const balance = totalIncome - totalExpense;
@@ -160,7 +181,7 @@ export default function FinancialPage() {
           </SelectContent>
         </Select>
 
-        {/* Novo Filtro de Mês */}
+        {/* Filtro de Mês */}
         <Select value={monthFilter} onValueChange={setMonthFilter}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Mês" />
@@ -191,9 +212,9 @@ export default function FinancialPage() {
         </AddIncomeExpenseDialog>
       </PageHeader>
 
-      <PageContent className="h-[calc(100vh-4rem-24px-120px)]"> {/* Ajustando altura para acomodar o summary e tabs */}
+      <PageContent className="h-[calc(100vh-4rem-24px-120px)] space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-4 mb-6 flex-shrink-0">
+        <div className="grid grid-cols-3 gap-4 mb-3 flex-shrink-0">
           <div className="p-4 rounded-lg bg-success/10 border border-success/20">
             <p className="text-sm text-muted-foreground">Total Receitas</p>
             <p className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</p>
@@ -222,20 +243,58 @@ export default function FinancialPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="income" className="flex-1 min-h-0 overflow-y-auto">
-            <DataTable 
-              data={incomes} 
-              columns={incomeColumns}
-              headerClassName="sticky top-0 z-10 bg-background shadow-sm"
-            />
+          <TabsContent value="income" className="flex-1 min-h-0 overflow-y-auto space-y-6">
+            {groupedIncomes.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <p>Nenhuma receita encontrada com os filtros selecionados.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              groupedIncomes.map(([monthYear, items]) => (
+                <Card key={monthYear}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-xl text-success">{monthYear}</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Total: <span className="font-medium text-success">{formatCurrency(items.reduce((sum, i) => sum + i.amount, 0))}</span>
+                    </p>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <DataTable 
+                      data={items} 
+                      columns={baseColumns}
+                    />
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
 
-          <TabsContent value="expenses" className="flex-1 min-h-0 overflow-y-auto">
-            <DataTable 
-              data={expenses} 
-              columns={expenseColumns}
-              headerClassName="sticky top-0 z-10 bg-background shadow-sm"
-            />
+          <TabsContent value="expenses" className="flex-1 min-h-0 overflow-y-auto space-y-6">
+            {groupedExpenses.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <p>Nenhuma despesa encontrada com os filtros selecionados.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              groupedExpenses.map(([monthYear, items]) => (
+                <Card key={monthYear}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-xl text-destructive">{monthYear}</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Total: <span className="font-medium text-destructive">{formatCurrency(items.reduce((sum, i) => sum + i.amount, 0))}</span>
+                    </p>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <DataTable 
+                      data={items} 
+                      columns={baseColumns}
+                    />
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </PageContent>
