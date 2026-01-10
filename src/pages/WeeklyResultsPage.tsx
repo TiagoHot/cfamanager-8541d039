@@ -26,8 +26,10 @@ const getWeekNumber = (week: string): number => {
 
 // Get month number from month name (handles abbreviations and composite months like Jan/Fev)
 const getMonthNumber = (month: string): number => {
+  // Normalize month string to check against MONTHS array (Jan=0, Fev=1, etc.)
   const normalized = month.toLowerCase().split('/')[0].trim();
   const index = MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
+  // Return 1-based month number (1 for Jan, 12 for Dez)
   return index >= 0 ? index + 1 : 0;
 };
 
@@ -183,15 +185,15 @@ export default function WeeklyResultsPage() {
     }
 
     return [...filtered].sort((a, b) => {
-      // First, compare by year (descending)
+      // 1. Compare by year (descending)
       if (b.year !== a.year) return b.year - a.year;
       
-      // Then by month (descending) - using the first month for sorting
+      // 2. Then by month (descending) - using the first month for sorting
       const monthA = getMonthNumber(a.month);
       const monthB = getMonthNumber(b.month);
       if (monthB !== monthA) return monthB - monthA;
       
-      // Finally by week number (descending)
+      // 3. Finally by week number (descending)
       return getWeekNumber(b.week) - getWeekNumber(a.week);
     });
   }, [weeklyResults, yearFilter, monthFilter]);
