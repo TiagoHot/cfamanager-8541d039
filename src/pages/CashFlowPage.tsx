@@ -46,6 +46,17 @@ export default function CashFlowPage() {
     acumulado: m.accumulatedBalance
   }));
 
+  // Prepare sorted breakdown data
+  const sortedIncomeBreakdown = useMemo(() => {
+    return Object.entries(cashFlowData.incomeBreakdown)
+      .sort(([, valueA], [, valueB]) => valueB - valueA);
+  }, [cashFlowData.incomeBreakdown]);
+
+  const sortedExpenseBreakdown = useMemo(() => {
+    return Object.entries(cashFlowData.expenseBreakdown)
+      .sort(([, valueA], [, valueB]) => valueB - valueA);
+  }, [cashFlowData.expenseBreakdown]);
+
   if (incomeExpenses.length === 0) {
     return (
       <div className="animate-fade-in space-y-6">
@@ -187,7 +198,7 @@ export default function CashFlowPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {Object.entries(cashFlowData.incomeBreakdown).map(([key, value]) => (
+              {sortedIncomeBreakdown.map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-success/5">
                   <span className="capitalize font-medium">{key}</span>
                   <span className="font-medium text-success">{formatCurrency(value)}</span>
@@ -203,7 +214,7 @@ export default function CashFlowPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {Object.entries(cashFlowData.expenseBreakdown).map(([key, value]) => (
+              {sortedExpenseBreakdown.map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-destructive/5">
                   <span className="capitalize font-medium">{key}</span>
                   <span className="font-medium text-destructive">{formatCurrency(value)}</span>
