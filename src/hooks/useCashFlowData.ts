@@ -25,6 +25,8 @@ interface CashFlowData {
 
 // Helper para obter o número do mês (0 para Jan, 11 para Dez)
 const getMonthIndex = (month: string): number => {
+  if (!month) return -1;
+  // Normaliza a string do mês (pega a primeira parte se for composta)
   const normalized = month.toLowerCase().split('/')[0].trim();
   return MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
 };
@@ -37,7 +39,7 @@ export function useCashFlowData(incomeExpenses: IncomeExpense[], selectedYear: n
     const monthlyMap = new Map<string, { income: number; expenses: number }>();
     
     yearItems.forEach(item => {
-      // Use the full month string (e.g., 'Jan', 'Mar/Abr') for grouping, but use the first month for ordering later
+      // Use a string do mês completa para a chave do mapa
       const monthKey = item.month; 
       const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
       
@@ -54,9 +56,9 @@ export function useCashFlowData(incomeExpenses: IncomeExpense[], selectedYear: n
       ...data,
       balance: data.income - data.expenses,
       monthIndex: getMonthIndex(month),
-    }));
+    })).filter(m => m.monthIndex !== -1); // Remove entries where month name couldn't be parsed
     
-    // Sort by month index (0-11)
+    // Sort by month index (0-11) chronologically
     rawMonths.sort((a, b) => a.monthIndex - b.monthIndex);
 
     let accumulatedBalance = 0;
