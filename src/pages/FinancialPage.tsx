@@ -4,7 +4,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload, Filter, X } from "lucide-react";
+import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { IncomeExpense, MONTHS } from "@/types";
 import { useData } from "@/contexts/DataContext";
@@ -13,7 +13,6 @@ import { AddIncomeExpenseDialog } from "@/components/dialogs/AddIncomeExpenseDia
 import { exportIncomeExpenses } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PageContent } from "@/components/PageContent"; // Importando PageContent
 
 const incomeColumns = [
@@ -128,13 +127,6 @@ export default function FinancialPage() {
   const incomes = filteredItems.filter(item => item.type === 'income');
   const expenses = filteredItems.filter(item => item.type === 'expense');
 
-  const hasFilters = yearFilter !== "all" || monthFilter !== "all";
-
-  const clearFilters = () => {
-    setYearFilter("all");
-    setMonthFilter("all");
-  };
-
   const handleExport = () => {
     if (filteredItems.length === 0) {
       toast.error('Nenhum registro para exportar');
@@ -155,6 +147,7 @@ export default function FinancialPage() {
         title="Receitas & Despesas" 
         description="Gerencie todas as suas entradas e saídas financeiras"
       >
+        {/* Filtro de Ano */}
         <Select value={yearFilter} onValueChange={setYearFilter}>
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Ano" />
@@ -167,43 +160,18 @@ export default function FinancialPage() {
           </SelectContent>
         </Select>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64" align="end">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Filtros</h4>
-                {hasFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    <X className="w-4 h-4 mr-1" />
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mês</label>
-                <Select value={monthFilter} onValueChange={setMonthFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Meses</SelectItem>
-                    {MONTHS.map(m => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        {/* Novo Filtro de Mês */}
+        <Select value={monthFilter} onValueChange={setMonthFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Mês" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Meses</SelectItem>
+            {MONTHS.map(m => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <ImportExcelDialog onImportComplete={importData}>
           <Button variant="outline" size="sm">
