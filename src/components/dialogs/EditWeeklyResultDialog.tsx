@@ -14,6 +14,12 @@ interface EditWeeklyResultDialogProps {
   children: React.ReactNode;
 }
 
+// Helper to extract week number from week string (e.g., "S01" -> 1)
+const getWeekNumber = (week: string): number => {
+  const match = week.match(/S(\d+)/i);
+  return match ? parseInt(match[1], 10) : 0;
+};
+
 export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeeklyResultDialogProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -48,6 +54,11 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.month.trim()) {
+      toast.error('Mês é obrigatório');
+      return;
+    }
+
     const campaignCosts = parseFloat(formData.campaignCosts) || 0;
     const campaignEarnings = parseFloat(formData.campaignEarnings) || 0;
     const organicEarnings = parseFloat(formData.organicEarnings) || 0;
@@ -59,7 +70,7 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
       ...result,
       week: formData.week.toUpperCase(),
       year: parseInt(formData.year),
-      month: formData.month,
+      month: formData.month.trim(),
       period: formData.period,
       campaignCosts,
       sales: parseInt(formData.sales) || 0,
@@ -120,17 +131,14 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
             </div>
 
             <div>
-              <Label htmlFor="month">Mês</Label>
-              <Select value={formData.month} onValueChange={(v) => setFormData(prev => ({ ...prev, month: v }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MONTHS.map(m => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="month">Mês (Ex: Jan ou Jan/Fev)</Label>
+              <Input
+                id="month"
+                value={formData.month}
+                onChange={(e) => setFormData(prev => ({ ...prev, month: e.target.value }))}
+                placeholder="Ex: Jan/Fev"
+                required
+              />
             </div>
 
             <div>

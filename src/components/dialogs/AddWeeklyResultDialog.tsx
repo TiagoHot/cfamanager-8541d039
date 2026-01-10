@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,15 +10,22 @@ import { toast } from 'sonner';
 interface AddWeeklyResultDialogProps {
   onAdd: (result: WeeklyResult) => void;
   children: React.ReactNode;
+  weeklyResults: WeeklyResult[]; // Pass existing results for auto-fill
 }
 
-export function AddWeeklyResultDialog({ onAdd, children }: AddWeeklyResultDialogProps) {
+// Helper to extract week number from week string (e.g., "S01" -> 1)
+const getWeekNumber = (week: string): number => {
+  const match = week.match(/S(\d+)/i);
+  return match ? parseInt(match[1], 10) : 0;
+};
+
+export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWeeklyResultDialogProps) {
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
   
   const [formData, setFormData] = useState({
-    week: 'S1',
+    week: 'S01', // Default, will be updated in useEffect
     year: currentYear.toString(),
     month: MONTHS[currentMonth],
     period: '',
@@ -29,9 +36,35 @@ export function AddWeeklyResultDialog({ onAdd, children }: AddWeeklyResultDialog
     adsenseEarnings: '',
   });
 
+  // Calculate next week number for the current year
+  useEffect(() => {
+    if (open) {
+      const currentYearInt = parseInt(formData.year);
+      
+      // Find the highest week number for the selected year
+      const maxWeek = weeklyResults
+        .filter(r => r.year === currentYearInt)
+        .reduce((max, r) => Math.max(max, getWeekNumber(r.week)), 0);
+        
+      const nextWeekNumber = maxWeek >= 52 ? 1 : maxWeek + 1;
+      const nextWeekString = `S${String(nextWeekNumber).padStart(2, '0')}`;
+      
+      setFormData(prev => ({
+        ...prev,
+        week: nextWeekString,
+        month: MONTHS[currentMonth], // Reset month to current month abbreviation
+      }));
+    }
+  }, [open, weeklyResults, currentYear, currentMonth, formData.year]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.month.trim()) {
+      toast.error('Mês é obrigatório');
+      return;
+    }
+
     const campaignCosts = parseFloat(formData.campaignCosts) || 0;
     const campaignEarnings = parseFloat(formData.campaignEarnings) || 0;
     const organicEarnings = parseFloat(formData.organicEarnings) || 0;
@@ -43,7 +76,7 @@ export function AddWeeklyResultDialog({ onAdd, children }: AddWeeklyResultDialog
       id: `week-new-${Date.now()}`,
       week: formData.week.toUpperCase(),
       year: parseInt(formData.year),
-      month: formData.month,
+      month: formData.month.trim(), // Allow composite month string
       period: formData.period,
       campaignCosts,
       sales: parseInt(formData.sales) || 0,
@@ -57,24 +90,10 @@ export function AddWeeklyResultDialog({ onAdd, children }: AddWeeklyResultDialog
     onAdd(newResult);
     toast.success('Resultado semanal adicionado com sucesso!');
     setOpen(false);
-    resetForm();
+    // Note: We don't reset the form here, as the useEffect will recalculate the next week when the dialog opens again.
   };
 
-  const resetForm = () => {
-    setFormData({
-      week: 'S1',
-      year: currentYear.toString(),
-      month: MONTHS[currentMonth],
-      period: '',
-      campaignCosts: '',
-      sales: '',
-      campaignEarnings: '',
-      organicEarnings: '',
-      adsenseEarnings: '',
-    });
-  };
-
-  const weeks = Array.from({ length: 52 }, (_, i) => `S${String(i + 1).padStart(2, '0')}`);
+  const weeks = useMemo(() => Array.from({ length: 52 }, (_, i) => `S${String(i + 1).padStart(2, '0')}`), []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -114,17 +133,14 @@ export function AddWeeklyResultDialog({ onAdd, children }: AddWeeklyResultDialog
             </div>
 
             <div>
-              <Label htmlFor="month">Mês</Label>
-              <Select value={formData.month} onValueChange={(v) => setFormData(prev => ({ ...prev, month: v }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MONTHS.map(m => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="month">Mês (Ex: Jan ou Jan/Fev)</Label>
+              <Input
+                id="month"
+                value={formData.month}
+                onChange={(e) => setFormData(prev => ({ ...prev, month: e.target.value }))}
+                placeholder="Ex: Jan/Fev"
+                required
+              />
             </div>
 
             <div>

@@ -24,10 +24,10 @@ const getWeekNumber = (week: string): number => {
   return match ? parseInt(match[1], 10) : 0;
 };
 
-// Get month number from month name
+// Get month number from month name (handles abbreviations and composite months like Jan/Fev)
 const getMonthNumber = (month: string): number => {
   const normalized = month.toLowerCase().split('/')[0].trim();
-  const index = MONTHS.findIndex(m => m.toLowerCase() === normalized);
+  const index = MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
   return index >= 0 ? index + 1 : 0;
 };
 
@@ -178,6 +178,7 @@ export default function WeeklyResultsPage() {
       filtered = filtered.filter(r => r.year === parseInt(yearFilter));
     }
     if (monthFilter !== "all") {
+      // Check if the month filter is contained in the potentially composite month field
       filtered = filtered.filter(r => r.month.toLowerCase().includes(monthFilter.toLowerCase()));
     }
 
@@ -185,7 +186,7 @@ export default function WeeklyResultsPage() {
       // First, compare by year (descending)
       if (b.year !== a.year) return b.year - a.year;
       
-      // Then by month (descending)
+      // Then by month (descending) - using the first month for sorting
       const monthA = getMonthNumber(a.month);
       const monthB = getMonthNumber(b.month);
       if (monthB !== monthA) return monthB - monthA;
@@ -277,7 +278,7 @@ export default function WeeklyResultsPage() {
           <Download className="w-4 h-4 mr-2" />
           Exportar
         </Button>
-        <AddWeeklyResultDialog onAdd={addWeeklyResult}>
+        <AddWeeklyResultDialog onAdd={addWeeklyResult} weeklyResults={weeklyResults}>
           <Button size="sm">
             <Plus className="w-4 h-4 mr-2" />
             Nova Semana
