@@ -20,10 +20,12 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
+import { MONTHS } from "@/types"; // Import MONTHS
 
 const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89%, 48%)'];
 
-const MONTH_ORDER = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+// Usando MONTHS importado
+const MONTH_ORDER = MONTHS;
 
 const getBusinessLevel = (profit: number): { level: string; message: string; color: string } => {
   if (profit < 0) {
@@ -78,16 +80,20 @@ export default function BusinessDashboard() {
     
     // Group by month
     const monthlyMap = new Map<string, { income: number; expenses: number }>();
+    // Use MONTH_ORDER (which is MONTHS) for initialization
     MONTH_ORDER.forEach(month => monthlyMap.set(month, { income: 0, expenses: 0 }));
     
     yearIncomes.forEach(ie => {
-      const current = monthlyMap.get(ie.month) || { income: 0, expenses: 0 };
-      monthlyMap.set(ie.month, { ...current, income: current.income + ie.amount });
+      // Use the month name from the data (which should be abbreviated now)
+      const monthKey = ie.month.split('/')[0].trim(); // Handle composite months by taking the first part
+      const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
+      monthlyMap.set(monthKey, { ...current, income: current.income + ie.amount });
     });
     
     yearExpenses.forEach(ie => {
-      const current = monthlyMap.get(ie.month) || { income: 0, expenses: 0 };
-      monthlyMap.set(ie.month, { ...current, expenses: current.expenses + ie.amount });
+      const monthKey = ie.month.split('/')[0].trim(); // Handle composite months by taking the first part
+      const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
+      monthlyMap.set(monthKey, { ...current, expenses: current.expenses + ie.amount });
     });
     
     const months = MONTH_ORDER.map(month => {
@@ -127,7 +133,7 @@ export default function BusinessDashboard() {
   const businessLevel = getBusinessLevel(yearData.totalProfit);
 
   const monthlyChartData = yearData.months.map(m => ({
-    month: m.month.substring(0, 3),
+    month: m.month, // Already abbreviated
     receita: m.income,
     despesa: m.expenses,
     lucro: m.balance
@@ -237,8 +243,8 @@ export default function BusinessDashboard() {
                         outerRadius={90}
                         innerRadius={50}
                         fill="#8884d8"
-                        dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        dataKey="value"
                       >
                         {yearData.incomeBreakdown.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -286,8 +292,8 @@ export default function BusinessDashboard() {
                         outerRadius={90}
                         innerRadius={50}
                         fill="#8884d8"
-                        dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        dataKey="value"
                       >
                         {yearData.expenseBreakdown.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -22,14 +22,14 @@ export default function CashFlowPage() {
   const data = mockCashFlow2025;
   
   const chartData = data.months.map(m => ({
-    month: m.month.substring(0, 3),
+    month: m.month, // Month is already abbreviated in mock data
     receitas: m.income,
     despesas: m.expenses,
     saldo: m.balance
   }));
 
   const accumulatedData = data.months.map(m => ({
-    month: m.month.substring(0, 3),
+    month: m.month, // Month is already abbreviated in mock data
     acumulado: m.accumulatedBalance
   }));
 

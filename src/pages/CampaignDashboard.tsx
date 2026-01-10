@@ -18,8 +18,10 @@ import {
   Legend
 } from "recharts";
 import { useState, useMemo } from "react";
+import { MONTHS } from "@/types"; // Import MONTHS
 
-const MONTH_ORDER = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+// Usando MONTHS importado
+const MONTH_ORDER = MONTHS;
 
 export default function CampaignDashboard() {
   const { campaigns } = useData();
@@ -56,19 +58,22 @@ export default function CampaignDashboard() {
     
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
     yearCampaigns.forEach(c => {
-      const current = monthlyMap.get(c.month) || { earnings: 0, costs: 0 };
-      monthlyMap.set(c.month, {
+      // Use the month name from the data (which should be abbreviated now)
+      const monthKey = c.month.split('/')[0].trim(); // Handle composite months by taking the first part
+      const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
+      monthlyMap.set(monthKey, {
         earnings: current.earnings + c.earnings,
         costs: current.costs + c.costs,
       });
     });
     
+    // Filter and map based on MONTH_ORDER (abbreviated list)
     return MONTH_ORDER
       .filter(month => monthlyMap.has(month))
       .map(month => {
         const data = monthlyMap.get(month)!;
         return {
-          month: month.substring(0, 3),
+          month: month, // Already abbreviated
           receita: data.earnings,
           despesa: data.costs,
         };
