@@ -5,11 +5,87 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Save, RefreshCw, X } from "lucide-react";
+import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useState } from "react";
 import { toast } from "sonner";
+
+// Componente auxiliar para gerenciar listas (Niches, Types, Sources)
+interface ListManagerProps {
+  title: string;
+  description: string;
+  items: string[];
+  onAdd: (item: string) => void;
+  onRemove: (item: string) => void;
+  onReset: () => void;
+  badgeColor: 'default' | 'success' | 'destructive';
+}
+
+const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badgeColor }: ListManagerProps) => {
+  const [newItem, setNewItem] = useState('');
+  
+  const handleAdd = () => {
+    if (newItem.trim()) {
+      onAdd(newItem.trim());
+      setNewItem('');
+      toast.success(`${title.slice(0, -1)} "${newItem.trim()}" adicionado.`);
+    }
+  };
+
+  const handleRemove = (item: string) => {
+    onRemove(item);
+    toast.info(`${title.slice(0, -1)} "${item}" removido.`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAdd();
+    }
+  };
+
+  const badgeVariant = badgeColor === 'success' ? 'bg-success/10 text-success border-success/20' : 
+                       badgeColor === 'destructive' ? 'bg-destructive/10 text-destructive border-destructive/20' : 
+                       'secondary';
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2 min-h-10">
+          {items.map(item => (
+            <Badge 
+              key={item} 
+              className={`text-sm cursor-pointer transition-colors ${badgeVariant}`} 
+              onClick={() => handleRemove(item)}
+            >
+              {item} <X className="w-3 h-3 ml-1" />
+            </Badge>
+          ))}
+        </div>
+        <Separator className="my-4" />
+        <div className="flex gap-2">
+          <Input 
+            placeholder={`Novo ${title.toLowerCase().slice(0, -1)}...`} 
+            className="flex-1" 
+            value={newItem}
+            onChange={(e) => setNewItem(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <Button variant="outline" size="sm" onClick={handleAdd}>Adicionar</Button>
+        </div>
+        <Button variant="link" size="sm" onClick={onReset} className="mt-2 p-0 text-xs text-muted-foreground">
+          Restaurar padrões
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
 
 export default function SettingsPage() {
   const { 
@@ -20,43 +96,25 @@ export default function SettingsPage() {
     productTypes,
     addProductType,
     removeProductType,
-    resetProductTypes
+    resetProductTypes,
+    incomeSources,
+    addIncomeSource,
+    removeIncomeSource,
+    resetIncomeSources,
+    expenseSources,
+    addExpenseSource,
+    removeExpenseSource,
+    resetExpenseSources,
   } = useSettings();
   
-  const [newNiche, setNewNiche] = useState('');
-  const [newProductType, setNewProductType] = useState('');
   const [newPlatform, setNewPlatform] = useState('');
   const [newStrategy, setNewStrategy] = useState('');
-
-  const handleAddNiche = () => {
-    if (newNiche.trim()) {
-      addNiche(newNiche.trim());
-      setNewNiche('');
-      toast.success(`Nicho "${newNiche.trim()}" adicionado.`);
-    }
-  };
-
-  const handleRemoveNiche = (niche: string) => {
-    removeNiche(niche);
-    toast.info(`Nicho "${niche}" removido.`);
-  };
-  
-  const handleAddProductType = () => {
-    if (newProductType.trim()) {
-      addProductType(newProductType.trim());
-      setNewProductType('');
-      toast.success(`Tipo de Produto "${newProductType.trim()}" adicionado.`);
-    }
-  };
-
-  const handleRemoveProductType = (type: string) => {
-    removeProductType(type);
-    toast.info(`Tipo de Produto "${type}" removido.`);
-  };
 
   const handleResetAll = () => {
     resetNiches();
     resetProductTypes();
+    resetIncomeSources();
+    resetExpenseSources();
     toast.success('Configurações restauradas para o padrão.');
   };
 
@@ -66,14 +124,6 @@ export default function SettingsPage() {
       // Logic to add platform (currently hardcoded in types/index.ts)
       toast.info(`Plataforma "${newPlatform.trim()}" adicionada (Apenas visual, lista fixa no código).`);
       setNewPlatform('');
-    }
-  };
-
-  const handleAddStrategy = () => {
-    if (newStrategy.trim()) {
-      // Logic to add strategy (currently hardcoded in dialogs)
-      toast.info(`Estratégia "${newStrategy.trim()}" adicionada (Apenas visual, lista fixa no código).`);
-      setNewStrategy('');
     }
   };
 
@@ -182,61 +232,49 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
         
+        {/* Income Sources */}
+        <ListManager
+          title="Fontes de Receita"
+          description="Gerencie as categorias de entrada de dinheiro."
+          items={incomeSources}
+          onAdd={addIncomeSource}
+          onRemove={removeIncomeSource}
+          onReset={resetIncomeSources}
+          badgeColor="success"
+        />
+
+        {/* Expense Sources */}
+        <ListManager
+          title="Fontes de Despesa"
+          description="Gerencie as categorias de saída de dinheiro."
+          items={expenseSources}
+          onAdd={addExpenseSource}
+          onRemove={removeExpenseSource}
+          onReset={resetExpenseSources}
+          badgeColor="destructive"
+        />
+
         {/* Product Types */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Tipos de Produto</CardTitle>
-            <CardDescription>Gerencie a lista de tipos de produtos (Nutra, Digital, etc.).</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2 min-h-10">
-              {productTypes.map(type => (
-                <Badge key={type} variant="secondary" className="text-sm cursor-pointer hover:bg-destructive/10 transition-colors" onClick={() => handleRemoveProductType(type)}>
-                  {type} <X className="w-3 h-3 ml-1" />
-                </Badge>
-              ))}
-            </div>
-            <Separator className="my-4" />
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Novo tipo de produto..." 
-                className="flex-1" 
-                value={newProductType}
-                onChange={(e) => setNewProductType(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddProductType()}
-              />
-              <Button variant="outline" size="sm" onClick={handleAddProductType}>Adicionar</Button>
-            </div>
-          </CardContent>
-        </Card>
+        <ListManager
+          title="Tipos de Produto"
+          description="Gerencie a lista de tipos de produtos (Nutra, Digital, etc.)."
+          items={productTypes}
+          onAdd={addProductType}
+          onRemove={removeProductType}
+          onReset={resetProductTypes}
+          badgeColor="default"
+        />
 
         {/* Niches */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Nichos de Produtos</CardTitle>
-            <CardDescription>Gerencie a lista de nichos disponíveis para categorização de produtos.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2 min-h-10">
-              {niches.map(niche => (
-                <Badge key={niche} variant="secondary" className="text-sm cursor-pointer hover:bg-destructive/10 transition-colors" onClick={() => handleRemoveNiche(niche)}>
-                  {niche} <X className="w-3 h-3 ml-1" />
-                </Badge>
-              ))}
-            </div>
-            <Separator className="my-4" />
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Novo nicho..." 
-                className="flex-1" 
-                value={newNiche}
-                onChange={(e) => setNewNiche(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddNiche()}
-              />
-              <Button variant="outline" size="sm" onClick={handleAddNiche}>Adicionar</Button>
-            </div>
-          </CardContent>
-        </Card>
+        <ListManager
+          title="Nichos de Produtos"
+          description="Gerencie a lista de nichos disponíveis para categorização de produtos."
+          items={niches}
+          onAdd={addNiche}
+          onRemove={removeNiche}
+          onReset={resetNiches}
+          badgeColor="default"
+        />
 
         {/* Platforms (Placeholder for future dynamic management) */}
         <Card>

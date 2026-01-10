@@ -1,59 +1,81 @@
 import { useState, useEffect, useCallback } from 'react';
-import { NICHES as defaultNiches, PRODUCT_TYPES as defaultProductTypes } from '@/types';
+import { NICHES as defaultNiches, PRODUCT_TYPES as defaultProductTypes, INCOME_SOURCES as defaultIncomeSources, EXPENSE_SOURCES as defaultExpenseSources } from '@/types';
 
 const NICHE_STORAGE_KEY = 'app_settings_niches';
 const TYPE_STORAGE_KEY = 'app_settings_product_types';
+const INCOME_SOURCE_STORAGE_KEY = 'app_settings_income_sources';
+const EXPENSE_SOURCE_STORAGE_KEY = 'app_settings_expense_sources';
 
 interface SettingsContextType {
   niches: string[];
   productTypes: string[];
+  incomeSources: string[];
+  expenseSources: string[];
   addNiche: (niche: string) => void;
   removeNiche: (niche: string) => void;
   resetNiches: () => void;
   addProductType: (type: string) => void;
   removeProductType: (type: string) => void;
   resetProductTypes: () => void;
+  addIncomeSource: (source: string) => void;
+  removeIncomeSource: (source: string) => void;
+  resetIncomeSources: () => void;
+  addExpenseSource: (source: string) => void;
+  removeExpenseSource: (source: string) => void;
+  resetExpenseSources: () => void;
 }
 
 export function useSettings(): SettingsContextType {
   const [niches, setNiches] = useState<string[]>([]);
   const [productTypes, setProductTypes] = useState<string[]>([]);
+  const [incomeSources, setIncomeSources] = useState<string[]>([]);
+  const [expenseSources, setExpenseSources] = useState<string[]>([]);
 
   // Load from localStorage on mount
   useEffect(() => {
-    // Load Niches
-    const storedNiches = localStorage.getItem(NICHE_STORAGE_KEY);
-    try {
-      const parsedNiches = storedNiches ? JSON.parse(storedNiches) : defaultNiches;
-      setNiches(Array.isArray(parsedNiches) ? parsedNiches.sort() : defaultNiches.sort());
-    } catch {
-      setNiches(defaultNiches.sort());
-    }
+    // Helper function to load and set state
+    const loadAndSet = (key: string, defaultList: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+      const stored = localStorage.getItem(key);
+      try {
+        const parsed = stored ? JSON.parse(stored) : defaultList;
+        setter(Array.isArray(parsed) ? parsed.sort() : defaultList.sort());
+      } catch {
+        setter(defaultList.sort());
+      }
+    };
 
-    // Load Product Types
-    const storedTypes = localStorage.getItem(TYPE_STORAGE_KEY);
-    try {
-      const parsedTypes = storedTypes ? JSON.parse(storedTypes) : defaultProductTypes;
-      setProductTypes(Array.isArray(parsedTypes) ? parsedTypes.sort() : defaultProductTypes.sort());
-    } catch {
-      setProductTypes(defaultProductTypes.sort());
-    }
+    loadAndSet(NICHE_STORAGE_KEY, defaultNiches, setNiches);
+    loadAndSet(TYPE_STORAGE_KEY, defaultProductTypes, setProductTypes);
+    loadAndSet(INCOME_SOURCE_STORAGE_KEY, defaultIncomeSources, setIncomeSources);
+    loadAndSet(EXPENSE_SOURCE_STORAGE_KEY, defaultExpenseSources, setExpenseSources);
   }, []);
 
-  // Save to localStorage whenever niches change
+  // Save to localStorage whenever state changes
   useEffect(() => {
     if (niches.length > 0) {
       localStorage.setItem(NICHE_STORAGE_KEY, JSON.stringify(niches));
     }
   }, [niches]);
 
-  // Save to localStorage whenever productTypes change
   useEffect(() => {
     if (productTypes.length > 0) {
       localStorage.setItem(TYPE_STORAGE_KEY, JSON.stringify(productTypes));
     }
   }, [productTypes]);
+  
+  useEffect(() => {
+    if (incomeSources.length > 0) {
+      localStorage.setItem(INCOME_SOURCE_STORAGE_KEY, JSON.stringify(incomeSources));
+    }
+  }, [incomeSources]);
+  
+  useEffect(() => {
+    if (expenseSources.length > 0) {
+      localStorage.setItem(EXPENSE_SOURCE_STORAGE_KEY, JSON.stringify(expenseSources));
+    }
+  }, [expenseSources]);
 
+  // --- Niche Management ---
   const addNiche = useCallback((niche: string) => {
     const normalizedNiche = niche.trim();
     if (!normalizedNiche) return;
@@ -76,6 +98,7 @@ export function useSettings(): SettingsContextType {
     localStorage.removeItem(NICHE_STORAGE_KEY);
   }, []);
   
+  // --- Product Type Management ---
   const addProductType = useCallback((type: string) => {
     const normalizedType = type.trim();
     if (!normalizedType) return;
@@ -97,15 +120,70 @@ export function useSettings(): SettingsContextType {
     setProductTypes(defaultProductTypes.sort());
     localStorage.removeItem(TYPE_STORAGE_KEY);
   }, []);
+  
+  // --- Income Source Management ---
+  const addIncomeSource = useCallback((source: string) => {
+    const normalizedSource = source.trim();
+    if (!normalizedSource) return;
+    
+    setIncomeSources(prev => {
+      if (prev.some(s => s.toLowerCase() === normalizedSource.toLowerCase())) {
+        return prev;
+      }
+      const newSources = [...prev, normalizedSource].sort();
+      return newSources;
+    });
+  }, []);
+
+  const removeIncomeSource = useCallback((source: string) => {
+    setIncomeSources(prev => prev.filter(s => s !== source).sort());
+  }, []);
+
+  const resetIncomeSources = useCallback(() => {
+    setIncomeSources(defaultIncomeSources.sort());
+    localStorage.removeItem(INCOME_SOURCE_STORAGE_KEY);
+  }, []);
+
+  // --- Expense Source Management ---
+  const addExpenseSource = useCallback((source: string) => {
+    const normalizedSource = source.trim();
+    if (!normalizedSource) return;
+    
+    setExpenseSources(prev => {
+      if (prev.some(s => s.toLowerCase() === normalizedSource.toLowerCase())) {
+        return prev;
+      }
+      const newSources = [...prev, normalizedSource].sort();
+      return newSources;
+    });
+  }, []);
+
+  const removeExpenseSource = useCallback((source: string) => {
+    setExpenseSources(prev => prev.filter(s => s !== source).sort());
+  }, []);
+
+  const resetExpenseSources = useCallback(() => {
+    setExpenseSources(defaultExpenseSources.sort());
+    localStorage.removeItem(EXPENSE_SOURCE_STORAGE_KEY);
+  }, []);
+
 
   return {
     niches,
     productTypes,
+    incomeSources,
+    expenseSources,
     addNiche,
     removeNiche,
     resetNiches,
     addProductType,
     removeProductType,
     resetProductTypes,
+    addIncomeSource,
+    removeIncomeSource,
+    resetIncomeSources,
+    addExpenseSource,
+    removeExpenseSource,
+    resetExpenseSources,
   };
 }

@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { IncomeExpense, MONTHS, INCOME_SOURCES, EXPENSE_SOURCES } from '@/types';
+import { IncomeExpense, MONTHS } from '@/types';
 import { toast } from 'sonner';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useSettings } from '@/hooks/useSettings'; // Import useSettings
 
 interface AddIncomeExpenseDialogProps {
   onAdd: (item: IncomeExpense) => void;
@@ -15,6 +16,7 @@ interface AddIncomeExpenseDialogProps {
 }
 
 export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDialogProps) {
+  const { incomeSources, expenseSources } = useSettings(); // Use dynamic sources
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
@@ -70,7 +72,7 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
     });
   };
 
-  const sources = type === 'income' ? INCOME_SOURCES : EXPENSE_SOURCES;
+  const sources = type === 'income' ? incomeSources : expenseSources;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
