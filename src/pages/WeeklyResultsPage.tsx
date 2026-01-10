@@ -20,7 +20,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
-  const match = week.match(/S(\d+)/i);
+  if (!week) return 0;
+  // Remove 'S' and parse the number
+  const match = week.toUpperCase().match(/S(\d+)/);
   return match ? parseInt(match[1], 10) : 0;
 };
 
@@ -29,7 +31,7 @@ const getMonthNumber = (month: string): number => {
   // Normalize month string to check against MONTHS array (Jan=0, Fev=1, etc.)
   const normalized = month.toLowerCase().split('/')[0].trim();
   const index = MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
-  // Return 1-based month number (1 for Jan, 12 for Dez)
+  // Return 1-based month number (1 for Jan, 12 for Dez). If not found, return 0.
   return index >= 0 ? index + 1 : 0;
 };
 
