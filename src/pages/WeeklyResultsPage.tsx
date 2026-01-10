@@ -2,19 +2,21 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Plus, Download, Upload, Filter, X } from "lucide-react";
+import { Plus, Download, Upload, Filter, X, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency, getProfitLossColor } from "@/lib/formatters";
 import { WeeklyResult, MONTHS } from "@/types";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 import { AddWeeklyResultDialog } from "@/components/dialogs/AddWeeklyResultDialog";
+import { EditWeeklyResultDialog } from "@/components/dialogs/EditWeeklyResultDialog";
 import { exportWeeklyResults } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { PageContent } from "@/components/PageContent"; // Importando PageContent
+import { PageContent } from "@/components/PageContent";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -29,98 +31,138 @@ const getMonthNumber = (month: string): number => {
   return index >= 0 ? index + 1 : 0;
 };
 
-const columns = [
-  {
-    key: 'week',
-    header: 'Semana',
-    render: (item: WeeklyResult) => (
-      <span className="font-bold">{item.week}</span>
-    ),
-  },
-  {
-    key: 'period',
-    header: 'Período',
-    render: (item: WeeklyResult) => (
-      <span className="text-sm">{item.period}</span>
-    ),
-  },
-  {
-    key: 'month',
-    header: 'Mês/Ano',
-    render: (item: WeeklyResult) => (
-      <div>
-        <span className="font-medium">{item.month}</span>
-        <span className="text-muted-foreground text-sm ml-1">{item.year}</span>
-      </div>
-    ),
-  },
-  {
-    key: 'campaignCosts',
-    header: 'Custo Campanhas',
-    className: 'text-right',
-    render: (item: WeeklyResult) => (
-      <span className="text-destructive">{formatCurrency(item.campaignCosts)}</span>
-    ),
-  },
-  {
-    key: 'sales',
-    header: 'Vendas',
-    className: 'text-center',
-    render: (item: WeeklyResult) => (
-      <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
-        {item.sales}
-      </span>
-    ),
-  },
-  {
-    key: 'campaignEarnings',
-    header: 'Ganhos Campanhas',
-    className: 'text-right',
-    render: (item: WeeklyResult) => (
-      <span>{formatCurrency(item.campaignEarnings)}</span>
-    ),
-  },
-  {
-    key: 'organicEarnings',
-    header: 'Ganhos Orgânico',
-    className: 'text-right',
-    render: (item: WeeklyResult) => (
-      <span>{formatCurrency(item.organicEarnings)}</span>
-    ),
-  },
-  {
-    key: 'adsenseEarnings',
-    header: 'Adsense',
-    className: 'text-right',
-    render: (item: WeeklyResult) => (
-      <span>{formatCurrency(item.adsenseEarnings)}</span>
-    ),
-  },
-  {
-    key: 'revenue',
-    header: 'Faturamento',
-    className: 'text-right',
-    render: (item: WeeklyResult) => (
-      <span className="font-medium text-primary">{formatCurrency(item.revenue)}</span>
-    ),
-  },
-  {
-    key: 'profitLoss',
-    header: 'Lucro/Prejuízo',
-    className: 'text-right',
-    render: (item: WeeklyResult) => (
-      <span className={cn("font-bold", getProfitLossColor(item.profitLoss))}>
-        {formatCurrency(item.profitLoss)}
-      </span>
-    ),
-  },
-];
-
 export default function WeeklyResultsPage() {
-  const { weeklyResults, importData, addWeeklyResult } = useData();
+  const { weeklyResults, importData, addWeeklyResult, updateWeeklyResult, removeWeeklyResult } = useData();
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
+
+  // Define columns inside the component to use updateWeeklyResult and removeWeeklyResult
+  const columns = useMemo(() => [
+    {
+      key: 'week',
+      header: 'Semana',
+      render: (item: WeeklyResult) => (
+        <span className="font-bold">{item.week}</span>
+      ),
+    },
+    {
+      key: 'period',
+      header: 'Período',
+      render: (item: WeeklyResult) => (
+        <span className="text-sm">{item.period}</span>
+      ),
+    },
+    {
+      key: 'month',
+      header: 'Mês/Ano',
+      render: (item: WeeklyResult) => (
+        <div>
+          <span className="font-medium">{item.month}</span>
+          <span className="text-muted-foreground text-sm ml-1">{item.year}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'campaignCosts',
+      header: 'Custo Campanhas',
+      className: 'text-right',
+      render: (item: WeeklyResult) => (
+        <span className="text-destructive">{formatCurrency(item.campaignCosts)}</span>
+      ),
+    },
+    {
+      key: 'sales',
+      header: 'Vendas',
+      className: 'text-center',
+      render: (item: WeeklyResult) => (
+        <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
+          {item.sales}
+        </span>
+      ),
+    },
+    {
+      key: 'campaignEarnings',
+      header: 'Ganhos Campanhas',
+      className: 'text-right',
+      render: (item: WeeklyResult) => (
+        <span>{formatCurrency(item.campaignEarnings)}</span>
+      ),
+    },
+    {
+      key: 'organicEarnings',
+      header: 'Ganhos Orgânico',
+      className: 'text-right',
+      render: (item: WeeklyResult) => (
+        <span>{formatCurrency(item.organicEarnings)}</span>
+      ),
+    },
+    {
+      key: 'adsenseEarnings',
+      header: 'Adsense',
+      className: 'text-right',
+      render: (item: WeeklyResult) => (
+        <span>{formatCurrency(item.adsenseEarnings)}</span>
+      ),
+    },
+    {
+      key: 'revenue',
+      header: 'Faturamento',
+      className: 'text-right',
+      render: (item: WeeklyResult) => (
+        <span className="font-medium text-primary">{formatCurrency(item.revenue)}</span>
+      ),
+    },
+    {
+      key: 'profitLoss',
+      header: 'Lucro/Prejuízo',
+      className: 'text-right',
+      render: (item: WeeklyResult) => (
+        <span className={cn("font-bold", getProfitLossColor(item.profitLoss))}>
+          {formatCurrency(item.profitLoss)}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Ações',
+      className: 'w-24 text-center',
+      render: (item: WeeklyResult) => (
+        <div className="flex justify-center gap-1">
+          <EditWeeklyResultDialog result={item} onUpdate={updateWeeklyResult}>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Pencil className="w-4 h-4" />
+            </Button>
+          </EditWeeklyResultDialog>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso removerá o resultado semanal da semana {item.week} de {item.year}.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={() => removeWeeklyResult(item.id)}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  Remover
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      ),
+    },
+  ], [updateWeeklyResult, removeWeeklyResult]);
 
   // Get unique years for filters
   const years = useMemo(() => {

@@ -18,6 +18,8 @@ interface DataContextType {
   updateProduct: (product: Product) => void;
   addCampaign: (campaign: CampaignResult) => void;
   addWeeklyResult: (result: WeeklyResult) => void;
+  updateWeeklyResult: (result: WeeklyResult) => void; // Added
+  removeWeeklyResult: (id: string) => void; // Added
   addIncomeExpense: (item: IncomeExpense) => void;
   importData: (data: {
     products: Product[];
@@ -108,6 +110,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const setWeeklyResults = useCallback(async (newResults: WeeklyResult[]) => {
     setWeeklyResultsState(newResults);
     if (user) {
+      // Since we are overwriting all weekly results on save, we just call saveWeeklyResults
       const success = await saveWeeklyResults(newResults);
       if (!success) {
         toast.error('Erro ao salvar resultados semanais');
@@ -145,6 +148,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addWeeklyResult = useCallback((result: WeeklyResult) => {
     const newResults = [...weeklyResults, result];
     setWeeklyResults(newResults);
+  }, [weeklyResults, setWeeklyResults]);
+  
+  const updateWeeklyResult = useCallback((updatedResult: WeeklyResult) => {
+    const newResults = weeklyResults.map(r => 
+      r.id === updatedResult.id ? updatedResult : r
+    );
+    setWeeklyResults(newResults);
+  }, [weeklyResults, setWeeklyResults]);
+
+  const removeWeeklyResult = useCallback((id: string) => {
+    const newResults = weeklyResults.filter(r => r.id !== id);
+    setWeeklyResults(newResults);
+    toast.success('Resultado semanal removido.');
   }, [weeklyResults, setWeeklyResults]);
 
   const addIncomeExpense = useCallback((item: IncomeExpense) => {
@@ -213,6 +229,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateProduct,
         addCampaign,
         addWeeklyResult,
+        updateWeeklyResult,
+        removeWeeklyResult,
         addIncomeExpense,
         importData,
         refreshData,
