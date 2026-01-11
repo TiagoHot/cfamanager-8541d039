@@ -218,7 +218,7 @@ export default function ProductDashboard() {
         <>
           {/* Product Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {/* Removed Dias Rodando card */}
+            <StatCard title="Dias Rodando" value={productData.totalDays} icon={Calendar} />
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
@@ -310,31 +310,6 @@ export default function ProductDashboard() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Resumo Total</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-                  <p className="text-sm text-muted-foreground">Receita Total</p>
-                  <p className="text-2xl font-bold text-success">{formatCurrency(productData.totalEarnings)}</p>
-                </div>
-                <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                  <p className="text-sm text-muted-foreground">Despesa Total</p>
-                  <p className="text-2xl font-bold text-destructive">{formatCurrency(productData.totalCosts)}</p>
-                </div>
-                <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
-                  <p className="text-sm text-muted-foreground">Lucro Total</p>
-                  <p className={`text-2xl font-bold ${productData.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {formatCurrency(productData.profit)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </>
       )}
     </div>
