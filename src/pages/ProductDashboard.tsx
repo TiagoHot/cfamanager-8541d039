@@ -13,15 +13,10 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   Legend
 } from "recharts";
 import { useState, useMemo, useEffect } from "react";
 import { MONTHS } from "@/types";
-
-const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(0, 72%, 51%)'];
 
 const MONTH_ORDER = MONTHS;
 
@@ -102,22 +97,14 @@ export default function ProductDashboard() {
     });
     
     const monthlyData = MONTH_ORDER
-      .filter(month => monthlyMap.has(month))
       .map(month => {
-        const data = monthlyMap.get(month)!;
+        const data = monthlyMap.get(month) || { earnings: 0, costs: 0 }; // Provide default if no data
         return {
           month: month,
           receita: data.earnings,
           despesa: data.costs,
         };
       });
-    
-    // Data for the new summary bar chart
-    const summaryChartData = [
-      { name: 'Receita', value: totalEarnings, gradientId: 'gradientReceita' },
-      { name: 'Despesa', value: totalCosts, gradientId: 'gradientDespesa' },
-      { name: 'Lucro', value: profit, gradientId: 'gradientLucro' },
-    ];
     
     return {
       totalDays,
@@ -130,7 +117,6 @@ export default function ProductDashboard() {
       roi,
       cpc,
       monthlyData,
-      summaryChartData, // New data for the summary chart
       hasData: filteredCampaigns.length > 0,
     };
   }, [campaigns, selectedYear, selectedMonth, selectedLocation, selectedProduct, products, productNamesByLocation]);
@@ -217,7 +203,6 @@ export default function ProductDashboard() {
         <>
           {/* Product Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {/* Removed Dias Rodando card */}
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
@@ -244,7 +229,7 @@ export default function ProductDashboard() {
           </Card>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6"> {/* Changed to grid-cols-1 */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Análise Mensal</CardTitle>
@@ -273,54 +258,6 @@ export default function ProductDashboard() {
                   </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-12">Sem dados mensais</p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Resumo Financeiro</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {productData.summaryChartData.length > 0 ? (
-                  <div className="h-72">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={productData.summaryChartData}
-                        layout="vertical"
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <defs>
-                          <linearGradient id="gradientReceita" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.8}/>
-                            <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.3}/>
-                          </linearGradient>
-                          <linearGradient id="gradientDespesa" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.8}/>
-                            <stop offset="100%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
-                          </linearGradient>
-                          <linearGradient id="gradientLucro" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.8}/>
-                            <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0.3}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-muted" />
-                        <XAxis type="number" hide />
-                        <YAxis type="category" dataKey="name" width={80} tickLine={false} axisLine={false} className="text-sm" />
-                        <Tooltip 
-                          formatter={(value: number) => formatCurrency(value)}
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--card))', 
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }}
-                        />
-                        <Bar dataKey="value" fill={(entry) => `url(#${entry.gradientId})`} barSize={30} radius={[0, 10, 10, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-12">Sem dados para o resumo financeiro</p>
                 )}
               </CardContent>
             </Card>
