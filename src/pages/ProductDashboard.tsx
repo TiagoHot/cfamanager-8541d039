@@ -218,12 +218,12 @@ export default function ProductDashboard() {
         <>
           {/* Product Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <StatCard title="Dias Rodando" value={productData.totalDays} icon={Calendar} />
+            {/* Removed Dias Rodando card */}
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
             <StatCard title="Receita" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
-            <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" /> {/* Added Custo card */}
+            <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" />
             <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
           </div>
 
