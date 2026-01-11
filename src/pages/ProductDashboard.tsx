@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatNumber, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
-import { Package, Calendar, Eye, DollarSign, TrendingUp, Target, MousePointer } from "lucide-react";
+import { Package, Calendar, Eye, DollarSign, TrendingUp, TrendingDown, MousePointer } from "lucide-react"; // Import TrendingDown
 import { 
   BarChart, 
   Bar, 
@@ -223,6 +223,7 @@ export default function ProductDashboard() {
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
             <StatCard title="Receita" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
+            <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" /> {/* Added Custo card */}
             <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
           </div>
 
