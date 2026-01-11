@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ThemeToggle"; // Import ThemeToggle
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -38,6 +39,8 @@ export function AppLayout() {
                 <span>Carregando...</span>
               </div>
             )}
+
+            <ThemeToggle /> {/* Add ThemeToggle here */}
 
             {user && (
               <DropdownMenu>
