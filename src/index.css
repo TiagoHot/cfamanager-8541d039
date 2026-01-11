@@ -77,53 +77,7 @@
     --gradient-accent: linear-gradient(135deg, hsl(210 100% 52%) 0%, hsl(199 89% 48%) 100%);
   }
 
-  .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 100% 52%;
-    --primary-foreground: 222 47% 11%;
-
-    --secondary: 222 47% 15%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 222 47% 15%;
-    --muted-foreground: 220 9% 65%;
-
-    --accent: 210 100% 52%;
-    --accent-foreground: 222 47% 11%;
-
-    --success: 152 69% 41%;
-    --success-foreground: 0 0% 100%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-
-    --info: 199 89% 48%;
-    --info-foreground: 0 0% 100%;
-
-    --border: 222 47% 18%;
-    --input: 222 47% 18%;
-    --ring: 210 100% 52%;
-
-    --sidebar-background: 222 47% 8%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 100% 52%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 15%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 47% 18%;
-    --sidebar-ring: 210 100% 52%;
-  }
+  /* Removed .dark theme variables */
 }
 
 @layer base {
@@ -132,7 +86,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased; /* Adicionado bg-background e text-foreground aqui */
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }

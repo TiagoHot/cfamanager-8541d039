@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ThemeToggle } from "@/components/ThemeToggle"; // Import ThemeToggle
+// Removed ThemeToggle import
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -26,7 +26,7 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full"> {/* Removed bg-background text-foreground from here */}
+      <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
@@ -40,7 +40,7 @@ export function AppLayout() {
               </div>
             )}
 
-            <ThemeToggle />
+            {/* Removed ThemeToggle component */}
 
             {user && (
               <DropdownMenu>
