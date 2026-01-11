@@ -217,7 +217,7 @@ export default function ProductDashboard() {
         <>
           {/* Product Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <StatCard title="Dias Rodando" value={productData.totalDays} icon={Calendar} />
+            {/* Removed Dias Rodando card */}
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
