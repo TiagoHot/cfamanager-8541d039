@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatNumber, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
-import { Package, Calendar, Eye, DollarSign, TrendingUp, TrendingDown, MousePointer } from "lucide-react"; // Import TrendingDown
+import { Package, Calendar, Eye, DollarSign, TrendingUp, TrendingDown, MousePointer } from "lucide-react";
 import { 
   BarChart, 
   Bar, 
@@ -19,11 +19,11 @@ import {
   Legend
 } from "recharts";
 import { useState, useMemo, useEffect } from "react";
-import { MONTHS } from "@/types"; // Import MONTHS
+import { MONTHS } from "@/types";
 
 const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(0, 72%, 51%)'];
 
-const MONTH_ORDER = MONTHS; // Using the imported MONTHS constant
+const MONTH_ORDER = MONTHS;
 
 export default function ProductDashboard() {
   const { products, campaigns } = useData();
@@ -219,7 +219,7 @@ export default function ProductDashboard() {
         <>
           {/* Product Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <StatCard title="Dias Rodando" value={productData.totalDays} icon={Calendar} />
+            {/* Removed Dias Rodando card */}
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
