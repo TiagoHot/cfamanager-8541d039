@@ -42,6 +42,11 @@ export default function WeeklyResultsPage() {
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
 
+  // Calculate max sales across all results for consistent bar scaling
+  const maxSales = useMemo(() => {
+    return Math.max(...weeklyResults.map(r => r.sales), 1); // Ensure at least 1 to prevent division by zero
+  }, [weeklyResults]);
+
   // Define columns inside the component to use updateWeeklyResult and removeWeeklyResult
   const columns = useMemo(() => [
     {
@@ -76,12 +81,23 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      className: 'text-center',
-      render: (item: WeeklyResult) => (
-        <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
-          {item.sales}
-        </span>
-      ),
+      className: 'w-40 text-left', // Increased width for bar + number, aligned left
+      render: (item: WeeklyResult) => {
+        const barWidth = (item.sales / maxSales) * 100; // Percentage width
+        return (
+          <div className="flex items-center gap-2">
+            <div className="relative h-5 w-24 rounded-sm bg-muted"> {/* Fixed width container for the bar */}
+              <div
+                className="absolute left-0 top-0 h-full rounded-sm bg-success/70"
+                style={{ width: `${barWidth}%` }}
+              />
+            </div>
+            <span className="text-sm font-bold text-foreground">
+              {item.sales}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: 'campaignEarnings',
@@ -164,7 +180,7 @@ export default function WeeklyResultsPage() {
         </div>
       ),
     },
-  ], [updateWeeklyResult, removeWeeklyResult]);
+  ], [updateWeeklyResult, removeWeeklyResult, maxSales]);
 
   // Get unique years for filters
   const years = useMemo(() => {
