@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Badge } from "@/components/ui/badge";
 import { PageContent } from "@/components/PageContent";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -59,12 +60,9 @@ export default function WeeklyResultsPage() {
     },
     {
       key: 'month',
-      header: 'Mês/Ano',
+      header: 'Mês', // Changed from 'Mês/Ano' as year is now in card title
       render: (item: WeeklyResult) => (
-        <div>
-          <span className="font-medium">{item.month}</span>
-          <span className="text-muted-foreground text-sm ml-1">{item.year}</span>
-        </div>
+        <span className="font-medium">{item.month}</span>
       ),
     },
     {
@@ -200,6 +198,19 @@ export default function WeeklyResultsPage() {
     });
   }, [weeklyResults, yearFilter, monthFilter]);
 
+  // Group results by year
+  const groupedResultsByYear = useMemo(() => {
+    const groups = new Map<number, WeeklyResult[]>();
+    for (const result of filteredAndSortedResults) {
+      if (!groups.has(result.year)) {
+        groups.set(result.year, []);
+      }
+      groups.get(result.year)!.push(result);
+    }
+    // Sort years descending
+    return Array.from(groups.entries()).sort((a, b) => b[0] - a[0]);
+  }, [filteredAndSortedResults]);
+
   const hasFilters = yearFilter !== "all" || monthFilter !== "all";
 
   const clearFilters = () => {
@@ -289,12 +300,33 @@ export default function WeeklyResultsPage() {
         </AddWeeklyResultDialog>
       </PageHeader>
 
-      <PageContent>
-        <DataTable 
-          data={filteredAndSortedResults} 
-          columns={columns}
-          headerClassName="sticky top-0 z-10 bg-background shadow-sm"
-        />
+      <PageContent className="space-y-6">
+        {groupedResultsByYear.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p>Nenhum resultado semanal encontrado com os filtros selecionados.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          groupedResultsByYear.map(([year, results]) => (
+            <Card key={year}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl">
+                  Ano de {year}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {results.length} resultados semanais registrados
+                </p>
+              </CardHeader>
+              <CardContent className="p-0">
+                <DataTable 
+                  data={results} 
+                  columns={columns}
+                />
+              </CardContent>
+            </Card>
+          ))
+        )}
       </PageContent>
     </div>
   );
