@@ -132,7 +132,7 @@
   }
 
   body {
-    @apply antialiased; /* Keep antialiased for font smoothing */
+    @apply bg-background text-foreground antialiased; /* Adicionado bg-background e text-foreground aqui */
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
