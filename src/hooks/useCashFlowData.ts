@@ -40,7 +40,7 @@ export function useCashFlowData(incomeExpenses: IncomeExpense[], selectedYear: n
     const monthlyMap = new Map<string, { income: number; expenses: number }>();
     
     yearItems.forEach(item => {
-      // Usa a string do mês normalizada (ex: 'Jan', 'Fev', 'Mar/Abr') como chave do mapa
+      // Usa a string do mês normalizada (ex: 'Jan', 'Fev', ou 'Jan/Fev') como chave do mapa
       const normalizedMonthForMap = normalizeMonthToAbbreviation(item.month);
       const current = monthlyMap.get(normalizedMonthForMap) || { income: 0, expenses: 0 };
       

@@ -3,7 +3,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
 import { 
   BarChart, 
@@ -37,7 +37,7 @@ export default function CampaignDashboard() {
     const year = parseInt(selectedYear);
     return campaigns.filter(c => {
       if (c.year !== year) return false;
-      if (selectedMonth !== "all" && c.month !== selectedMonth) return false;
+      if (selectedMonth !== "all" && normalizeMonthToAbbreviation(c.month) !== selectedMonth) return false;
       return true;
     });
   }, [campaigns, selectedYear, selectedMonth]);
@@ -59,7 +59,7 @@ export default function CampaignDashboard() {
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
     yearCampaigns.forEach(c => {
       // Use the month name from the data (which should be abbreviated now)
-      const monthKey = c.month.split('/')[0].trim(); // Handle composite months by taking the first part
+      const monthKey = normalizeMonthToAbbreviation(c.month); // Use normalizeMonthToAbbreviation
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
       monthlyMap.set(monthKey, {
         earnings: current.earnings + c.earnings,
@@ -126,7 +126,7 @@ export default function CampaignDashboard() {
   
   const monthsWithData = useMemo(() => {
     const year = parseInt(selectedYear);
-    return [...new Set(campaigns.filter(c => c.year === year).map(c => c.month))];
+    return [...new Set(campaigns.filter(c => c.year === year).map(c => normalizeMonthToAbbreviation(c.month)))];
   }, [campaigns, selectedYear]);
 
   if (campaigns.length === 0) {

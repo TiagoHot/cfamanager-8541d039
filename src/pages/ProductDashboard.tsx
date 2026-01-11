@@ -3,7 +3,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
-import { formatCurrency, formatNumber, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatNumber, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { Package, Calendar, Eye, DollarSign, TrendingUp, Target, MousePointer } from "lucide-react";
 import { 
   BarChart, 
@@ -18,39 +18,84 @@ import {
   Cell,
   Legend
 } from "recharts";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { MONTHS } from "@/types"; // Import MONTHS
 
 const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(0, 72%, 51%)'];
 
-const MONTH_ORDER = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+const MONTH_ORDER = MONTHS; // Using the imported MONTHS constant
 
 export default function ProductDashboard() {
   const { products, campaigns } = useData();
   
-  const productNames = useMemo(() => {
-    return [...new Set(campaigns.map(c => c.productName))];
+  const years = useMemo(() => {
+    const uniqueYears = [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
+    return uniqueYears;
   }, [campaigns]);
+
+  const locations = useMemo(() => {
+    return [...new Set(products.map(p => p.country))];
+  }, [products]);
   
-  const [selectedProduct, setSelectedProduct] = useState(productNames[0] || "");
+  const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [selectedLocation, setSelectedLocation] = useState<string>(locations[0] || "all");
+  const [selectedProduct, setSelectedProduct] = useState<string>("all");
   
+  // Filter product names based on selected location
+  const productNamesByLocation = useMemo(() => {
+    const filteredProducts = products.filter(p => 
+      selectedLocation === "all" || p.country === selectedLocation
+    );
+    return [...new Set(filteredProducts.map(p => p.name))].sort();
+  }, [products, selectedLocation]);
+
+  // Reset selected product if the location changes and the product is no longer valid
+  useEffect(() => {
+    if (selectedProduct !== "all" && !productNamesByLocation.includes(selectedProduct)) {
+      setSelectedProduct("all");
+    }
+  }, [selectedLocation, productNamesByLocation, selectedProduct]);
+
   const productData = useMemo(() => {
-    const productCampaigns = campaigns.filter(c => c.productName === selectedProduct);
+    let filteredCampaigns = campaigns.filter(c => {
+      const campaignYear = c.year.toString();
+      const campaignMonth = normalizeMonthToAbbreviation(c.month);
+      const campaignLocation = c.location;
+      const campaignProductName = c.productName;
+
+      const yearMatch = selectedYear === "all" || campaignYear === selectedYear;
+      const monthMatch = selectedMonth === "all" || campaignMonth === selectedMonth;
+      const locationMatch = selectedLocation === "all" || campaignLocation === selectedLocation;
+      const productMatch = selectedProduct === "all" || campaignProductName === selectedProduct;
+
+      return yearMatch && monthMatch && locationMatch && productMatch;
+    });
+
+    // If a specific product is selected, ensure only its campaigns are considered
+    if (selectedProduct !== "all") {
+      filteredCampaigns = filteredCampaigns.filter(c => c.productName === selectedProduct);
+    } else if (productNamesByLocation.length > 0 && selectedProduct === "all") {
+      // If no specific product is selected, but a location is, show data for all products in that location
+      filteredCampaigns = filteredCampaigns.filter(c => productNamesByLocation.includes(c.productName));
+    }
     
-    const totalDays = productCampaigns.reduce((sum, c) => sum + c.daysRunning, 0);
-    const totalImpressions = productCampaigns.reduce((sum, c) => sum + c.impressions, 0);
-    const totalClicks = productCampaigns.reduce((sum, c) => sum + c.clicks, 0);
-    const totalSales = productCampaigns.reduce((sum, c) => sum + c.sales, 0);
-    const totalEarnings = productCampaigns.reduce((sum, c) => sum + c.earnings, 0);
-    const totalCosts = productCampaigns.reduce((sum, c) => sum + c.costs, 0);
+    const totalDays = filteredCampaigns.reduce((sum, c) => sum + c.daysRunning, 0);
+    const totalImpressions = filteredCampaigns.reduce((sum, c) => sum + c.impressions, 0);
+    const totalClicks = filteredCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+    const totalSales = filteredCampaigns.reduce((sum, c) => sum + c.sales, 0);
+    const totalEarnings = filteredCampaigns.reduce((sum, c) => sum + c.earnings, 0);
+    const totalCosts = filteredCampaigns.reduce((sum, c) => sum + c.costs, 0);
     const profit = totalEarnings - totalCosts;
     const roi = totalCosts > 0 ? ((totalEarnings - totalCosts) / totalCosts) * 100 : 0;
     const cpc = totalClicks > 0 ? totalCosts / totalClicks : 0;
     
     // Monthly data
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
-    productCampaigns.forEach(c => {
-      const current = monthlyMap.get(c.month) || { earnings: 0, costs: 0 };
-      monthlyMap.set(c.month, {
+    filteredCampaigns.forEach(c => {
+      const monthKey = normalizeMonthToAbbreviation(c.month);
+      const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
+      monthlyMap.set(monthKey, {
         earnings: current.earnings + c.earnings,
         costs: current.costs + c.costs,
       });
@@ -61,7 +106,7 @@ export default function ProductDashboard() {
       .map(month => {
         const data = monthlyMap.get(month)!;
         return {
-          month: month.substring(0, 3),
+          month: month,
           receita: data.earnings,
           despesa: data.costs,
         };
@@ -69,7 +114,7 @@ export default function ProductDashboard() {
     
     // Strategy data
     const strategyMap = new Map<string, number>();
-    productCampaigns.forEach(c => {
+    filteredCampaigns.forEach(c => {
       const strategy = c.strategy || 'Outros';
       strategyMap.set(strategy, (strategyMap.get(strategy) || 0) + c.earnings);
     });
@@ -88,8 +133,9 @@ export default function ProductDashboard() {
       cpc,
       monthlyData,
       strategyData,
+      hasData: filteredCampaigns.length > 0,
     };
-  }, [campaigns, selectedProduct]);
+  }, [campaigns, selectedYear, selectedMonth, selectedLocation, selectedProduct, products, productNamesByLocation]);
 
   if (products.length === 0 && campaigns.length === 0) {
     return (
@@ -113,19 +159,62 @@ export default function ProductDashboard() {
         title="Dashboard de Produtos" 
         description="Análise de desempenho por produto"
       >
-        <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Anos</SelectItem>
+            {years.map(year => (
+              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Mês" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Meses</SelectItem>
+            {MONTH_ORDER.map(month => (
+              <SelectItem key={month} value={month}>{month}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="Local" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Locais</SelectItem>
+            {locations.map(loc => (
+              <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={productNamesByLocation.length === 0}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="Selecione um produto" />
           </SelectTrigger>
           <SelectContent>
-            {productNames.map(name => (
+            <SelectItem value="all">Todos os Produtos</SelectItem>
+            {productNamesByLocation.map(name => (
               <SelectItem key={name} value={name}>{name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </PageHeader>
 
-      {selectedProduct && (
+      {!productData.hasData ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p>Nenhum dado encontrado para os filtros selecionados.</p>
+          </CardContent>
+        </Card>
+      ) : (
         <>
           {/* Product Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">

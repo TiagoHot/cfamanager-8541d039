@@ -139,7 +139,7 @@ export default function CampaignsPage() {
     return campaigns.filter(c => {
       if (yearFilter !== "all" && c.year !== parseInt(yearFilter)) return false;
       // Normaliza o mês da campanha para comparação com o filtro
-      if (monthFilter !== "all" && !normalizeMonthToAbbreviation(c.month).toLowerCase().includes(monthFilter.toLowerCase())) return false;
+      if (monthFilter !== "all" && normalizeMonthToAbbreviation(c.month) !== monthFilter) return false;
       if (productFilter !== "all" && c.productName !== productFilter) return false;
       return true;
     }).sort((a, b) => {

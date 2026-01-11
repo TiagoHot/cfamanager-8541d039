@@ -197,7 +197,7 @@ export default function WeeklyResultsPage() {
     }
     if (monthFilter !== "all") {
       // Normaliza o mês do resultado para comparação com o filtro
-      filtered = filtered.filter(r => normalizeMonthToAbbreviation(r.month).toLowerCase().includes(monthFilter.toLowerCase()));
+      filtered = filtered.filter(r => normalizeMonthToAbbreviation(r.month) === monthFilter);
     }
 
     return [...filtered].sort((a, b) => {

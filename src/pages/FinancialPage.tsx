@@ -4,7 +4,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/formatters";
+import { formatCurrency, formatDate, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { IncomeExpense, MONTHS } from "@/types";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 
 // Helper para obter o número do mês para ordenação (1 para Jan, 12 para Dez)
 const getMonthNumber = (month: string): number => {
-  const normalized = month.toLowerCase().split('/')[0].trim();
-  const index = MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
+  const normalized = normalizeMonthToAbbreviation(month.split('/')[0].trim());
+  const index = MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized.toLowerCase());
   return index >= 0 ? index + 1 : 0;
 };
 
@@ -111,7 +111,7 @@ export default function FinancialPage() {
       filtered = filtered.filter(i => i.year === parseInt(yearFilter));
     }
     if (monthFilter !== "all") {
-      filtered = filtered.filter(i => i.month.toLowerCase().includes(monthFilter.toLowerCase()));
+      filtered = filtered.filter(i => normalizeMonthToAbbreviation(i.month) === monthFilter);
     }
 
     // Sort by date descending
@@ -126,7 +126,7 @@ export default function FinancialPage() {
   const groupedItems = useMemo(() => {
     const groups = new Map<string, IncomeExpense[]>(); // Key: "Month Year"
     filteredItems.forEach(item => {
-      const key = `${item.month} ${item.year}`;
+      const key = `${normalizeMonthToAbbreviation(item.month)} ${item.year}`;
       if (!groups.has(key)) {
         groups.set(key, []);
       }
