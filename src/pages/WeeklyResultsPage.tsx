@@ -81,12 +81,12 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      className: 'w-32 text-left', // Adjusted width for the column
+      className: 'w-28 text-left', // Adjusted width for the column
       render: (item: WeeklyResult) => {
         const barWidth = (item.sales / maxSales) * 100; // Percentage width
         return (
           <div className="flex items-center gap-2">
-            <div className="relative h-5 w-20 rounded-sm bg-muted"> {/* Adjusted width for the bar container */}
+            <div className="relative h-5 w-16 rounded-sm bg-muted"> {/* Adjusted width for the bar container */}
               <div
                 className="absolute left-0 top-0 h-full rounded-sm bg-success/70"
                 style={{ width: `${barWidth}%` }}
