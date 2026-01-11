@@ -26,7 +26,7 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background text-foreground"> {/* Added bg-background text-foreground here */}
         <AppSidebar />
         <SidebarInset className="flex-1">
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
@@ -40,7 +40,7 @@ export function AppLayout() {
               </div>
             )}
 
-            <ThemeToggle /> {/* Add ThemeToggle here */}
+            <ThemeToggle />
 
             {user && (
               <DropdownMenu>
