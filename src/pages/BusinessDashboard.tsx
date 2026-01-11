@@ -3,7 +3,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
-import { formatCurrency } from "@/lib/formatters";
+import { formatCurrency, normalizeMonthToAbbreviation } from "@/lib/formatters"; // Import the new utility
 import { DollarSign, TrendingUp, TrendingDown, Award, BarChart2 } from "lucide-react";
 import { 
   BarChart, 
@@ -84,14 +84,15 @@ export default function BusinessDashboard() {
     MONTH_ORDER.forEach(month => monthlyMap.set(month, { income: 0, expenses: 0 }));
     
     yearIncomes.forEach(ie => {
-      // Use the month name from the data (which should be abbreviated now)
-      const monthKey = ie.month.split('/')[0].trim(); // Handle composite months by taking the first part
+      // Normaliza o nome do mês para abreviação antes de usar como chave
+      const monthKey = normalizeMonthToAbbreviation(ie.month); 
       const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
       monthlyMap.set(monthKey, { ...current, income: current.income + ie.amount });
     });
     
     yearExpenses.forEach(ie => {
-      const monthKey = ie.month.split('/')[0].trim(); // Handle composite months by taking the first part
+      // Normaliza o nome do mês para abreviação antes de usar como chave
+      const monthKey = normalizeMonthToAbbreviation(ie.month); 
       const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
       monthlyMap.set(monthKey, { ...current, expenses: current.expenses + ie.amount });
     });

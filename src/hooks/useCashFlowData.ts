@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { IncomeExpense, MONTHS } from '@/types';
+import { normalizeMonthToAbbreviation } from '@/lib/formatters'; // Import the new utility
 
 interface CashFlowMonthData {
   month: string;
@@ -26,9 +27,9 @@ interface CashFlowData {
 // Helper para obter o número do mês (0 para Jan, 11 para Dez)
 const getMonthIndex = (month: string): number => {
   if (!month) return -1;
-  // Normaliza a string do mês (pega a primeira parte se for composta)
-  const normalized = month.toLowerCase().split('/')[0].trim();
-  return MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
+  // Normaliza a string do mês para sua abreviação antes de encontrar o índice
+  const abbrMonth = normalizeMonthToAbbreviation(month.split('/')[0].trim()); // Pega a primeira parte para lookup
+  return MONTHS.findIndex(m => m === abbrMonth);
 };
 
 export function useCashFlowData(incomeExpenses: IncomeExpense[], selectedYear: number): CashFlowData {
@@ -39,26 +40,26 @@ export function useCashFlowData(incomeExpenses: IncomeExpense[], selectedYear: n
     const monthlyMap = new Map<string, { income: number; expenses: number }>();
     
     yearItems.forEach(item => {
-      // Use a string do mês completa para a chave do mapa
-      const monthKey = item.month; 
-      const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
+      // Usa a string do mês normalizada (ex: 'Jan', 'Fev', 'Mar/Abr') como chave do mapa
+      const normalizedMonthForMap = normalizeMonthToAbbreviation(item.month);
+      const current = monthlyMap.get(normalizedMonthForMap) || { income: 0, expenses: 0 };
       
       if (item.type === 'income') {
-        monthlyMap.set(monthKey, { ...current, income: current.income + item.amount });
+        monthlyMap.set(normalizedMonthForMap, { ...current, income: current.income + item.amount });
       } else {
-        monthlyMap.set(monthKey, { ...current, expenses: current.expenses + item.amount });
+        monthlyMap.set(normalizedMonthForMap, { ...current, expenses: current.expenses + item.amount });
       }
     });
 
     // 2. Sort and Calculate Accumulated Balance
     const rawMonths = Array.from(monthlyMap.entries()).map(([month, data]) => ({
-      month,
+      month, // Esta string 'month' pode ser 'Jan', 'Fev', ou 'Jan/Fev'
       ...data,
       balance: data.income - data.expenses,
-      monthIndex: getMonthIndex(month),
-    })).filter(m => m.monthIndex !== -1); // Remove entries where month name couldn't be parsed
+      monthIndex: getMonthIndex(month), // Usa o helper para obter o índice para ordenação
+    })).filter(m => m.monthIndex !== -1); // Remove entradas onde o mês não pôde ser parseado
     
-    // Sort by month index (0-11) chronologically
+    // Ordena pelo índice do mês (0-11) cronologicamente
     rawMonths.sort((a, b) => a.monthIndex - b.monthIndex);
 
     let accumulatedBalance = 0;

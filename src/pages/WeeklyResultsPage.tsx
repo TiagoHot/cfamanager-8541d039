@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, Upload, Filter, X, Pencil, Trash2 } from "lucide-react";
-import { formatCurrency, getProfitLossColor } from "@/lib/formatters";
+import { formatCurrency, getProfitLossColor, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { WeeklyResult, MONTHS } from "@/types";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
@@ -28,9 +28,9 @@ const getWeekNumber = (week: string): number => {
 
 // Get month number from month name (handles abbreviations and composite months like Jan/Fev)
 const getMonthNumber = (month: string): number => {
-  // Normalize month string to check against MONTHS array (Jan=0, Fev=1, etc.)
-  const normalized = month.toLowerCase().split('/')[0].trim();
-  const index = MONTHS.map(m => m.toLowerCase()).findIndex(m => m === normalized);
+  // Normaliza a string do mês para sua abreviação antes de encontrar o índice
+  const normalizedAbbr = normalizeMonthToAbbreviation(month.split('/')[0].trim()); // Usa a nova utilidade
+  const index = MONTHS.findIndex(m => m === normalizedAbbr);
   // Return 1-based month number (1 for Jan, 12 for Dez). If not found, return 0.
   return index >= 0 ? index + 1 : 0;
 };
@@ -182,8 +182,8 @@ export default function WeeklyResultsPage() {
       filtered = filtered.filter(r => r.year === parseInt(yearFilter));
     }
     if (monthFilter !== "all") {
-      // Check if the month filter is contained in the potentially composite month field
-      filtered = filtered.filter(r => r.month.toLowerCase().includes(monthFilter.toLowerCase()));
+      // Normaliza o mês do resultado para comparação com o filtro
+      filtered = filtered.filter(r => normalizeMonthToAbbreviation(r.month).toLowerCase().includes(monthFilter.toLowerCase()));
     }
 
     return [...filtered].sort((a, b) => {
@@ -261,7 +261,6 @@ export default function WeeklyResultsPage() {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos os Meses</SelectItem>
                     {MONTHS.map(m => (
                       <SelectItem key={m} value={m}>{m}</SelectItem>
                     ))}

@@ -4,7 +4,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Download, Filter, Upload, X } from "lucide-react";
-import { formatCurrency, formatNumber, formatPercent, getProfitLossColor, getROIColor } from "@/lib/formatters";
+import { formatCurrency, formatNumber, formatPercent, getProfitLossColor, getROIColor, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { CampaignResult, MONTHS } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -16,12 +16,6 @@ import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PageContent } from "@/components/PageContent";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Mapeamento para ordenação correta dos meses
-const MONTH_ORDER_MAP = MONTHS.reduce((acc, month, index) => {
-    acc[month] = index;
-    return acc;
-}, {} as Record<string, number>);
 
 // Colunas da tabela (sem a coluna Mês/Ano, que agora está no Card Header)
 const columns = [
@@ -144,8 +138,8 @@ export default function CampaignsPage() {
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter(c => {
       if (yearFilter !== "all" && c.year !== parseInt(yearFilter)) return false;
-      // Check if the month filter is contained in the potentially composite month field
-      if (monthFilter !== "all" && !c.month.toLowerCase().includes(monthFilter.toLowerCase())) return false;
+      // Normaliza o mês da campanha para comparação com o filtro
+      if (monthFilter !== "all" && !normalizeMonthToAbbreviation(c.month).toLowerCase().includes(monthFilter.toLowerCase())) return false;
       if (productFilter !== "all" && c.productName !== productFilter) return false;
       return true;
     }).sort((a, b) => {
@@ -155,6 +149,12 @@ export default function CampaignsPage() {
       return dateB - dateA;
     });
   }, [campaigns, yearFilter, monthFilter, productFilter]);
+
+  // Helper para obter o número do mês da primeira parte de uma string (ex: 'Jan/Fev' -> 0)
+  const getFirstMonthIndex = (monthStr: string) => {
+      const firstMonthAbbr = normalizeMonthToAbbreviation(monthStr.split('/')[0].trim()); // Usa a nova utilidade
+      return MONTHS.indexOf(firstMonthAbbr);
+  };
 
   // Group campaigns by Year and Month
   const groupedCampaigns = useMemo(() => {
@@ -166,21 +166,16 @@ export default function CampaignsPage() {
         }
         const monthMap = groups.get(campaign.year)!;
         
-        // Use the full month string (which might be composite like 'Jan/Fev') for grouping
-        if (!monthMap.has(campaign.month)) {
-            monthMap.set(campaign.month, []);
+        // Usa a string do mês normalizada para agrupamento
+        const normalizedMonthForGrouping = normalizeMonthToAbbreviation(campaign.month);
+        if (!monthMap.has(normalizedMonthForGrouping)) {
+            monthMap.set(normalizedMonthForGrouping, []);
         }
-        monthMap.get(campaign.month)!.push(campaign);
+        monthMap.get(normalizedMonthForGrouping)!.push(campaign);
     }
 
     // Sort years descending
     const sortedYears = Array.from(groups.keys()).sort((a, b) => b - a);
-
-    // Helper to get the month number of the first month in a composite string (e.g., 'Jan/Fev' -> 0)
-    const getFirstMonthIndex = (monthStr: string) => {
-        const firstMonthAbbr = monthStr.split('/')[0].trim();
-        return MONTHS.indexOf(firstMonthAbbr);
-    };
 
     // Prepare final structure, sorting months within each year (descending month number)
     const finalGroups: { year: number; month: string; campaigns: CampaignResult[] }[] = [];
