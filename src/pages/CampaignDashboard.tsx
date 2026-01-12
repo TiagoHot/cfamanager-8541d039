@@ -41,6 +41,72 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+// Helper function to get dynamic styling for categories
+const getCategoryStyling = (categoryName: string) => {
+  let cardBgClass = '';
+  let cardBorderClass = '';
+  let cardTextClass = '';
+  let circleBgClass = '';
+
+  switch (categoryName) {
+    case 'Brasil':
+      cardBgClass = 'bg-success/5'; // Lighter background
+      cardBorderClass = 'border-success/20';
+      cardTextClass = 'text-success';
+      circleBgClass = 'bg-success';
+      break;
+    case 'Gringa':
+      cardBgClass = 'bg-info/5';
+      cardBorderClass = 'border-info/20';
+      cardTextClass = 'text-info';
+      circleBgClass = 'bg-info';
+      break;
+    case 'Pesquisa':
+      cardBgClass = 'bg-warning/5';
+      cardBorderClass = 'border-warning/20';
+      cardTextClass = 'text-warning';
+      circleBgClass = 'bg-warning';
+      break;
+    case 'Display':
+      cardBgClass = 'bg-chart-5/5'; // Purple-ish
+      cardBorderClass = 'border-chart-5/20';
+      cardTextClass = 'text-chart-5';
+      circleBgClass = 'bg-chart-5';
+      break;
+    case 'YouTube':
+      cardBgClass = 'bg-chart-1/5'; // Blue
+      cardBorderClass = 'border-chart-1/20';
+      cardTextClass = 'text-chart-1';
+      circleBgClass = 'bg-chart-1';
+      break;
+    case 'Shopping':
+      cardBgClass = 'bg-chart-2/5'; // Green
+      cardBorderClass = 'border-chart-2/20';
+      cardTextClass = 'text-chart-2';
+      circleBgClass = 'bg-chart-2';
+      break;
+    case 'Performance Max':
+      cardBgClass = 'bg-chart-3/5'; // Yellow/Orange
+      cardBorderClass = 'border-chart-3/20';
+      cardTextClass = 'text-chart-3';
+      circleBgClass = 'bg-chart-3';
+      break;
+    case 'Discovery':
+      cardBgClass = 'bg-chart-6/5'; // Another blue
+      cardBorderClass = 'border-chart-6/20';
+      cardTextClass = 'text-chart-6';
+      circleBgClass = 'bg-chart-6';
+      break;
+    default:
+      cardBgClass = 'bg-secondary/5';
+      cardBorderClass = 'border-secondary/20';
+      cardTextClass = 'text-secondary-foreground';
+      circleBgClass = 'bg-secondary';
+      break;
+  }
+  return { cardBgClass, cardBorderClass, cardTextClass, circleBgClass };
+};
+
 export default function CampaignDashboard() {
   const { campaigns } = useData();
   
@@ -295,53 +361,56 @@ export default function CampaignDashboard() {
               <CardTitle className="text-lg">Análise por Estratégia</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {strategyData.map(strategy => (
-                <Card key={strategy.name} className="card-hover">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <span className={`w-3 h-3 rounded-full ${strategy.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
-                      {strategy.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Profit/Loss - most prominent */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">{strategy.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
-                        <p className={cn("text-2xl font-bold", getProfitLossColor(strategy.profit))}>
-                          {formatCurrency(strategy.profit)}
-                        </p>
+              {strategyData.map(strategy => {
+                const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(strategy.name);
+                return (
+                  <Card key={strategy.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className={cn("text-lg flex items-center gap-2", cardTextClass)}>
+                        <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
+                        {strategy.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 p-6 pt-0"> {/* Added p-6 pt-0 for consistent spacing */}
+                      {/* Profit/Loss - most prominent */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">{strategy.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
+                          <p className={cn("text-3xl font-bold", getProfitLossColor(strategy.profit))}>
+                            {formatCurrency(strategy.profit)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Revenues and Costs */}
-                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Receitas</p>
-                        <p className="text-base font-medium text-success">{formatCurrency(strategy.earnings)}</p>
+                      {/* Revenues and Costs */}
+                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Receitas</p>
+                          <p className="text-lg font-semibold text-success">{formatCurrency(strategy.earnings)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Despesas</p>
+                          <p className="text-lg font-semibold text-destructive">{formatCurrency(strategy.costs)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Despesas</p>
-                        <p className="text-base font-medium text-destructive">{formatCurrency(strategy.costs)}</p>
-                      </div>
-                    </div>
 
-                    {/* Sales and ROI */}
-                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Vendas</p>
-                        <p className="text-base font-medium">{strategy.sales}</p>
+                      {/* Sales and ROI */}
+                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Vendas</p>
+                          <p className="text-lg font-semibold">{strategy.sales}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">ROI</p>
+                          <p className={cn("text-lg font-semibold", getROIColor(strategy.roi))}>
+                            {formatPercent(strategy.roi)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">ROI</p>
-                        <p className={cn("text-base font-medium", getROIColor(strategy.roi))}>
-                          {formatPercent(strategy.roi)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </CardContent>
           </Card>
         )}
@@ -352,53 +421,56 @@ export default function CampaignDashboard() {
               <CardTitle className="text-lg">Análise por Local</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {locationData.map(location => (
-                <Card key={location.name} className="card-hover">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <span className={`w-3 h-3 rounded-full ${location.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
-                      {location.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Profit/Loss - most prominent */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">{location.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
-                        <p className={cn("text-2xl font-bold", getProfitLossColor(location.profit))}>
-                          {formatCurrency(location.profit)}
-                        </p>
+              {locationData.map(location => {
+                const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(location.name);
+                return (
+                  <Card key={location.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className={cn("text-lg flex items-center gap-2", cardTextClass)}>
+                        <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
+                        {location.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 p-6 pt-0"> {/* Added p-6 pt-0 for consistent spacing */}
+                      {/* Profit/Loss - most prominent */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">{location.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
+                          <p className={cn("text-3xl font-bold", getProfitLossColor(location.profit))}>
+                            {formatCurrency(location.profit)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Revenues and Costs */}
-                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Receitas</p>
-                        <p className="text-base font-medium text-success">{formatCurrency(location.earnings)}</p>
+                      {/* Revenues and Costs */}
+                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Receitas</p>
+                          <p className="text-lg font-semibold text-success">{formatCurrency(location.earnings)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Despesas</p>
+                          <p className="text-lg font-semibold text-destructive">{formatCurrency(location.costs)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Despesas</p>
-                        <p className="text-base font-medium text-destructive">{formatCurrency(location.costs)}</p>
-                      </div>
-                    </div>
 
-                    {/* Sales and ROI */}
-                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Vendas</p>
-                        <p className="text-base font-medium">{location.sales}</p>
+                      {/* Sales and ROI */}
+                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Vendas</p>
+                          <p className="text-lg font-semibold">{location.sales}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">ROI</p>
+                          <p className={cn("text-lg font-semibold", getROIColor(location.roi))}>
+                            {formatPercent(location.roi)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">ROI</p>
-                        <p className={cn("text-base font-medium", getROIColor(location.roi))}>
-                          {formatPercent(location.roi)}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </CardContent>
           </Card>
         )}
