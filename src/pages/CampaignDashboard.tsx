@@ -53,7 +53,6 @@ export default function CampaignDashboard() {
   const monthlyData = useMemo(() => {
     const year = selectedYear === "all" ? null : parseInt(selectedYear);
     
-    // Filter campaigns by year and month for the chart data
     const filteredCampaignsForChart = campaigns.filter(c => {
       const yearMatch = year === null || c.year === year;
       const monthMatch = selectedMonth === "all" || normalizeMonthToAbbreviation(c.month) === selectedMonth;
@@ -70,7 +69,6 @@ export default function CampaignDashboard() {
       });
     });
     
-    // If a specific month is selected, only return data for that month
     if (selectedMonth !== "all") {
       const data = monthlyMap.get(selectedMonth) || { earnings: 0, costs: 0 };
       return [{
@@ -80,7 +78,6 @@ export default function CampaignDashboard() {
       }];
     }
 
-    // Otherwise, return all months with data, ordered
     return MONTH_ORDER
       .filter(month => monthlyMap.has(month))
       .map(month => {
@@ -91,7 +88,7 @@ export default function CampaignDashboard() {
           despesa: data.costs,
         };
       });
-  }, [campaigns, selectedYear, selectedMonth]); // Add selectedMonth to dependencies
+  }, [campaigns, selectedYear, selectedMonth]);
   
   const strategyData = useMemo(() => {
     const strategyMap = new Map<string, { earnings: number; costs: number; sales: number }>();
@@ -366,3 +363,5 @@ export default function CampaignDashboard() {
         )}
       </div>
     </div>
+  );
+}
