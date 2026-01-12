@@ -37,20 +37,30 @@ export default function ProductDashboard() {
   const [selectedLocation, setSelectedLocation] = useState<string>(locations[0] || "all");
   const [selectedProduct, setSelectedProduct] = useState<string>("all");
   
-  // Filter product names based on selected location
+  // Filter product names based on selected location AND selected year
   const productNamesByLocation = useMemo(() => {
-    const filteredProducts = products.filter(p => 
-      selectedLocation === "all" || p.country === selectedLocation
-    );
-    return [...new Set(filteredProducts.map(p => p.name))].sort();
-  }, [products, selectedLocation]);
+    const yearInt = parseInt(selectedYear);
+    
+    const productsWithCampaignsInYear = new Set<string>();
+    if (selectedYear !== "all") {
+      campaigns.filter(c => c.year === yearInt).forEach(c => productsWithCampaignsInYear.add(c.productName));
+    }
 
-  // Reset selected product if the location changes and the product is no longer valid
+    const filteredProducts = products.filter(p => {
+      const locationMatch = selectedLocation === "all" || p.country === selectedLocation;
+      const yearMatch = selectedYear === "all" || productsWithCampaignsInYear.has(p.name);
+      return locationMatch && yearMatch;
+    });
+    
+    return [...new Set(filteredProducts.map(p => p.name))].sort();
+  }, [products, campaigns, selectedLocation, selectedYear]);
+
+  // Reset selected product if the location or year changes and the product is no longer valid
   useEffect(() => {
     if (selectedProduct !== "all" && !productNamesByLocation.includes(selectedProduct)) {
       setSelectedProduct("all");
     }
-  }, [selectedLocation, productNamesByLocation, selectedProduct]);
+  }, [selectedLocation, selectedYear, productNamesByLocation, selectedProduct]);
 
   const productData = useMemo(() => {
     let filteredCampaigns = campaigns.filter(c => {
@@ -208,7 +218,7 @@ export default function ProductDashboard() {
         <>
           {/* Product Stats */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <StatCard title="Dias" value={formatNumber(productData.totalDays)} icon={Calendar} /> {/* New card */}
+            <StatCard title="Dias" value={formatNumber(productData.totalDays)} icon={Calendar} />
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
