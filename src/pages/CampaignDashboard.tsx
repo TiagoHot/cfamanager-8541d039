@@ -2,10 +2,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button"; // <-- Adicionado
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercent, normalizeMonthToAbbreviation, getProfitLossColor, getROIColor } from "@/lib/formatters";
-import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent, X } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
 import { 
   BarChart, 
   Bar, 
@@ -292,7 +291,7 @@ export default function CampaignDashboard() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleMonthClick("all")} // Use handleMonthClick to clear filter
+              onClick={() => setSelectedMonth("all")}
               className="text-muted-foreground hover:text-destructive"
             >
               <X className="w-4 h-4" />
