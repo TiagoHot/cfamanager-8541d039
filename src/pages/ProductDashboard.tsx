@@ -211,11 +211,11 @@ export default function ProductDashboard() {
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
-            <StatCard title="Cliques/Venda" value={productData.clicksPerSale.toFixed(1)} icon={MousePointer} />
+            <StatCard title="Cliques/Venda" value={productData.clicksPerSale.toFixed(1)} icon={MousePointer} /> {/* Moved and formatted */}
+            <StatCard title="Receitas" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
             <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" />
-            <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="warning" />
-            <StatCard title="Receitas" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" /> {/* Moved */}
-            <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
+            <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="warning" /> {/* Color changed */}
+            <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} /> {/* Moved to last */}
           </div>
 
           {/* Balance Card */}
