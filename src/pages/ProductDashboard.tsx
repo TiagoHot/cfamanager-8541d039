@@ -85,10 +85,8 @@ export default function ProductDashboard() {
     const roi = totalCosts > 0 ? ((totalEarnings - totalCosts) / totalCosts) * 100 : 0;
     const cpc = totalClicks > 0 ? totalCosts / totalClicks : 0;
 
-    // New calculations
     const clicksPerSale = totalSales > 0 ? totalClicks / totalSales : 0;
     const costPerSale = totalSales > 0 ? totalCosts / totalSales : 0;
-    // Removed totalRefunds and netRevenue as per user request
     
     // Monthly data
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
@@ -213,13 +211,11 @@ export default function ProductDashboard() {
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
-            <StatCard title="Receitas" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" /> {/* Renamed */}
+            <StatCard title="Cliques/Venda" value={productData.clicksPerSale.toFixed(1)} icon={MousePointer} /> {/* Moved and formatted */}
+            <StatCard title="Receitas" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
             <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" />
-            
-            <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
-            <StatCard title="Cliques/Venda" value={productData.clicksPerSale.toFixed(1)} icon={MousePointer} /> {/* Formatted */}
-            <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="danger" />
-            {/* Removed Reembolso and Receita Líquida */}
+            <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="warning" /> {/* Color changed */}
+            <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} /> {/* Moved to last */}
           </div>
 
           {/* Balance Card */}
