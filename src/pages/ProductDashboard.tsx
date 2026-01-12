@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import { useState, useMemo, useEffect } from "react";
 import { MONTHS } from "@/types";
+import { cn } from "@/lib/utils"; // Import cn
 
 const MONTH_ORDER = MONTHS;
 
@@ -175,135 +176,138 @@ export default function ProductDashboard() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <PageHeader 
-        title="Dashboard de Produtos" 
-        description="Análise de desempenho por produto"
-        className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6"
-      >
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Ano" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Anos</SelectItem>
-            {years.map(year => (
-              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Custom Header Structure */}
+      <div className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6 border-b">
+        <div className="flex items-start justify-between">
+          
+          {/* Left Block: Title and Description */}
+          <div className="flex flex-col min-w-[300px] flex-shrink-0">
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard de Produtos</h1>
+            <p className="text-sm text-muted-foreground mt-1">Análise de desempenho por produto</p>
+          </div>
 
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Mês" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Meses</SelectItem>
-            {MONTH_ORDER.map(month => (
-              <SelectItem key={month} value={month}>{month}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {/* Middle Block: Filters (Year, Location, Product) */}
+          <div className="flex-1 flex items-start justify-center gap-4 pt-1"> 
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-32 h-10">
+                <SelectValue placeholder="Ano" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Anos</SelectItem>
+                {years.map(year => (
+                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-          <SelectTrigger className="w-36">
-            <SelectValue placeholder="Local" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Locais</SelectItem>
-            {locations.map(loc => (
-              <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <SelectTrigger className="w-36 h-10">
+                <SelectValue placeholder="Local" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Locais</SelectItem>
+                {locations.map(loc => (
+                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-        <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={productNamesByLocation.length === 0}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Selecione um produto" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Produtos</SelectItem>
-            {productNamesByLocation.map(name => (
-              <SelectItem key={name} value={name}>{name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </PageHeader>
+            <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={productNamesByLocation.length === 0}>
+              <SelectTrigger className="w-48 h-10">
+                <SelectValue placeholder="Selecione um produto" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Produtos</SelectItem>
+                {productNamesByLocation.map(name => (
+                  <SelectItem key={name} value={name}>{name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {!productData.hasData ? (
+          {/* Right Block: Month Filter (Keeping it here for consistency, even if it's usually 'all' or hidden) */}
+          <div className="flex flex-col gap-2 w-[150px] flex-shrink-0 items-end">
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-full h-10">
+                <SelectValue placeholder="Mês" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Meses</SelectItem>
+                {MONTH_ORDER.map(month => (
+                  <SelectItem key={month} value={month}>{month}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      {/* End Custom Header Structure */}
+
+      {/* Product Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <StatCard title="Dias" value={formatNumber(productData.totalDays)} icon={Calendar} />
+        <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
+        <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
+        <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
+        <StatCard title="Cliques/Venda" value={productData.clicksPerSale.toFixed(1)} icon={MousePointer} />
+        <StatCard title="Receitas" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
+        <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" />
+        <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="warning" />
+        <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
+      </div>
+
+      {/* Balance Card */}
+      <Card className={cn(productData.profit >= 0 ? "border-success bg-success/5" : "border-destructive bg-destructive/5", "card-hover")}>
+        <CardContent className="py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Balanço do Produto</p>
+              <p className={`text-3xl font-bold ${productData.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
+                {productData.profit >= 0 ? 'Gerou Lucro de ' : 'Prejuízo de '}{formatCurrency(Math.abs(productData.profit))}
+              </p>
+            </div>
+            <div className={`p-4 rounded-xl ${productData.profit >= 0 ? 'bg-success/20' : 'bg-destructive/20'}`}>
+              <TrendingUp className={`w-8 h-8 ${productData.profit >= 0 ? 'text-success' : 'text-destructive'}`} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-6">
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <p>Nenhum dado encontrado para os filtros selecionados.</p>
+          <CardHeader>
+            <CardTitle className="text-lg">Análise Mensal</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {productData.monthlyData.length > 0 ? (
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={productData.monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="month" className="text-xs" />
+                    <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(1)}k`} />
+                    <Tooltip 
+                      content={<CustomTooltip />} // Use the custom tooltip component
+                      wrapperStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        outline: 'none' // Remove default focus outline
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="receita" name="Receita" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="despesa" name="Despesa" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-12">Sem dados mensais</p>
+            )}
           </CardContent>
         </Card>
-      ) : (
-        <>
-          {/* Product Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <StatCard title="Dias" value={formatNumber(productData.totalDays)} icon={Calendar} />
-            <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
-            <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
-            <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
-            <StatCard title="Cliques/Venda" value={productData.clicksPerSale.toFixed(1)} icon={MousePointer} />
-            <StatCard title="Receitas" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
-            <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" />
-            <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="warning" />
-            <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
-          </div>
-
-          {/* Balance Card */}
-          <Card className={productData.profit >= 0 ? "border-success bg-success/5" : "border-destructive bg-destructive/5"}>
-            <CardContent className="py-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Balanço do Produto</p>
-                  <p className={`text-3xl font-bold ${productData.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {productData.profit >= 0 ? 'Gerou Lucro de ' : 'Prejuízo de '}{formatCurrency(Math.abs(productData.profit))}
-                  </p>
-                </div>
-                <div className={`p-4 rounded-xl ${productData.profit >= 0 ? 'bg-success/20' : 'bg-destructive/20'}`}>
-                  <TrendingUp className={`w-8 h-8 ${productData.profit >= 0 ? 'text-success' : 'text-destructive'}`} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Charts */}
-          <div className="grid grid-cols-1 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Análise Mensal</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {productData.monthlyData.length > 0 ? (
-                  <div className="h-72">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={productData.monthlyData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="month" className="text-xs" />
-                        <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(1)}k`} />
-                        <Tooltip 
-                          content={<CustomTooltip />} // Use the custom tooltip component
-                          wrapperStyle={{ 
-                            backgroundColor: 'hsl(var(--card))', 
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px',
-                            outline: 'none' // Remove default focus outline
-                          }}
-                        />
-                        <Legend />
-                        <Bar dataKey="receita" name="Receita" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="despesa" name="Despesa" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-12">Sem dados mensais</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </>
-      )}
+      </div>
     </div>
   );
 }
