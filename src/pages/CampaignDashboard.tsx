@@ -6,20 +6,19 @@ import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
 import { 
-  BarChart, // Changed from LineChart
+  BarChart, 
   Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Line, // Added Line component
+  Line, 
   Legend
 } from "recharts";
 import { useState, useMemo } from "react";
-import { MONTHS } from "@/types"; // Import MONTHS
+import { MONTHS } from "@/types"; 
 
-// Usando MONTHS importado
 const MONTH_ORDER = MONTHS;
 
 export default function CampaignDashboard() {
@@ -53,12 +52,17 @@ export default function CampaignDashboard() {
   
   const monthlyData = useMemo(() => {
     const year = selectedYear === "all" ? null : parseInt(selectedYear);
-    const yearCampaigns = campaigns.filter(c => year === null || c.year === year);
+    
+    // Filter campaigns by year and month for the chart data
+    const filteredCampaignsForChart = campaigns.filter(c => {
+      const yearMatch = year === null || c.year === year;
+      const monthMatch = selectedMonth === "all" || normalizeMonthToAbbreviation(c.month) === selectedMonth;
+      return yearMatch && monthMatch;
+    });
     
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
-    yearCampaigns.forEach(c => {
-      // Use the month name from the data (which should be abbreviated now)
-      const monthKey = normalizeMonthToAbbreviation(c.month); // Use normalizeMonthToAbbreviation
+    filteredCampaignsForChart.forEach(c => { 
+      const monthKey = normalizeMonthToAbbreviation(c.month);
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
       monthlyMap.set(monthKey, {
         earnings: current.earnings + c.earnings,
@@ -66,18 +70,28 @@ export default function CampaignDashboard() {
       });
     });
     
-    // Filter and map based on MONTH_ORDER (abbreviated list)
+    // If a specific month is selected, only return data for that month
+    if (selectedMonth !== "all") {
+      const data = monthlyMap.get(selectedMonth) || { earnings: 0, costs: 0 };
+      return [{
+        month: selectedMonth,
+        receita: data.earnings,
+        despesa: data.costs,
+      }];
+    }
+
+    // Otherwise, return all months with data, ordered
     return MONTH_ORDER
       .filter(month => monthlyMap.has(month))
       .map(month => {
         const data = monthlyMap.get(month)!;
         return {
-          month: month, // Already abbreviated
+          month: month,
           receita: data.earnings,
           despesa: data.costs,
         };
       });
-  }, [campaigns, selectedYear]);
+  }, [campaigns, selectedYear, selectedMonth]); // Add selectedMonth to dependencies
   
   const strategyData = useMemo(() => {
     const strategyMap = new Map<string, { earnings: number; costs: number; sales: number }>();
@@ -209,7 +223,7 @@ export default function CampaignDashboard() {
       </div>
 
       {/* Evolution Chart */}
-      {monthlyData.length > 0 && (
+      {monthlyData.length > 0 ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Evolução Mensal - Receita vs Despesa</CardTitle>
@@ -217,13 +231,13 @@ export default function CampaignDashboard() {
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}> {/* Changed to BarChart */}
+                <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis 
                     dataKey="month" 
                     className="text-xs" 
-                    tick={{ angle: -45, textAnchor: 'end' }} // Rotated labels
-                    height={60} // Increased height to accommodate rotated labels
+                    tick={{ angle: -45, textAnchor: 'end' }}
+                    height={60}
                   />
                   <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
                   <Tooltip 
@@ -240,20 +254,27 @@ export default function CampaignDashboard() {
                     name="Receita"
                     fill="hsl(var(--success))" 
                     radius={[4, 4, 0, 0]} 
-                    label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }} // Label on top of bars
+                    label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }}
                   />
-                  <Line // Added Line for Despesa
+                  <Line 
                     type="monotone" 
                     dataKey="despesa" 
                     name="Despesa"
-                    stroke="hsl(var(--warning))" // Orange color
+                    stroke="hsl(var(--warning))" 
                     strokeWidth={3}
-                    dot={{ fill: 'hsl(var(--warning))', r: 4 }} // Orange dots
-                    label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }} // Label on top of line points
+                    strokeDasharray="5 5" 
+                    dot={{ fill: 'hsl(var(--warning))', r: 4 }}
+                    label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p>Nenhum dado de campanha encontrado para os filtros selecionados.</p>
           </CardContent>
         </Card>
       )}
@@ -345,5 +366,3 @@ export default function CampaignDashboard() {
         )}
       </div>
     </div>
-  );
-}
