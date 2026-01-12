@@ -275,10 +275,10 @@ export default function CampaignDashboard() {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard 
-          title="Lucro" 
-          value={formatCurrency(stats.profit)} 
-          icon={TrendingUp} 
-          variant={stats.profit >= 0 ? "success" : "danger"} 
+          title="Receita" 
+          value={formatCurrency(stats.totalEarnings)} 
+          icon={DollarSign} 
+          variant="info" 
         />
         <StatCard 
           title="Despesa" 
@@ -287,10 +287,10 @@ export default function CampaignDashboard() {
           variant="danger" 
         />
         <StatCard 
-          title="Receita" 
-          value={formatCurrency(stats.totalEarnings)} 
-          icon={DollarSign} 
-          variant="info" 
+          title="Lucro" 
+          value={formatCurrency(stats.profit)} 
+          icon={TrendingUp} 
+          variant={stats.profit >= 0 ? "success" : "danger"} 
         />
         <StatCard 
           title="Nº de Vendas" 
