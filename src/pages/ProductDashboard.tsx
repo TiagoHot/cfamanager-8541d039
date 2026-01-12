@@ -18,6 +18,7 @@ import {
 import { useState, useMemo, useEffect } from "react";
 import { MONTHS } from "@/types";
 import { cn } from "@/lib/utils"; // Import cn
+import { Button } from "@/components/ui/button"; // Import Button
 
 const MONTH_ORDER = MONTHS;
 
@@ -59,10 +60,10 @@ export default function ProductDashboard() {
   
   // Filter product names based on selected location AND selected year
   const productNamesByLocation = useMemo(() => {
-    const yearInt = parseInt(selectedYear);
+    const yearInt = selectedYear === "all" ? null : parseInt(selectedYear);
     
     const productsWithCampaignsInYear = new Set<string>();
-    if (selectedYear !== "all") {
+    if (yearInt !== null) {
       campaigns.filter(c => c.year === yearInt).forEach(c => productsWithCampaignsInYear.add(c.productName));
     }
 
@@ -158,6 +159,11 @@ export default function ProductDashboard() {
     };
   }, [campaigns, selectedYear, selectedMonth, selectedLocation, selectedProduct, products, productNamesByLocation]);
 
+  // Determine which months have data for the selected year
+  const monthsWithData = useMemo(() => {
+    return [...new Set(campaigns.filter(c => selectedYear === "all" || c.year === parseInt(selectedYear)).map(c => normalizeMonthToAbbreviation(c.month)))].sort((a, b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
+  }, [campaigns, selectedYear]);
+
   if (products.length === 0 && campaigns.length === 0) {
     return (
       <div className="animate-fade-in space-y-6">
@@ -186,58 +192,118 @@ export default function ProductDashboard() {
             <p className="text-sm text-muted-foreground mt-1">Análise de desempenho por produto</p>
           </div>
 
-          {/* Middle Block: Filters (Year, Location, Product) */}
-          <div className="flex-1 flex items-start justify-center gap-4 pt-1"> 
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-32 h-10">
-                <SelectValue placeholder="Ano" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Anos</SelectItem>
-                {years.map(year => (
-                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Middle Block: Empty space for alignment */}
+          <div className="flex-1" />
 
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger className="w-36 h-10">
-                <SelectValue placeholder="Local" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Locais</SelectItem>
-                {locations.map(loc => (
-                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Right Block: Filters (Year, Location, Product) and Month Buttons Grid */}
+          <div className="flex gap-4 items-start">
+            
+            {/* Filters (Year, Location, Product) - Grouped on the left side of the filter area */}
+            <div className="flex flex-col gap-2 w-[450px] flex-shrink-0">
+              <div className="grid grid-cols-3 gap-2">
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Anos</SelectItem>
+                    {years.map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-            <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={productNamesByLocation.length === 0}>
-              <SelectTrigger className="w-48 h-10">
-                <SelectValue placeholder="Selecione um produto" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Produtos</SelectItem>
-                {productNamesByLocation.map(name => (
-                  <SelectItem key={name} value={name}>{name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Local" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Locais</SelectItem>
+                    {locations.map(loc => (
+                      <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-          {/* Right Block: Month Filter (Keeping it here for consistency, even if it's usually 'all' or hidden) */}
-          <div className="flex flex-col gap-2 w-[150px] flex-shrink-0 items-end">
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-full h-10">
-                <SelectValue placeholder="Mês" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Meses</SelectItem>
-                {MONTH_ORDER.map(month => (
-                  <SelectItem key={month} value={month}>{month}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={productNamesByLocation.length === 0}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecione um produto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Produtos</SelectItem>
+                    {productNamesByLocation.map(name => (
+                      <SelectItem key={name} value={name}>{name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Month Buttons Grid (2 rows, 7 columns wide) */}
+            <div className="flex flex-col gap-2 w-[450px] flex-shrink-0">
+              {/* Row 1: Todos + Jan-Mai (7 columns wide) */}
+              <div className="grid grid-cols-7 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setSelectedMonth("all")}
+                  className={cn(
+                    "transition-all duration-200 col-span-2 h-10", // col-span-2 for Todos os Meses
+                    selectedMonth === "all" 
+                      ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+                      : "hover:bg-muted"
+                  )}
+                >
+                  Todos os Meses
+                </Button>
+                {MONTH_ORDER.slice(0, 5).map(month => { // Jan, Fev, Mar, Abr, Mai (5 months)
+                  const hasData = monthsWithData.includes(month);
+                  return (
+                    <Button 
+                      key={month} 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedMonth(month)}
+                      disabled={!hasData}
+                      className={cn(
+                        "transition-all duration-200 h-10",
+                        selectedMonth === month 
+                          ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+                          : "hover:bg-muted",
+                        !hasData && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      {month}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              {/* Row 2: Jun-Dez (7 columns wide) */}
+              <div className="grid grid-cols-7 gap-2">
+                {MONTH_ORDER.slice(5).map(month => { // Jun, Jul, Ago, Set, Out, Nov, Dez (7 months)
+                  const hasData = monthsWithData.includes(month);
+                  return (
+                    <Button 
+                      key={month} 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedMonth(month)}
+                      disabled={!hasData}
+                      className={cn(
+                        "transition-all duration-200 h-10",
+                        selectedMonth === month 
+                          ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+                          : "hover:bg-muted",
+                        !hasData && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      {month}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
