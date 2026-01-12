@@ -88,8 +88,7 @@ export default function ProductDashboard() {
     // New calculations
     const clicksPerSale = totalSales > 0 ? totalClicks / totalSales : 0;
     const costPerSale = totalSales > 0 ? totalCosts / totalSales : 0;
-    const totalRefunds = 0; // Placeholder for now, as refund data is not in the current model
-    const netRevenue = totalEarnings - totalRefunds;
+    // Removed totalRefunds and netRevenue as per user request
     
     // Monthly data
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
@@ -122,10 +121,8 @@ export default function ProductDashboard() {
       profit,
       roi,
       cpc,
-      clicksPerSale, // New
-      costPerSale,   // New
-      totalRefunds,  // New
-      netRevenue,    // New
+      clicksPerSale,
+      costPerSale,
       monthlyData,
       hasData: filteredCampaigns.length > 0,
     };
@@ -216,14 +213,13 @@ export default function ProductDashboard() {
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
-            <StatCard title="Receita Bruta" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
+            <StatCard title="Receitas" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" /> {/* Renamed */}
             <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" />
             
             <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
-            <StatCard title="Cliques/Venda" value={formatNumber(productData.clicksPerSale)} icon={MousePointer} />
+            <StatCard title="Cliques/Venda" value={productData.clicksPerSale.toFixed(1)} icon={MousePointer} /> {/* Formatted */}
             <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="danger" />
-            <StatCard title="Reembolso" value={formatCurrency(productData.totalRefunds)} icon={Undo} variant="warning" />
-            <StatCard title="Receita Líquida" value={formatCurrency(productData.netRevenue)} icon={Wallet} variant="success" />
+            {/* Removed Reembolso and Receita Líquida */}
           </div>
 
           {/* Balance Card */}
