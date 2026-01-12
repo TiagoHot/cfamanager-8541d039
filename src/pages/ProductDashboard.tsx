@@ -84,7 +84,8 @@ export default function ProductDashboard() {
   }, [selectedLocation, selectedYear, productNamesByLocation, selectedProduct]);
 
   const productData = useMemo(() => {
-    let filteredCampaigns = campaigns.filter(c => {
+    // 1. Campaigns filtered by Year, Month, Location, Product (Used for STATS CARDS)
+    let filteredCampaignsForStats = campaigns.filter(c => {
       const campaignYear = c.year.toString();
       const campaignMonth = normalizeMonthToAbbreviation(c.month);
       const campaignLocation = c.location;
@@ -98,20 +99,17 @@ export default function ProductDashboard() {
       return yearMatch && monthMatch && locationMatch && productMatch;
     });
 
-    // If a specific product is selected, ensure only its campaigns are considered
-    if (selectedProduct !== "all") {
-      filteredCampaigns = filteredCampaigns.filter(c => c.productName === selectedProduct);
-    } else if (productNamesByLocation.length > 0 && selectedProduct === "all") {
-      // If no specific product is selected, but a location is, show data for all products in that location
-      filteredCampaigns = filteredCampaigns.filter(c => productNamesByLocation.includes(c.productName));
+    // Apply product name filtering based on location/year context if 'all' is selected
+    if (selectedProduct === "all" && productNamesByLocation.length > 0) {
+      filteredCampaignsForStats = filteredCampaignsForStats.filter(c => productNamesByLocation.includes(c.productName));
     }
     
-    const totalDays = filteredCampaigns.reduce((sum, c) => sum + c.daysRunning, 0);
-    const totalImpressions = filteredCampaigns.reduce((sum, c) => sum + c.impressions, 0);
-    const totalClicks = filteredCampaigns.reduce((sum, c) => sum + c.clicks, 0);
-    const totalSales = filteredCampaigns.reduce((sum, c) => sum + c.sales, 0);
-    const totalEarnings = filteredCampaigns.reduce((sum, c) => sum + c.earnings, 0);
-    const totalCosts = filteredCampaigns.reduce((sum, c) => sum + c.costs, 0);
+    const totalDays = filteredCampaignsForStats.reduce((sum, c) => sum + c.daysRunning, 0);
+    const totalImpressions = filteredCampaignsForStats.reduce((sum, c) => sum + c.impressions, 0);
+    const totalClicks = filteredCampaignsForStats.reduce((sum, c) => sum + c.clicks, 0);
+    const totalSales = filteredCampaignsForStats.reduce((sum, c) => sum + c.sales, 0);
+    const totalEarnings = filteredCampaignsForStats.reduce((sum, c) => sum + c.earnings, 0);
+    const totalCosts = filteredCampaignsForStats.reduce((sum, c) => sum + c.costs, 0);
     const profit = totalEarnings - totalCosts;
     const roi = totalCosts > 0 ? ((totalEarnings - totalCosts) / totalCosts) * 100 : 0;
     const cpc = totalClicks > 0 ? totalCosts / totalClicks : 0;
@@ -119,15 +117,7 @@ export default function ProductDashboard() {
     const clicksPerSale = totalSales > 0 ? totalClicks / totalSales : 0;
     const costPerSale = totalSales > 0 ? totalCosts / totalSales : 0;
     
-    // Monthly data calculation for the chart
-    const monthlyMap = new Map<string, { earnings: number; costs: number }>();
-    
-    // Use a separate set of campaigns for the chart data calculation, 
-    // which is only filtered by Year, Location, and Product, but NOT by Month.
-    // This ensures the chart shows the evolution across the selected period.
-    // If selectedMonth is 'all', we use filteredCampaigns (which is already filtered by Y, L, P).
-    // If selectedMonth is specific, we need to re-filter campaigns only by Y, L, P.
-    
+    // 2. Campaigns filtered by Year, Location, Product (Used for CHART - IGNORES MONTH)
     const campaignsForChart = campaigns.filter(c => {
       const campaignYear = c.year.toString();
       const campaignLocation = c.location;
@@ -140,7 +130,16 @@ export default function ProductDashboard() {
       return yearMatch && locationMatch && productMatch;
     });
 
-    campaignsForChart.forEach(c => {
+    // Apply product name filtering based on location/year context if 'all' is selected
+    let campaignsForChartFinal = campaignsForChart;
+    if (selectedProduct === "all" && productNamesByLocation.length > 0) {
+      campaignsForChartFinal = campaignsForChart.filter(c => productNamesByLocation.includes(c.productName));
+    }
+
+    // Monthly data calculation for the chart
+    const monthlyMap = new Map<string, { earnings: number; costs: number }>();
+    
+    campaignsForChartFinal.forEach(c => {
       const monthKey = normalizeMonthToAbbreviation(c.month);
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
       monthlyMap.set(monthKey, {
@@ -149,7 +148,7 @@ export default function ProductDashboard() {
       });
     });
     
-    let monthlyData = MONTH_ORDER
+    const monthlyData = MONTH_ORDER
       .map(month => {
         const data = monthlyMap.get(month) || { earnings: 0, costs: 0 };
         return {
@@ -160,10 +159,6 @@ export default function ProductDashboard() {
       })
       .filter(m => m.receita > 0 || m.despesa > 0); // Only show months with data
 
-    // If a specific month is selected, filter the chart data to only show that month
-    if (selectedMonth !== "all") {
-      monthlyData = monthlyData.filter(m => m.month === selectedMonth);
-    }
     
     return {
       totalDays,
@@ -178,7 +173,7 @@ export default function ProductDashboard() {
       clicksPerSale,
       costPerSale,
       monthlyData,
-      hasData: filteredCampaigns.length > 0,
+      hasData: filteredCampaignsForStats.length > 0,
     };
   }, [campaigns, selectedYear, selectedMonth, selectedLocation, selectedProduct, products, productNamesByLocation]);
 
