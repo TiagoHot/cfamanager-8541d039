@@ -6,15 +6,14 @@ import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
 import { 
-  BarChart, 
+  BarChart, // Changed from LineChart
   Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  LineChart,
-  Line,
+  Line, // Added Line component
   Legend
 } from "recharts";
 import { useState, useMemo } from "react";
@@ -30,13 +29,13 @@ export default function CampaignDashboard() {
     return [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
   }, [campaigns]);
   
-  const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "2025");
+  const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
   
   const filteredCampaigns = useMemo(() => {
-    const year = parseInt(selectedYear);
+    const year = selectedYear === "all" ? null : parseInt(selectedYear);
     return campaigns.filter(c => {
-      if (c.year !== year) return false;
+      if (year !== null && c.year !== year) return false;
       if (selectedMonth !== "all" && normalizeMonthToAbbreviation(c.month) !== selectedMonth) return false;
       return true;
     });
@@ -53,8 +52,8 @@ export default function CampaignDashboard() {
   }, [filteredCampaigns]);
   
   const monthlyData = useMemo(() => {
-    const year = parseInt(selectedYear);
-    const yearCampaigns = campaigns.filter(c => c.year === year);
+    const year = selectedYear === "all" ? null : parseInt(selectedYear);
+    const yearCampaigns = campaigns.filter(c => year === null || c.year === year);
     
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
     yearCampaigns.forEach(c => {
@@ -125,8 +124,9 @@ export default function CampaignDashboard() {
   }, [filteredCampaigns]);
   
   const monthsWithData = useMemo(() => {
-    const year = parseInt(selectedYear);
-    return [...new Set(campaigns.filter(c => c.year === year).map(c => normalizeMonthToAbbreviation(c.month)))];
+    const year = selectedYear === "all" ? null : parseInt(selectedYear);
+    const campaignsForSelectedYear = campaigns.filter(c => year === null || c.year === year);
+    return [...new Set(campaignsForSelectedYear.map(c => normalizeMonthToAbbreviation(c.month)))].sort((a, b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
   }, [campaigns, selectedYear]);
 
   if (campaigns.length === 0) {
@@ -156,6 +156,7 @@ export default function CampaignDashboard() {
             <SelectValue placeholder="Ano" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">Todos os Anos</SelectItem>
             {years.map(year => (
               <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
             ))}
@@ -216,9 +217,14 @@ export default function CampaignDashboard() {
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData}>
+                <BarChart data={monthlyData}> {/* Changed to BarChart */}
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="month" className="text-xs" />
+                  <XAxis 
+                    dataKey="month" 
+                    className="text-xs" 
+                    tick={{ angle: -45, textAnchor: 'end' }} // Rotated labels
+                    height={60} // Increased height to accommodate rotated labels
+                  />
                   <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
                   <Tooltip 
                     formatter={(value: number) => formatCurrency(value)}
@@ -229,23 +235,23 @@ export default function CampaignDashboard() {
                     }}
                   />
                   <Legend />
-                  <Line 
-                    type="monotone" 
+                  <Bar 
                     dataKey="receita" 
                     name="Receita"
-                    stroke="hsl(var(--success))" 
-                    strokeWidth={3}
-                    dot={{ fill: 'hsl(var(--success))' }}
+                    fill="hsl(var(--success))" 
+                    radius={[4, 4, 0, 0]} 
+                    label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }} // Label on top of bars
                   />
-                  <Line 
+                  <Line // Added Line for Despesa
                     type="monotone" 
                     dataKey="despesa" 
                     name="Despesa"
-                    stroke="hsl(var(--destructive))" 
+                    stroke="hsl(var(--warning))" // Orange color
                     strokeWidth={3}
-                    dot={{ fill: 'hsl(var(--destructive))' }}
+                    dot={{ fill: 'hsl(var(--warning))', r: 4 }} // Orange dots
+                    label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }} // Label on top of line points
                   />
-                </LineChart>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
