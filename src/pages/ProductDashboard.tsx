@@ -119,11 +119,28 @@ export default function ProductDashboard() {
     const clicksPerSale = totalSales > 0 ? totalClicks / totalSales : 0;
     const costPerSale = totalSales > 0 ? totalCosts / totalSales : 0;
     
-    // Monthly data
+    // Monthly data calculation for the chart
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
-    MONTH_ORDER.forEach(month => monthlyMap.set(month, { earnings: 0, costs: 0 })); // Initialize all months
     
-    filteredCampaigns.forEach(c => {
+    // Use a separate set of campaigns for the chart data calculation, 
+    // which is only filtered by Year, Location, and Product, but NOT by Month.
+    // This ensures the chart shows the evolution across the selected period.
+    // If selectedMonth is 'all', we use filteredCampaigns (which is already filtered by Y, L, P).
+    // If selectedMonth is specific, we need to re-filter campaigns only by Y, L, P.
+    
+    const campaignsForChart = campaigns.filter(c => {
+      const campaignYear = c.year.toString();
+      const campaignLocation = c.location;
+      const campaignProductName = c.productName;
+
+      const yearMatch = selectedYear === "all" || campaignYear === selectedYear;
+      const locationMatch = selectedLocation === "all" || campaignLocation === selectedLocation;
+      const productMatch = selectedProduct === "all" || campaignProductName === selectedProduct;
+
+      return yearMatch && locationMatch && productMatch;
+    });
+
+    campaignsForChart.forEach(c => {
       const monthKey = normalizeMonthToAbbreviation(c.month);
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
       monthlyMap.set(monthKey, {
@@ -132,15 +149,21 @@ export default function ProductDashboard() {
       });
     });
     
-    const monthlyData = MONTH_ORDER
+    let monthlyData = MONTH_ORDER
       .map(month => {
-        const data = monthlyMap.get(month) || { earnings: 0, costs: 0 }; // Provide default if no data
+        const data = monthlyMap.get(month) || { earnings: 0, costs: 0 };
         return {
           month: month,
           receita: data.earnings,
           despesa: data.costs,
         };
-      });
+      })
+      .filter(m => m.receita > 0 || m.despesa > 0); // Only show months with data
+
+    // If a specific month is selected, filter the chart data to only show that month
+    if (selectedMonth !== "all") {
+      monthlyData = monthlyData.filter(m => m.month === selectedMonth);
+    }
     
     return {
       totalDays,
