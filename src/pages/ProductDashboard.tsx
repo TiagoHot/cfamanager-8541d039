@@ -192,17 +192,13 @@ export default function ProductDashboard() {
             <p className="text-sm text-muted-foreground mt-1">Análise de desempenho por produto</p>
           </div>
 
-          {/* Middle Block: Empty space for alignment */}
-          <div className="flex-1" />
-
-          {/* Right Block: Filters (Year, Location, Product) and Month Buttons Grid */}
-          <div className="flex gap-4 items-start">
+          {/* Right Block: Filters (Selects and Month Buttons) - Stacked vertically */}
+          <div className="flex flex-col gap-2 flex-shrink-0">
             
-            {/* Filters (Year, Location, Product) - Grouped on the left side of the filter area */}
-            <div className="flex flex-col gap-2 w-[450px] flex-shrink-0">
-              <div className="grid grid-cols-3 gap-2">
+            {/* Row 1: Selects (Year, Location, Product) */}
+            <div className="flex gap-2 items-center">
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className="w-28 h-10">
                     <SelectValue placeholder="Ano" />
                   </SelectTrigger>
                   <SelectContent>
@@ -214,7 +210,7 @@ export default function ProductDashboard() {
                 </Select>
 
                 <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className="w-32 h-10">
                     <SelectValue placeholder="Local" />
                   </SelectTrigger>
                   <SelectContent>
@@ -226,8 +222,8 @@ export default function ProductDashboard() {
                 </Select>
 
                 <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={productNamesByLocation.length === 0}>
-                  <SelectTrigger className="h-10">
-                    <SelectValue placeholder="Selecione um produto" />
+                  <SelectTrigger className="w-40 h-10">
+                    <SelectValue placeholder="Todos os..." />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Produtos</SelectItem>
@@ -236,19 +232,16 @@ export default function ProductDashboard() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
             </div>
 
-            {/* Month Buttons Grid (2 rows, 7 columns wide) */}
-            <div className="flex flex-col gap-2 w-[450px] flex-shrink-0">
-              {/* Row 1: Todos + Jan-Mai (7 columns wide) */}
-              <div className="grid grid-cols-7 gap-2">
+            {/* Row 2: Month Buttons Grid (Single row of 13 buttons) */}
+            <div className="flex gap-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => setSelectedMonth("all")}
                   className={cn(
-                    "transition-all duration-200 col-span-2 h-10", // col-span-2 for Todos os Meses
+                    "transition-all duration-200 h-10 px-4", 
                     selectedMonth === "all" 
                       ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
                       : "hover:bg-muted"
@@ -256,7 +249,7 @@ export default function ProductDashboard() {
                 >
                   Todos os Meses
                 </Button>
-                {MONTH_ORDER.slice(0, 5).map(month => { // Jan, Fev, Mar, Abr, Mai (5 months)
+                {MONTH_ORDER.map(month => { 
                   const hasData = monthsWithData.includes(month);
                   return (
                     <Button 
@@ -266,7 +259,7 @@ export default function ProductDashboard() {
                       onClick={() => setSelectedMonth(month)}
                       disabled={!hasData}
                       className={cn(
-                        "transition-all duration-200 h-10",
+                        "transition-all duration-200 h-10 w-12 px-2", // Fixed width for month buttons
                         selectedMonth === month 
                           ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
                           : "hover:bg-muted",
@@ -277,32 +270,6 @@ export default function ProductDashboard() {
                     </Button>
                   );
                 })}
-              </div>
-              
-              {/* Row 2: Jun-Dez (7 columns wide) */}
-              <div className="grid grid-cols-7 gap-2">
-                {MONTH_ORDER.slice(5).map(month => { // Jun, Jul, Ago, Set, Out, Nov, Dez (7 months)
-                  const hasData = monthsWithData.includes(month);
-                  return (
-                    <Button 
-                      key={month} 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setSelectedMonth(month)}
-                      disabled={!hasData}
-                      className={cn(
-                        "transition-all duration-200 h-10",
-                        selectedMonth === month 
-                          ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
-                          : "hover:bg-muted",
-                        !hasData && "opacity-50 cursor-not-allowed"
-                      )}
-                    >
-                      {month}
-                    </Button>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>
