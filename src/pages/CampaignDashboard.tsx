@@ -250,16 +250,10 @@ export default function CampaignDashboard() {
       {/* Custom Header Structure */}
       <div className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6 border-b">
         <div className="flex justify-between items-start">
-          {/* Left Side: Title and Description */}
+          {/* Left Side: Title and Year Filter */}
           <div className="flex flex-col">
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard de Campanhas</h1>
-            <p className="text-sm text-muted-foreground mt-1">Análise de desempenho das campanhas de marketing</p>
-          </div>
-
-          {/* Right Side: Filters (Year + Month Buttons Grid) */}
-          <div className="flex flex-col gap-2 w-[450px]">
-            {/* Year Filter */}
-            <div className="flex justify-end mb-2">
+            <div className="flex items-center gap-6"> {/* Increased gap to 6 (1.5rem) */}
+              <h1 className="text-3xl font-bold tracking-tight">Dashboard de Campanhas</h1>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="Ano" />
@@ -272,8 +266,11 @@ export default function CampaignDashboard() {
                 </SelectContent>
               </Select>
             </div>
+            <p className="text-sm text-muted-foreground mt-1">Análise de desempenho das campanhas de marketing</p>
+          </div>
 
-            {/* Month Buttons Grid */}
+          {/* Right Side: Month Buttons Grid (2 rows, 7 columns) */}
+          <div className="flex flex-col gap-2 w-[450px]">
             {/* Row 1: Todos + Jan-Mai (7 items total) */}
             <div className="grid grid-cols-7 gap-2">
               <Button 
