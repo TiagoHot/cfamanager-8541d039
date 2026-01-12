@@ -3,7 +3,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
-import { formatCurrency, formatPercent, normalizeMonthToAbbreviation, getProfitLossColor } from "@/lib/formatters";
+import { formatCurrency, formatPercent, normalizeMonthToAbbreviation, getProfitLossColor, getROIColor } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
 import { 
   BarChart, 
@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; 
+import { cn } from "@/lib/utils";
 
 const MONTH_ORDER = MONTHS;
 
@@ -293,39 +294,54 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Estratégia</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {strategyData.map(strategy => (
-                  <div key={strategy.name} className={`p-4 rounded-lg border ${strategy.profit >= 0 ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full ${strategy.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
-                        {strategy.name}
-                      </h4>
+            <CardContent className="space-y-4">
+              {strategyData.map(strategy => (
+                <Card key={strategy.name} className="card-hover">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${strategy.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
+                      {strategy.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Profit/Loss - most prominent */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{strategy.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
+                        <p className={cn("text-2xl font-bold", getProfitLossColor(strategy.profit))}>
+                          {formatCurrency(strategy.profit)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3 mb-2">
+
+                    {/* Revenues and Costs */}
+                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
                       <div>
                         <p className="text-xs text-muted-foreground">Receitas</p>
-                        <p className="text-sm text-success">{formatCurrency(strategy.earnings)}</p>
+                        <p className="text-base font-medium text-success">{formatCurrency(strategy.earnings)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Despesas</p>
-                        <p className="text-sm text-destructive">{formatCurrency(strategy.costs)}</p>
+                        <p className="text-base font-medium text-destructive">{formatCurrency(strategy.costs)}</p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-sm text-muted-foreground">{strategy.profit >= 0 ? 'Lucro' : 'Prejuízo'}</span>
-                      <span className={strategy.profit >= 0 ? 'text-success font-bold' : 'text-destructive font-bold'}>
-                        {formatCurrency(strategy.profit)}
-                      </span>
+
+                    {/* Sales and ROI */}
+                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Vendas</p>
+                        <p className="text-base font-medium">{strategy.sales}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">ROI</p>
+                        <p className={cn("text-base font-medium", getROIColor(strategy.roi))}>
+                          {formatPercent(strategy.roi)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-xs mt-2 text-muted-foreground">
-                      <span>{strategy.sales} vendas</span>
-                      <span>ROI: {formatPercent(strategy.roi)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
             </CardContent>
           </Card>
         )}
@@ -335,39 +351,54 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Local</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {locationData.map(location => (
-                  <div key={location.name} className={`p-4 rounded-lg border ${location.profit >= 0 ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full ${location.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
-                        {location.name}
-                      </h4>
+            <CardContent className="space-y-4">
+              {locationData.map(location => (
+                <Card key={location.name} className="card-hover">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${location.profit >= 0 ? 'bg-success' : 'bg-destructive'}`} />
+                      {location.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Profit/Loss - most prominent */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{location.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
+                        <p className={cn("text-2xl font-bold", getProfitLossColor(location.profit))}>
+                          {formatCurrency(location.profit)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3 mb-2">
+
+                    {/* Revenues and Costs */}
+                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
                       <div>
                         <p className="text-xs text-muted-foreground">Receitas</p>
-                        <p className="text-sm text-success">{formatCurrency(location.earnings)}</p>
+                        <p className="text-base font-medium text-success">{formatCurrency(location.earnings)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Despesas</p>
-                        <p className="text-sm text-destructive">{formatCurrency(location.costs)}</p>
+                        <p className="text-base font-medium text-destructive">{formatCurrency(location.costs)}</p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-sm text-muted-foreground">{location.profit >= 0 ? 'Lucro' : 'Prejuízo'}</span>
-                      <span className={location.profit >= 0 ? 'text-success font-bold' : 'text-destructive font-bold'}>
-                        {formatCurrency(location.profit)}
-                      </span>
+
+                    {/* Sales and ROI */}
+                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Vendas</p>
+                        <p className="text-base font-medium">{location.sales}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">ROI</p>
+                        <p className={cn("text-base font-medium", getROIColor(location.roi))}>
+                          {formatPercent(location.roi)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-xs mt-2 text-muted-foreground">
-                      <span>{location.sales} vendas</span>
-                      <span>ROI: {formatPercent(location.roi)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
             </CardContent>
           </Card>
         )}
