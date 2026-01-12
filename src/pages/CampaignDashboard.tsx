@@ -250,9 +250,9 @@ export default function CampaignDashboard() {
       {/* Custom Header Structure */}
       <div className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6 border-b">
         <div className="flex justify-between items-start">
-          {/* Title and Year Filter */}
+          {/* Left Side: Title and Year Filter */}
           <div className="flex flex-col">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6"> {/* Increased gap to 6 (1.5rem) */}
               <h1 className="text-3xl font-bold tracking-tight">Dashboard de Campanhas</h1>
               <Select value={selectedYear} onValueChange={setSelectedYear}>
                 <SelectTrigger className="w-32">
@@ -269,15 +269,16 @@ export default function CampaignDashboard() {
             <p className="text-sm text-muted-foreground mt-1">Análise de desempenho das campanhas de marketing</p>
           </div>
 
-          {/* Month Buttons Grid */}
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-6 gap-2">
+          {/* Right Side: Month Buttons Grid (2 rows, 7 columns) */}
+          <div className="flex flex-col gap-2 w-[450px]">
+            {/* Row 1: Todos + Jan-Mai (7 items total) */}
+            <div className="grid grid-cols-7 gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => setSelectedMonth("all")}
                 className={cn(
-                  "transition-all duration-200 col-span-2 h-10",
+                  "transition-all duration-200 col-span-2 h-10", // col-span-2 for Todos os Meses
                   selectedMonth === "all" 
                     ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
                     : "hover:bg-muted"
@@ -285,7 +286,7 @@ export default function CampaignDashboard() {
               >
                 Todos os Meses
               </Button>
-              {MONTH_ORDER.slice(0, 4).map(month => {
+              {MONTH_ORDER.slice(0, 5).map(month => { // Jan, Fev, Mar, Abr, Mai (5 months)
                 const hasData = monthsWithData.includes(month);
                 return (
                   <Button 
@@ -307,8 +308,10 @@ export default function CampaignDashboard() {
                 );
               })}
             </div>
-            <div className="grid grid-cols-6 gap-2">
-              {MONTH_ORDER.slice(4).map(month => {
+            
+            {/* Row 2: Jun-Dez (7 months) */}
+            <div className="grid grid-cols-7 gap-2">
+              {MONTH_ORDER.slice(5).map(month => { // Jun, Jul, Ago, Set, Out, Nov, Dez (7 months)
                 const hasData = monthsWithData.includes(month);
                 return (
                   <Button 
