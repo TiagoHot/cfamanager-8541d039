@@ -179,6 +179,7 @@ export default function CampaignDashboard() {
       <PageHeader 
         title="Dashboard de Campanhas" 
         description="Análise de desempenho das campanhas de marketing"
+        className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6"
       >
         <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger className="w-32">
