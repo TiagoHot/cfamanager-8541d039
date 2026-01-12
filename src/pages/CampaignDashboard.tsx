@@ -222,10 +222,7 @@ export default function CampaignDashboard() {
   const monthsWithData = useMemo(() => {
     const year = selectedYear === "all" ? null : parseInt(selectedYear);
     const campaignsForSelectedYear = campaigns.filter(c => year === null || c.year === year);
-    
-    // Get unique months and sort them chronologically
-    const uniqueMonths = [...new Set(campaignsForSelectedYear.map(c => normalizeMonthToAbbreviation(c.month)))];
-    return uniqueMonths.sort((a, b) => MONTH_ORDER.indexOf(a.split('/')[0].trim()) - MONTH_ORDER.indexOf(b.split('/')[0].trim()));
+    return [...new Set(campaignsForSelectedYear.map(c => normalizeMonthToAbbreviation(c.month)))].sort((a, b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
   }, [campaigns, selectedYear]);
 
   if (campaigns.length === 0) {
@@ -243,10 +240,6 @@ export default function CampaignDashboard() {
       </div>
     );
   }
-
-  const handleMonthClick = (month: string) => {
-    setSelectedMonth(prev => prev === month ? "all" : month);
-  };
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -266,39 +259,18 @@ export default function CampaignDashboard() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Mês" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Meses</SelectItem>
+            {monthsWithData.map(month => (
+              <SelectItem key={month} value={month}>{month}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </PageHeader>
-
-      {/* Month Buttons */}
-      {monthsWithData.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {monthsWithData.map(month => (
-            <Button
-              key={month}
-              variant={selectedMonth === month ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleMonthClick(month)}
-              className={cn(
-                "transition-all duration-200",
-                selectedMonth === month 
-                  ? "bg-warning text-warning-foreground hover:bg-warning/90 border-warning" 
-                  : "hover:bg-muted/50"
-              )}
-            >
-              {month}
-            </Button>
-          ))}
-          {selectedMonth !== "all" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedMonth("all")}
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-      )}
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
