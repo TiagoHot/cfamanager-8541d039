@@ -116,7 +116,7 @@ export default function CampaignDashboard() {
   }, [campaigns]);
   
   const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "all");
-  const [selectedMonth, setSelectedMonth] = useState<string>("all"); // 'all' or 'Jan', 'Fev', etc.
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
   
   // 1. Campaigns filtered by Year (used for overall stats and chart)
   const yearFilteredCampaigns = useMemo(() => {
@@ -150,10 +150,15 @@ export default function CampaignDashboard() {
   
   // Monthly data for the chart (always based on YEAR filtered campaigns)
   const monthlyData = useMemo(() => {
-    const monthlyMap = new Map<string, { earnings: number; costs: number }>();
+    const year = selectedYear === "all" ? null : parseInt(selectedYear);
     
-    // Use yearFilteredCampaigns here to ensure the chart shows all months for the selected year
-    yearFilteredCampaigns.forEach(c => { 
+    const filteredCampaignsForChart = campaigns.filter(c => {
+      const yearMatch = year === null || c.year === year;
+      return yearMatch; // Do not filter by month here
+    });
+    
+    const monthlyMap = new Map<string, { earnings: number; costs: number }>();
+    filteredCampaignsForChart.forEach(c => { 
       const monthKey = normalizeMonthToAbbreviation(c.month);
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
       monthlyMap.set(monthKey, {
@@ -162,7 +167,6 @@ export default function CampaignDashboard() {
       });
     });
     
-    // Ensure all months are present for a continuous chart view
     return MONTH_ORDER
       .map(month => { 
         const data = monthlyMap.get(month) || { earnings: 0, costs: 0 };
@@ -172,7 +176,7 @@ export default function CampaignDashboard() {
           despesa: data.costs,
         };
       });
-  }, [yearFilteredCampaigns]);
+  }, [campaigns, selectedYear]);
   
   const strategyData = useMemo(() => {
     const strategyMap = new Map<string, { earnings: number; costs: number; sales: number }>();
@@ -243,66 +247,93 @@ export default function CampaignDashboard() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <PageHeader 
-        title="Dashboard de Campanhas" 
-        description="Análise de desempenho das campanhas de marketing"
-        className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6"
-      >
-        {/* Year Filter (Moved to the left) */}
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Ano" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Anos</SelectItem>
-            {years.map(year => (
-              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {/* Removed Month Select Filter */}
-      </PageHeader>
-      
-      {/* Month Buttons */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {/* Button Todos os Meses */}
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setSelectedMonth("all")}
-          className={cn(
-            "transition-all duration-200",
-            selectedMonth === "all" 
-              ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
-              : "hover:bg-muted"
-          )}
-        >
-          Todos os Meses
-        </Button>
-        
-        {/* Month Buttons (2 lines of 6) */}
-        {MONTH_ORDER.map(month => {
-          const hasData = monthsWithData.includes(month);
-          return (
-            <Button 
-              key={month} 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setSelectedMonth(month)}
-              disabled={!hasData}
-              className={cn(
-                "transition-all duration-200",
-                selectedMonth === month 
-                  ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
-                  : "hover:bg-muted",
-                !hasData && "opacity-50 cursor-not-allowed"
-              )}
-            >
-              {month}
-            </Button>
-          );
-        })}
+      {/* Custom Header Structure */}
+      <div className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6 border-b">
+        <div className="flex justify-between items-start">
+          {/* Title and Year Filter */}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-bold tracking-tight">Dashboard de Campanhas</h1>
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Anos</SelectItem>
+                  {years.map(year => (
+                    <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">Análise de desempenho das campanhas de marketing</p>
+          </div>
+
+          {/* Month Buttons Grid */}
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-6 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setSelectedMonth("all")}
+                className={cn(
+                  "transition-all duration-200 col-span-2 h-10",
+                  selectedMonth === "all" 
+                    ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+                    : "hover:bg-muted"
+                )}
+              >
+                Todos os Meses
+              </Button>
+              {MONTH_ORDER.slice(0, 4).map(month => {
+                const hasData = monthsWithData.includes(month);
+                return (
+                  <Button 
+                    key={month} 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setSelectedMonth(month)}
+                    disabled={!hasData}
+                    className={cn(
+                      "transition-all duration-200 h-10",
+                      selectedMonth === month 
+                        ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+                        : "hover:bg-muted",
+                      !hasData && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    {month}
+                  </Button>
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-6 gap-2">
+              {MONTH_ORDER.slice(4).map(month => {
+                const hasData = monthsWithData.includes(month);
+                return (
+                  <Button 
+                    key={month} 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setSelectedMonth(month)}
+                    disabled={!hasData}
+                    className={cn(
+                      "transition-all duration-200 h-10",
+                      selectedMonth === month 
+                        ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+                        : "hover:bg-muted",
+                      !hasData && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    {month}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
+      {/* End Custom Header Structure */}
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
