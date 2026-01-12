@@ -3,7 +3,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
-import { formatCurrency, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
+import { formatCurrency, formatPercent, normalizeMonthToAbbreviation, getProfitLossColor } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
 import { 
   BarChart, 
@@ -20,6 +20,25 @@ import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; 
 
 const MONTH_ORDER = MONTHS;
+
+// Custom Tooltip Component
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const receita = payload.find((p: any) => p.dataKey === 'receita')?.value || 0;
+    const despesa = payload.find((p: any) => p.dataKey === 'despesa')?.value || 0;
+    const lucroPrejuizo = receita - despesa;
+
+    return (
+      <div className="p-3 bg-card border border-border rounded-lg shadow-lg text-sm">
+        <p className="font-semibold mb-1">{label}</p>
+        <p className="text-success">Receita : {formatCurrency(receita)}</p>
+        <p className="text-destructive">Despesa : {formatCurrency(despesa)}</p>
+        <p className={getProfitLossColor(lucroPrejuizo)}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function CampaignDashboard() {
   const { campaigns } = useData();
@@ -237,12 +256,8 @@ export default function CampaignDashboard() {
                   />
                   <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
                   <Tooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
+                    content={<CustomTooltip />} // Use the custom tooltip component
+                    wrapperStyle={{ outline: 'none' }} // Remove default focus outline
                   />
                   <Legend />
                   <Bar 
@@ -250,14 +265,12 @@ export default function CampaignDashboard() {
                     name="Receita"
                     fill="hsl(var(--success))" 
                     radius={[4, 4, 0, 0]} 
-                    // Removed label prop
                   />
                   <Bar 
                     dataKey="despesa" 
                     name="Despesa"
                     fill="hsl(var(--destructive))" 
                     radius={[4, 4, 0, 0]}
-                    // Removed label prop
                   />
                 </BarChart>
               </ResponsiveContainer>
