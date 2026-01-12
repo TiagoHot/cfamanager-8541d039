@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button"; // Adicionando a importação do Button
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercent, normalizeMonthToAbbreviation, getProfitLossColor, getROIColor } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent, ChevronLeft, ChevronRight } from "lucide-react";
