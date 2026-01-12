@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercent, normalizeMonthToAbbreviation, getProfitLossColor, getROIColor } from "@/lib/formatters";
-import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, ShoppingCart, Percent, ChevronLeft, ChevronRight } from "lucide-react";
 import { 
   BarChart, 
   Bar, 
@@ -225,6 +225,27 @@ export default function CampaignDashboard() {
     return [...new Set(campaignsForSelectedYear.map(c => normalizeMonthToAbbreviation(c.month)))].sort((a, b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
   }, [campaigns, selectedYear]);
 
+  // Logic for month navigation
+  const currentMonthIndex = useMemo(() => {
+    if (selectedMonth === "all") return -1;
+    return monthsWithData.indexOf(selectedMonth);
+  }, [selectedMonth, monthsWithData]);
+
+  const canGoPreviousMonth = currentMonthIndex > 0;
+  const canGoNextMonth = currentMonthIndex !== -1 && currentMonthIndex < monthsWithData.length - 1;
+
+  const handlePreviousMonth = () => {
+    if (canGoPreviousMonth) {
+      setSelectedMonth(monthsWithData[currentMonthIndex - 1]);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (canGoNextMonth) {
+      setSelectedMonth(monthsWithData[currentMonthIndex + 1]);
+    }
+  };
+
   if (campaigns.length === 0) {
     return (
       <div className="animate-fade-in space-y-6">
@@ -259,17 +280,36 @@ export default function CampaignDashboard() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Mês" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Meses</SelectItem>
-            {monthsWithData.map(month => (
-              <SelectItem key={month} value={month}>{month}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handlePreviousMonth}
+            disabled={selectedMonth === "all" || !canGoPreviousMonth}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Mês" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Meses</SelectItem>
+              {monthsWithData.map(month => (
+                <SelectItem key={month} value={month}>{month}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleNextMonth}
+            disabled={selectedMonth === "all" || !canGoNextMonth}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </PageHeader>
 
       {/* Summary Stats */}
