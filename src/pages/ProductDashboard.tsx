@@ -3,7 +3,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
-import { formatCurrency, formatNumber, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
+import { formatCurrency, formatNumber, formatPercent, normalizeMonthToAbbreviation, getProfitLossColor } from "@/lib/formatters";
 import { Package, Eye, DollarSign, TrendingUp, TrendingDown, MousePointer, Receipt, Calendar } from "lucide-react";
 import { 
   BarChart, 
@@ -19,6 +19,25 @@ import { useState, useMemo, useEffect } from "react";
 import { MONTHS } from "@/types";
 
 const MONTH_ORDER = MONTHS;
+
+// Custom Tooltip Component for Product Dashboard
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const receita = payload.find((p: any) => p.dataKey === 'receita')?.value || 0;
+    const despesa = payload.find((p: any) => p.dataKey === 'despesa')?.value || 0;
+    const lucroPrejuizo = receita - despesa;
+
+    return (
+      <div className="p-3 bg-card border border-border rounded-lg shadow-lg text-sm">
+        <p className="font-semibold mb-1">{label}</p>
+        <p className="text-success">Receita : {formatCurrency(receita)}</p>
+        <p className="text-destructive">Despesa : {formatCurrency(despesa)}</p>
+        <p className={getProfitLossColor(lucroPrejuizo)}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function ProductDashboard() {
   const { products, campaigns } = useData();
@@ -100,6 +119,8 @@ export default function ProductDashboard() {
     
     // Monthly data
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
+    MONTH_ORDER.forEach(month => monthlyMap.set(month, { earnings: 0, costs: 0 })); // Initialize all months
+    
     filteredCampaigns.forEach(c => {
       const monthKey = normalizeMonthToAbbreviation(c.month);
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
@@ -261,11 +282,12 @@ export default function ProductDashboard() {
                         <XAxis dataKey="month" className="text-xs" />
                         <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(1)}k`} />
                         <Tooltip 
-                          formatter={(value: number) => formatCurrency(value)}
-                          contentStyle={{ 
+                          content={<CustomTooltip />} // Use the custom tooltip component
+                          wrapperStyle={{ 
                             backgroundColor: 'hsl(var(--card))', 
                             border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            outline: 'none' // Remove default focus outline
                           }}
                         />
                         <Legend />
