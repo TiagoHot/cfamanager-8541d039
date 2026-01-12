@@ -19,6 +19,7 @@ import {
 import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const MONTH_ORDER = MONTHS;
 
@@ -115,38 +116,44 @@ export default function CampaignDashboard() {
   }, [campaigns]);
   
   const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "all");
-  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all"); // 'all' or 'Jan', 'Fev', etc.
   
-  const filteredCampaigns = useMemo(() => {
+  // 1. Campaigns filtered by Year (used for overall stats and chart)
+  const yearFilteredCampaigns = useMemo(() => {
     const year = selectedYear === "all" ? null : parseInt(selectedYear);
     return campaigns.filter(c => {
       if (year !== null && c.year !== year) return false;
-      if (selectedMonth !== "all" && normalizeMonthToAbbreviation(c.month) !== selectedMonth) return false;
       return true;
     });
-  }, [campaigns, selectedYear, selectedMonth]);
+  }, [campaigns, selectedYear]);
+
+  // 2. Campaigns filtered by Year AND Month (used for Strategy/Location analysis cards)
+  const monthFilteredCampaigns = useMemo(() => {
+    if (selectedMonth === "all") {
+      return yearFilteredCampaigns;
+    }
+    return yearFilteredCampaigns.filter(c => {
+      return normalizeMonthToAbbreviation(c.month) === selectedMonth;
+    });
+  }, [yearFilteredCampaigns, selectedMonth]);
   
   const stats = useMemo(() => {
-    const totalEarnings = filteredCampaigns.reduce((sum, c) => sum + c.earnings, 0);
-    const totalCosts = filteredCampaigns.reduce((sum, c) => sum + c.costs, 0);
-    const totalSales = filteredCampaigns.reduce((sum, c) => sum + c.sales, 0);
+    // Calculate stats based on MONTH filtered campaigns
+    const totalEarnings = monthFilteredCampaigns.reduce((sum, c) => sum + c.earnings, 0);
+    const totalCosts = monthFilteredCampaigns.reduce((sum, c) => sum + c.costs, 0);
+    const totalSales = monthFilteredCampaigns.reduce((sum, c) => sum + c.sales, 0);
     const profit = totalEarnings - totalCosts;
     const roi = totalCosts > 0 ? ((totalEarnings - totalCosts) / totalCosts) * 100 : 0;
     
     return { totalEarnings, totalCosts, totalSales, profit, roi };
-  }, [filteredCampaigns]);
+  }, [monthFilteredCampaigns]);
   
+  // Monthly data for the chart (always based on YEAR filtered campaigns)
   const monthlyData = useMemo(() => {
-    const year = selectedYear === "all" ? null : parseInt(selectedYear);
-    
-    const filteredCampaignsForChart = campaigns.filter(c => {
-      const yearMatch = year === null || c.year === year;
-      const monthMatch = selectedMonth === "all" || normalizeMonthToAbbreviation(c.month) === selectedMonth;
-      return yearMatch && monthMatch;
-    });
-    
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
-    filteredCampaignsForChart.forEach(c => { 
+    
+    // Use yearFilteredCampaigns here to ensure the chart shows all months for the selected year
+    yearFilteredCampaigns.forEach(c => { 
       const monthKey = normalizeMonthToAbbreviation(c.month);
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
       monthlyMap.set(monthKey, {
@@ -155,15 +162,7 @@ export default function CampaignDashboard() {
       });
     });
     
-    if (selectedMonth !== "all") {
-      const data = monthlyMap.get(selectedMonth) || { earnings: 0, costs: 0 };
-      return [{
-        month: selectedMonth,
-        receita: data.earnings,
-        despesa: data.costs,
-      }];
-    }
-
+    // Ensure all months are present for a continuous chart view
     return MONTH_ORDER
       .map(month => { 
         const data = monthlyMap.get(month) || { earnings: 0, costs: 0 };
@@ -173,11 +172,12 @@ export default function CampaignDashboard() {
           despesa: data.costs,
         };
       });
-  }, [campaigns, selectedYear, selectedMonth]);
+  }, [yearFilteredCampaigns]);
   
   const strategyData = useMemo(() => {
     const strategyMap = new Map<string, { earnings: number; costs: number; sales: number }>();
-    filteredCampaigns.forEach(c => {
+    // Use monthFilteredCampaigns here
+    monthFilteredCampaigns.forEach(c => {
       const strategy = c.strategy || 'Outros';
       const current = strategyMap.get(strategy) || { earnings: 0, costs: 0, sales: 0 };
       strategyMap.set(strategy, {
@@ -195,11 +195,12 @@ export default function CampaignDashboard() {
       profit: data.earnings - data.costs,
       roi: data.costs > 0 ? ((data.earnings - data.costs) / data.costs) * 100 : 0,
     }));
-  }, [filteredCampaigns]);
+  }, [monthFilteredCampaigns]);
   
   const locationData = useMemo(() => {
     const locationMap = new Map<string, { earnings: number; costs: number; sales: number }>();
-    filteredCampaigns.forEach(c => {
+    // Use monthFilteredCampaigns here
+    monthFilteredCampaigns.forEach(c => {
       const location = c.location || 'Outros';
       const current = locationMap.get(location) || { earnings: 0, costs: 0, sales: 0 };
       locationMap.set(location, {
@@ -217,13 +218,12 @@ export default function CampaignDashboard() {
       profit: data.earnings - data.costs,
       roi: data.costs > 0 ? ((data.earnings - data.costs) / data.costs) * 100 : 0,
     }));
-  }, [filteredCampaigns]);
+  }, [monthFilteredCampaigns]);
   
+  // Determine which months have data for the selected year
   const monthsWithData = useMemo(() => {
-    const year = selectedYear === "all" ? null : parseInt(selectedYear);
-    const campaignsForSelectedYear = campaigns.filter(c => year === null || c.year === year);
-    return [...new Set(campaignsForSelectedYear.map(c => normalizeMonthToAbbreviation(c.month)))].sort((a, b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
-  }, [campaigns, selectedYear]);
+    return [...new Set(yearFilteredCampaigns.map(c => normalizeMonthToAbbreviation(c.month)))].sort((a, b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
+  }, [yearFilteredCampaigns]);
 
   if (campaigns.length === 0) {
     return (
@@ -248,6 +248,7 @@ export default function CampaignDashboard() {
         description="Análise de desempenho das campanhas de marketing"
         className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6"
       >
+        {/* Year Filter (Moved to the left) */}
         <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Ano" />
@@ -259,18 +260,49 @@ export default function CampaignDashboard() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Mês" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Meses</SelectItem>
-            {monthsWithData.map(month => (
-              <SelectItem key={month} value={month}>{month}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Removed Month Select Filter */}
       </PageHeader>
+      
+      {/* Month Buttons */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {/* Button Todos os Meses */}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setSelectedMonth("all")}
+          className={cn(
+            "transition-all duration-200",
+            selectedMonth === "all" 
+              ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+              : "hover:bg-muted"
+          )}
+        >
+          Todos os Meses
+        </Button>
+        
+        {/* Month Buttons (2 lines of 6) */}
+        {MONTH_ORDER.map(month => {
+          const hasData = monthsWithData.includes(month);
+          return (
+            <Button 
+              key={month} 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setSelectedMonth(month)}
+              disabled={!hasData}
+              className={cn(
+                "transition-all duration-200",
+                selectedMonth === month 
+                  ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
+                  : "hover:bg-muted",
+                !hasData && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {month}
+            </Button>
+          );
+        })}
+      </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -309,7 +341,7 @@ export default function CampaignDashboard() {
       {monthlyData.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Evolução Mensal - Receita vs Despesa</CardTitle>
+            <CardTitle className="text-lg">Evolução Mensal - Receita vs Despesa (Ano {selectedYear})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -358,7 +390,7 @@ export default function CampaignDashboard() {
         {strategyData.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Análise por Estratégia</CardTitle>
+              <CardTitle className="text-lg">Análise por Estratégia {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {strategyData.map(strategy => {
@@ -418,7 +450,7 @@ export default function CampaignDashboard() {
         {locationData.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Análise por Local</CardTitle>
+              <CardTitle className="text-lg">Análise por Local {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {locationData.map(location => {
