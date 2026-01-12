@@ -13,7 +13,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Line, 
+  Line, // Keep Line import for other potential uses, but we'll use Bar for despesa
   Legend
 } from "recharts";
 import { useState, useMemo } from "react";
@@ -78,10 +78,10 @@ export default function CampaignDashboard() {
       }];
     }
 
+    // Ensure all months are included, even if they have no data, so bars appear consistently.
     return MONTH_ORDER
-      .filter(month => monthlyMap.has(month))
-      .map(month => {
-        const data = monthlyMap.get(month)!;
+      .map(month => { // Changed from filter then map to just map
+        const data = monthlyMap.get(month) || { earnings: 0, costs: 0 };
         return {
           month: month,
           receita: data.earnings,
@@ -253,14 +253,11 @@ export default function CampaignDashboard() {
                     radius={[4, 4, 0, 0]} 
                     label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }}
                   />
-                  <Line 
-                    type="monotone" 
+                  <Bar // Changed from Line to Bar for Despesa
                     dataKey="despesa" 
                     name="Despesa"
-                    stroke="hsl(var(--warning))" 
-                    strokeWidth={3}
-                    strokeDasharray="5 5" 
-                    dot={{ fill: 'hsl(var(--warning))', r: 4 }}
+                    fill="hsl(var(--destructive))" // Red color for expenses
+                    radius={[4, 4, 0, 0]}
                     label={{ position: 'top', formatter: (value: number) => formatCurrency(value, 'BRL'), fill: 'hsl(var(--foreground))', fontSize: 12 }}
                   />
                 </BarChart>
