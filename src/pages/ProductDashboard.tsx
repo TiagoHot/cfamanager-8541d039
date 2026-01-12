@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatNumber, formatPercent, normalizeMonthToAbbreviation } from "@/lib/formatters";
-import { Package, Calendar, Eye, DollarSign, TrendingUp, TrendingDown, MousePointer } from "lucide-react";
+import { Package, Eye, DollarSign, TrendingUp, TrendingDown, MousePointer, Receipt, Undo, Wallet } from "lucide-react";
 import { 
   BarChart, 
   Bar, 
@@ -84,6 +84,12 @@ export default function ProductDashboard() {
     const profit = totalEarnings - totalCosts;
     const roi = totalCosts > 0 ? ((totalEarnings - totalCosts) / totalCosts) * 100 : 0;
     const cpc = totalClicks > 0 ? totalCosts / totalClicks : 0;
+
+    // New calculations
+    const clicksPerSale = totalSales > 0 ? totalClicks / totalSales : 0;
+    const costPerSale = totalSales > 0 ? totalCosts / totalSales : 0;
+    const totalRefunds = 0; // Placeholder for now, as refund data is not in the current model
+    const netRevenue = totalEarnings - totalRefunds;
     
     // Monthly data
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
@@ -116,6 +122,10 @@ export default function ProductDashboard() {
       profit,
       roi,
       cpc,
+      clicksPerSale, // New
+      costPerSale,   // New
+      totalRefunds,  // New
+      netRevenue,    // New
       monthlyData,
       hasData: filteredCampaigns.length > 0,
     };
@@ -202,13 +212,18 @@ export default function ProductDashboard() {
       ) : (
         <>
           {/* Product Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <StatCard title="Impressões" value={formatNumber(productData.totalImpressions)} icon={Eye} />
             <StatCard title="Cliques" value={formatNumber(productData.totalClicks)} icon={MousePointer} />
             <StatCard title="Vendas" value={productData.totalSales} icon={Package} variant="success" />
-            <StatCard title="Receita" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
+            <StatCard title="Receita Bruta" value={formatCurrency(productData.totalEarnings)} icon={TrendingUp} variant="success" />
             <StatCard title="Custo" value={formatCurrency(productData.totalCosts)} icon={TrendingDown} variant="danger" />
+            
             <StatCard title="ROI" value={formatPercent(productData.roi)} icon={DollarSign} variant={productData.roi > 0 ? "success" : "danger"} />
+            <StatCard title="Cliques/Venda" value={formatNumber(productData.clicksPerSale)} icon={MousePointer} />
+            <StatCard title="Custo/Venda" value={formatCurrency(productData.costPerSale)} icon={Receipt} variant="danger" />
+            <StatCard title="Reembolso" value={formatCurrency(productData.totalRefunds)} icon={Undo} variant="warning" />
+            <StatCard title="Receita Líquida" value={formatCurrency(productData.netRevenue)} icon={Wallet} variant="success" />
           </div>
 
           {/* Balance Card */}
@@ -229,7 +244,7 @@ export default function ProductDashboard() {
           </Card>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 gap-6"> {/* Changed to grid-cols-1 */}
+          <div className="grid grid-cols-1 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Análise Mensal</CardTitle>
