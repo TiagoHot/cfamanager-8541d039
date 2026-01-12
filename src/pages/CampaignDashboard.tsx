@@ -249,33 +249,33 @@ export default function CampaignDashboard() {
     <div className="animate-fade-in space-y-6">
       {/* Custom Header Structure */}
       <div className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6 border-b">
-        <div className="flex flex-col gap-4"> {/* Main container for 2 rows */}
-          
-          {/* Row 1: Title, Description, and Year Selector */}
-          <div className="flex justify-between items-end">
-            <div className="flex flex-col">
-              <h1 className="text-3xl font-bold tracking-tight">Dashboard de Campanhas</h1>
-              <p className="text-sm text-muted-foreground mt-1">Análise de desempenho das campanhas de marketing</p>
-            </div>
-            
-            {/* Year Filter (moved to the right of the title block, but still on the left side of the overall header) */}
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Ano" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Anos</SelectItem>
-                {years.map(year => (
-                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex justify-between items-start">
+          {/* Left Side: Title and Description */}
+          <div className="flex flex-col">
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard de Campanhas</h1>
+            <p className="text-sm text-muted-foreground mt-1">Análise de desempenho das campanhas de marketing</p>
           </div>
 
-          {/* Row 2: Month Buttons Grid (2 rows, 6 columns total) */}
-          <div className="flex flex-col gap-2">
-            {/* Row 1: Todos + Jan-Abr (6 items total) */}
-            <div className="grid grid-cols-6 gap-2">
+          {/* Right Side: Filters (Year + Month Buttons Grid) */}
+          <div className="flex flex-col gap-2 w-[450px]">
+            {/* Year Filter */}
+            <div className="flex justify-end mb-2">
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Anos</SelectItem>
+                  {years.map(year => (
+                    <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Month Buttons Grid */}
+            {/* Row 1: Todos + Jan-Mai (7 items total) */}
+            <div className="grid grid-cols-7 gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -289,7 +289,7 @@ export default function CampaignDashboard() {
               >
                 Todos os Meses
               </Button>
-              {MONTH_ORDER.slice(0, 4).map(month => { // Jan, Fev, Mar, Abr (4 months)
+              {MONTH_ORDER.slice(0, 5).map(month => { // Jan, Fev, Mar, Abr, Mai (5 months)
                 const hasData = monthsWithData.includes(month);
                 return (
                   <Button 
@@ -312,19 +312,9 @@ export default function CampaignDashboard() {
               })}
             </div>
             
-            {/* Row 2: Mai-Dez (8 months, 6 columns total, so we need to adjust the grid) */}
-            {/* To fit 8 months into 6 columns, we need 2 rows of 6 columns total. 
-                Row 1: Todos (2 cols) + Jan (1) + Fev (1) + Mar (1) + Abr (1) = 6 cols.
-                Row 2: Mai (1) + Jun (1) + Jul (1) + Ago (1) + Set (1) + Out (1) = 6 cols.
-                Row 3: Nov (1) + Dez (1) = 2 cols. This requires 3 rows.
-                
-                Let's stick to the 2-row request by making the grid 7 columns wide again, 
-                and placing the year selector on the left side of the month grid.
-            */}
-            
-            {/* Reverting to 7 columns for the month grid to fit 13 items in 2 rows (7+6) */}
+            {/* Row 2: Jun-Dez (7 months) */}
             <div className="grid grid-cols-7 gap-2">
-              {MONTH_ORDER.slice(4, 11).map(month => { // Mai, Jun, Jul, Ago, Set, Out, Nov (7 months)
+              {MONTH_ORDER.slice(5).map(month => { // Jun, Jul, Ago, Set, Out, Nov, Dez (7 months)
                 const hasData = monthsWithData.includes(month);
                 return (
                   <Button 
@@ -345,103 +335,6 @@ export default function CampaignDashboard() {
                   </Button>
                 );
               })}
-            </div>
-            
-            {/* Row 3: Dez (1 month) - This is unavoidable if we want 13 items (Todos + 12 months) in 2 rows of 7 columns. 
-                Let's adjust the layout to be 2 rows of 6 columns total, forcing 6 months per row.
-                
-                New Plan (6 columns total):
-                Row 1: Todos (2 cols) + Jan (1) + Fev (1) + Mar (1) + Abr (1) = 6 cols. (5 months)
-                Row 2: Mai (1) + Jun (1) + Jul (1) + Ago (1) + Set (1) + Out (1) = 6 cols. (6 months)
-                Row 3: Nov (1) + Dez (1) = 2 cols. (2 months) -> Still 3 rows.
-                
-                To fit 13 items in 2 rows, we need 7 columns:
-                Row 1: Todos (2) + Jan-Mai (5) = 7 items.
-                Row 2: Jun-Dez (7 items).
-                
-                Let's go back to the 7-column grid, but place the year selector on the left side of the month grid.
-            */}
-            
-            {/* Reverting to the 7-column grid structure for months, but placing the year selector on the left of the month grid. */}
-            <div className="flex gap-4 items-start">
-              {/* Year Selector on the left of the month grid */}
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Anos</SelectItem>
-                  {years.map(year => (
-                    <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {/* Month Buttons Grid (2 rows, 7 columns) */}
-              <div className="flex flex-col gap-2 flex-1">
-                {/* Row 1: Todos + Jan-Mai (7 items total) */}
-                <div className="grid grid-cols-7 gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setSelectedMonth("all")}
-                    className={cn(
-                      "transition-all duration-200 col-span-2 h-10", // col-span-2 for Todos os Meses
-                      selectedMonth === "all" 
-                        ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
-                        : "hover:bg-muted"
-                    )}
-                  >
-                    Todos
-                  </Button>
-                  {MONTH_ORDER.slice(0, 5).map(month => { // Jan, Fev, Mar, Abr, Mai (5 months)
-                    const hasData = monthsWithData.includes(month);
-                    return (
-                      <Button 
-                        key={month} 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setSelectedMonth(month)}
-                        disabled={!hasData}
-                        className={cn(
-                          "transition-all duration-200 h-10",
-                          selectedMonth === month 
-                            ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
-                            : "hover:bg-muted",
-                          !hasData && "opacity-50 cursor-not-allowed"
-                        )}
-                      >
-                        {month}
-                      </Button>
-                    );
-                  })}
-                </div>
-                
-                {/* Row 2: Jun-Dez (7 months) */}
-                <div className="grid grid-cols-7 gap-2">
-                  {MONTH_ORDER.slice(5).map(month => { // Jun, Jul, Ago, Set, Out, Nov, Dez (7 months)
-                    const hasData = monthsWithData.includes(month);
-                    return (
-                      <Button 
-                        key={month} 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setSelectedMonth(month)}
-                        disabled={!hasData}
-                        className={cn(
-                          "transition-all duration-200 h-10",
-                          selectedMonth === month 
-                            ? "bg-warning/20 text-warning border-warning/50 hover:bg-warning/30" 
-                            : "hover:bg-muted",
-                          !hasData && "opacity-50 cursor-not-allowed"
-                        )}
-                      >
-                        {month}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
           </div>
         </div>
