@@ -91,11 +91,13 @@ export default function ProductDashboard() {
       const campaignProductName = c.productName;
 
       const yearMatch = selectedYear === "all" || campaignYear === selectedYear;
-      const monthMatch = selectedMonth === "all" || campaignMonth === selectedMonth;
+      // NOTE: We intentionally ignore monthMatch here for the initial filtering, 
+      // as the monthly chart needs all months if selectedMonth is "all".
+      // The month filter is applied later for the summary stats.
       const locationMatch = selectedLocation === "all" || campaignLocation === selectedLocation;
       const productMatch = selectedProduct === "all" || campaignProductName === selectedProduct;
 
-      return yearMatch && monthMatch && locationMatch && productMatch;
+      return yearMatch && locationMatch && productMatch;
     });
 
     // If a specific product is selected, ensure only its campaigns are considered
@@ -106,12 +108,17 @@ export default function ProductDashboard() {
       filteredCampaigns = filteredCampaigns.filter(c => productNamesByLocation.includes(c.productName));
     }
     
-    const totalDays = filteredCampaigns.reduce((sum, c) => sum + c.daysRunning, 0);
-    const totalImpressions = filteredCampaigns.reduce((sum, c) => sum + c.impressions, 0);
-    const totalClicks = filteredCampaigns.reduce((sum, c) => sum + c.clicks, 0);
-    const totalSales = filteredCampaigns.reduce((sum, c) => sum + c.sales, 0);
-    const totalEarnings = filteredCampaigns.reduce((sum, c) => sum + c.earnings, 0);
-    const totalCosts = filteredCampaigns.reduce((sum, c) => sum + c.costs, 0);
+    // --- Calculate Summary Stats (Applying Month Filter Here) ---
+    const summaryCampaigns = filteredCampaigns.filter(c => 
+      selectedMonth === "all" || normalizeMonthToAbbreviation(c.month) === selectedMonth
+    );
+
+    const totalDays = summaryCampaigns.reduce((sum, c) => sum + c.daysRunning, 0);
+    const totalImpressions = summaryCampaigns.reduce((sum, c) => sum + c.impressions, 0);
+    const totalClicks = summaryCampaigns.reduce((sum, c) => sum + c.clicks, 0);
+    const totalSales = summaryCampaigns.reduce((sum, c) => sum + c.sales, 0);
+    const totalEarnings = summaryCampaigns.reduce((sum, c) => sum + c.earnings, 0);
+    const totalCosts = summaryCampaigns.reduce((sum, c) => sum + c.costs, 0);
     const profit = totalEarnings - totalCosts;
     const roi = totalCosts > 0 ? ((totalEarnings - totalCosts) / totalCosts) * 100 : 0;
     const cpc = totalClicks > 0 ? totalCosts / totalClicks : 0;
@@ -119,10 +126,10 @@ export default function ProductDashboard() {
     const clicksPerSale = totalSales > 0 ? totalClicks / totalSales : 0;
     const costPerSale = totalSales > 0 ? totalCosts / totalSales : 0;
     
-    // Monthly data
+    // --- Calculate Monthly Data for Chart (Ignoring selectedMonth filter) ---
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
-    MONTH_ORDER.forEach(month => monthlyMap.set(month, { earnings: 0, costs: 0 })); // Initialize all months
     
+    // Use the campaigns filtered by Year, Location, and Product (but NOT Month)
     filteredCampaigns.forEach(c => {
       const monthKey = normalizeMonthToAbbreviation(c.month);
       const current = monthlyMap.get(monthKey) || { earnings: 0, costs: 0 };
@@ -140,7 +147,8 @@ export default function ProductDashboard() {
           receita: data.earnings,
           despesa: data.costs,
         };
-      });
+      })
+      .filter(m => m.receita > 0 || m.despesa > 0); // Only keep months with data
     
     return {
       totalDays,
@@ -155,7 +163,8 @@ export default function ProductDashboard() {
       clicksPerSale,
       costPerSale,
       monthlyData,
-      hasData: filteredCampaigns.length > 0,
+      hasData: summaryCampaigns.length > 0, // Check if summary data exists
+      hasMonthlyData: monthlyData.length > 0, // Check if chart data exists
     };
   }, [campaigns, selectedYear, selectedMonth, selectedLocation, selectedProduct, products, productNamesByLocation]);
 
@@ -180,6 +189,10 @@ export default function ProductDashboard() {
     );
   }
 
+  // Decide whether to show the monthly chart or a single month summary
+  const showMonthlyChart = selectedMonth === "all" && productData.hasMonthlyData;
+  const showSingleMonthSummary = selectedMonth !== "all" && productData.hasData;
+
   return (
     <div className="animate-fade-in space-y-6">
       {/* Custom Header Structure */}
@@ -191,6 +204,9 @@ export default function ProductDashboard() {
             <h1 className="text-3xl font-bold tracking-tight">Dashboard de Produtos</h1>
             <p className="text-sm text-muted-foreground mt-1">Análise de desempenho por produto</p>
           </div>
+
+          {/* Middle Block: Empty space for alignment */}
+          <div className="flex-1" />
 
           {/* Right Block: Filters (Selects and Month Buttons) - Stacked vertically */}
           <div className="flex flex-col gap-2 flex-shrink-0">
@@ -310,10 +326,12 @@ export default function ProductDashboard() {
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Análise Mensal</CardTitle>
+            <CardTitle className="text-lg">
+              {selectedMonth === "all" ? "Evolução Mensal" : `Resumo do Mês: ${selectedMonth}`}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {productData.monthlyData.length > 0 ? (
+            {showMonthlyChart ? (
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={productData.monthlyData}>
@@ -335,8 +353,26 @@ export default function ProductDashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+            ) : showSingleMonthSummary ? (
+              <div className="py-12 text-center">
+                <p className="text-xl font-semibold mb-2">Dados Consolidados para {selectedMonth}</p>
+                <div className="flex justify-center gap-8 mt-4">
+                  <div className="text-success">
+                    <p className="text-sm text-muted-foreground">Receita</p>
+                    <p className="text-2xl font-bold">{formatCurrency(productData.totalEarnings)}</p>
+                  </div>
+                  <div className="text-destructive">
+                    <p className="text-sm text-muted-foreground">Despesa</p>
+                    <p className="text-2xl font-bold">{formatCurrency(productData.totalCosts)}</p>
+                  </div>
+                  <div className={getProfitLossColor(productData.profit)}>
+                    <p className="text-sm text-muted-foreground">Lucro</p>
+                    <p className="text-2xl font-bold">{formatCurrency(productData.profit)}</p>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <p className="text-center text-muted-foreground py-12">Sem dados mensais</p>
+              <p className="text-center text-muted-foreground py-12">Sem dados de campanha para os filtros selecionados.</p>
             )}
           </CardContent>
         </Card>
