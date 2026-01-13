@@ -253,7 +253,7 @@ export default function BusinessDashboard() {
                         outerRadius={90}
                         innerRadius={50}
                         fill="#8884d8"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        // REMOVED label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                         dataKey="value"
                       >
                         {yearData.incomeBreakdown.map((entry, index) => (
@@ -286,7 +286,7 @@ export default function BusinessDashboard() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingDown className="w-5 h-5 text-destructive" />
-              Fonte de Despesas {/* Renomeado aqui */}
+              Fonte de Despesas
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -302,7 +302,7 @@ export default function BusinessDashboard() {
                         outerRadius={90}
                         innerRadius={50}
                         fill="#8884d8"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        // REMOVED label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                         dataKey="value"
                       >
                         {yearData.expenseBreakdown.map((entry, index) => (
