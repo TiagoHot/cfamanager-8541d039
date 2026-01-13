@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { PageContent } from "@/components/PageContent";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import InlineProductEditor from "@/components/InlineProductEditor";
 
 export default function ProductsPage() {
   const { products, importData, addProduct, updateProduct } = useData();
@@ -33,69 +34,106 @@ export default function ProductsPage() {
       key: 'name',
       header: 'Produto',
       render: (item: Product) => (
-        <span className="font-medium">{item.name}</span>
+        <InlineProductEditor product={item} field="name" type="text">
+          <span className="font-medium">{item.name}</span>
+        </InlineProductEditor>
       ),
     },
     {
       key: 'type',
       header: 'Tipo',
       render: (item: Product) => (
-        <Badge variant="secondary">{item.type || 'Não Definido'}</Badge>
+        <InlineProductEditor product={item} field="type" type="select" badgeVariant="secondary">
+          <Badge variant="secondary">{item.type || 'Não Definido'}</Badge>
+        </InlineProductEditor>
       ),
     },
     {
       key: 'niche',
       header: 'Nicho',
       render: (item: Product) => (
-        <Badge variant="outline">{item.niche || 'Não Definido'}</Badge>
+        <InlineProductEditor product={item} field="niche" type="select" badgeVariant="outline">
+          <Badge variant="outline">{item.niche || 'Não Definido'}</Badge>
+        </InlineProductEditor>
       ),
     },
     {
       key: 'platform',
       header: 'Plataforma',
       render: (item: Product) => (
-        <Badge variant="secondary">{item.platform}</Badge>
+        <InlineProductEditor product={item} field="platform" type="select" badgeVariant="secondary">
+          <Badge variant="secondary">{item.platform}</Badge>
+        </InlineProductEditor>
       ),
     },
     {
       key: 'country',
-      header: 'Local', // Renomeado de 'País' para 'Local'
-      render: (item: Product) => {
-        const isBrasil = item.country === 'Brasil';
-        const badgeClasses = cn(
-          "text-xs font-medium",
-          isBrasil 
-            ? "bg-success/10 text-success border-success/20 hover:bg-success/20" 
-            : "bg-info/10 text-info border-info/20 hover:bg-info/20"
-        );
-        return (
-          <Badge className={badgeClasses}>
-            {item.country}
-          </Badge>
-        );
-      },
+      header: 'Local',
+      render: (item: Product) => (
+        <InlineProductEditor product={item} field="country" type="select" badgeVariant={item.country === 'Brasil' ? 'success' : 'info'}>
+          {/* Display handled by InlineProductEditor renderDisplay */}
+          <span className="text-xs font-medium">{item.country}</span>
+        </InlineProductEditor>
+      ),
+    },
+    {
+      key: 'averageTicket',
+      header: 'Ticket Médio',
+      className: 'text-right',
+      render: (item: Product) => (
+        <InlineProductEditor product={item} field="averageTicket" type="number" className="text-right">
+          {formatCurrency(item.averageTicket)}
+        </InlineProductEditor>
+      ),
+    },
+    {
+      key: 'commissionPercent',
+      header: 'Comissão (%)',
+      className: 'text-right',
+      render: (item: Product) => (
+        <InlineProductEditor product={item} field="commissionPercent" type="number" className="text-right">
+          {item.commissionPercent.toFixed(1)}%
+        </InlineProductEditor>
+      ),
+    },
+    {
+      key: 'commissionBRL',
+      header: 'Comissão (R$)',
+      className: 'text-right font-medium text-success',
+      render: (item: Product) => (
+        // Calculated field, not editable inline
+        <span>{formatCurrency(item.commissionBRL)}</span>
+      ),
     },
     {
       key: 'notes',
       header: 'Notas',
       className: 'w-20 text-center',
-      render: (item: Product) => item.notes ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <MessageSquare className="w-4 h-4 text-muted-foreground mx-auto cursor-pointer hover:text-primary" />
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs">
-            <p>{item.notes}</p>
-          </TooltipContent>
-        </Tooltip>
-      ) : (
-        <span className="text-muted-foreground">-</span>
+      render: (item: Product) => (
+        <InlineProductEditor product={item} field="notes" type="textarea" className="text-center">
+          {item.notes ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <MessageSquare className="w-4 h-4 text-muted-foreground mx-auto cursor-pointer hover:text-primary" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>{item.notes}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className="text-muted-foreground">-</span>
+          )}
+        </InlineProductEditor>
       ),
     },
     {
       key: 'date',
       header: 'Data',
-      render: (item: Product) => formatDate(item.date),
+      render: (item: Product) => (
+        <InlineProductEditor product={item} field="date" type="date">
+          {formatDate(item.date)}
+        </InlineProductEditor>
+      ),
     },
     {
       key: 'actions',
@@ -111,7 +149,7 @@ export default function ProductsPage() {
     },
   ], [updateProduct]);
 
-  // Sort products by date descending (most recent first), then by productNumber descending
+  // Sort products by date descending (most recent first, then by productNumber descending)
   const sortedProducts = useMemo(() => {
     return [...products].sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : 0;
