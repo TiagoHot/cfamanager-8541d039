@@ -359,7 +359,11 @@ export default function BusinessDashboard() {
                   {yearData.expenseBreakdown.map((item, index) => (
                     <div key={item.name} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        {/* Adicionando o indicador de cor (bola) usando o mapeamento COLORS */}
+                        <span 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }} 
+                        />
                         <span>{item.name}</span>
                       </div>
                       <span className="font-medium">{formatCurrency(item.value)}</span>
