@@ -442,23 +442,23 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Estratégia {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3"> {/* Reduced vertical spacing */}
+            <CardContent className="space-y-3">
               {strategyData.map(strategy => {
                 const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(strategy.name);
                 return (
                   <Card key={strategy.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
-                    <CardContent className="p-4"> {/* Reduced padding */}
+                    <CardContent className="p-3"> {/* Reduced padding here */}
                       <div className="flex items-center justify-between mb-2">
-                        <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
+                        <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}>
                           <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
                           {strategy.name}
                         </CardTitle>
-                        <span className={cn("text-lg font-bold", getProfitLossColor(strategy.profit))}>
+                        <span className={cn("text-xl font-bold", getProfitLossColor(strategy.profit))}>
                           {formatCurrency(strategy.profit)}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4 text-xs border-t pt-2"> {/* Compact layout */}
+                      <div className="grid grid-cols-4 gap-4 text-xs border-t pt-2"> {/* Using text-xs for metrics */}
                         <div>
                           <p className="text-muted-foreground">Receitas</p>
                           <p className="font-semibold text-success">{formatCurrency(strategy.earnings)}</p>
@@ -466,6 +466,10 @@ export default function CampaignDashboard() {
                         <div>
                           <p className="text-muted-foreground">Despesas</p>
                           <p className="font-semibold text-destructive">{formatCurrency(strategy.costs)}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Vendas</p>
+                          <p className="font-semibold">{strategy.sales}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-muted-foreground">ROI</p>
@@ -487,23 +491,23 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Local {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3"> {/* Reduced vertical spacing */}
+            <CardContent className="space-y-3">
               {locationData.map(location => {
                 const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(location.name);
                 return (
                   <Card key={location.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
-                    <CardContent className="p-4"> {/* Reduced padding */}
+                    <CardContent className="p-3"> {/* Reduced padding here */}
                       <div className="flex items-center justify-between mb-2">
-                        <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
+                        <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}>
                           <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
                           {location.name}
                         </CardTitle>
-                        <span className={cn("text-lg font-bold", getProfitLossColor(location.profit))}>
+                        <span className={cn("text-xl font-bold", getProfitLossColor(location.profit))}>
                           {formatCurrency(location.profit)}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4 text-xs border-t pt-2"> {/* Compact layout */}
+                      <div className="grid grid-cols-4 gap-4 text-xs border-t pt-2"> {/* Using text-xs for metrics */}
                         <div>
                           <p className="text-muted-foreground">Receitas</p>
                           <p className="font-semibold text-success">{formatCurrency(location.earnings)}</p>
@@ -511,6 +515,10 @@ export default function CampaignDashboard() {
                         <div>
                           <p className="text-muted-foreground">Despesas</p>
                           <p className="font-semibold text-destructive">{formatCurrency(location.costs)}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Vendas</p>
+                          <p className="font-semibold">{location.sales}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-muted-foreground">ROI</p>
