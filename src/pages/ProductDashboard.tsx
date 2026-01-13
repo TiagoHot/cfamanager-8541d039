@@ -148,7 +148,7 @@ export default function ProductDashboard() {
       });
     });
     
-    const monthlyData = MONTH_ORDER
+    let monthlyData = MONTH_ORDER
       .map(month => {
         const data = monthlyMap.get(month) || { earnings: 0, costs: 0 };
         return {
@@ -156,9 +156,12 @@ export default function ProductDashboard() {
           receita: data.earnings,
           despesa: data.costs,
         };
-      })
-      .filter(m => m.receita > 0 || m.despesa > 0); // Only show months with data
+      });
 
+    // If a specific month is selected, filter the chart data to only show that month
+    if (selectedMonth !== "all") {
+      monthlyData = monthlyData.filter(m => m.month === selectedMonth);
+    }
     
     return {
       totalDays,
