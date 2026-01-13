@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; // Import MONTHS
 
-const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89%, 48%)'];
+const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89% 48%)'];
 
 // Usando MONTHS importado
 const MONTH_ORDER = MONTHS;
@@ -121,13 +121,22 @@ export default function BusinessDashboard() {
       expenseBySource.set(source, (expenseBySource.get(source) || 0) + ie.amount);
     });
     
+    // Convert maps to arrays and sort by value descending
+    const sortedIncomeBreakdown = Array.from(incomeBySource.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
+    const sortedExpenseBreakdown = Array.from(expenseBySource.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
     return {
       totalIncome,
       totalExpenses,
       totalProfit,
       months,
-      incomeBreakdown: Array.from(incomeBySource.entries()).map(([name, value]) => ({ name, value })),
-      expenseBreakdown: Array.from(expenseBySource.entries()).map(([name, value]) => ({ name, value })),
+      incomeBreakdown: sortedIncomeBreakdown,
+      expenseBreakdown: sortedExpenseBreakdown,
     };
   }, [incomeExpenses, selectedYear]);
   
@@ -277,7 +286,7 @@ export default function BusinessDashboard() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingDown className="w-5 h-5 text-destructive" />
-              Breakdown de Despesas
+              Fonte de Despesas {/* Renomeado aqui */}
             </CardTitle>
           </CardHeader>
           <CardContent>
