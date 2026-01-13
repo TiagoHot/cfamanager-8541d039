@@ -449,52 +449,8 @@ export default function BusinessDashboard() {
                   <Legend />
                   <Bar dataKey="receita" name="Receita" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="despesa" name="Despesa" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-                  {/* Removed Bar dataKey="lucro" */}
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Monthly Summary Table */}
-      {yearData.months.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Resumo Mensal Detalhado</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-semibold">Mês</th>
-                    <th className="text-right py-3 px-4 font-semibold text-success">Receita</th>
-                    <th className="text-right py-3 px-4 font-semibold text-destructive">Despesa</th>
-                    <th className="text-right py-3 px-4 font-semibold">Lucro</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {yearData.months.map((month) => (
-                    <tr key={month.month} className="border-b hover:bg-muted/50 transition-colors">
-                      <td className="py-3 px-4 font-medium">{month.month}</td>
-                      <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(month.income)}</td>
-                      <td className="py-3 px-4 text-right font-medium text-destructive">{formatCurrency(month.expenses)}</td>
-                      <td className={cn("py-3 px-4 text-right font-medium", month.balance >= 0 ? 'text-success' : 'text-destructive')}>
-                        {formatCurrency(month.balance)}
-                      </td>
-                    </tr>
-                  ))}
-                  <tr className="bg-muted/50 font-bold">
-                    <td className="py-3 px-4">Total</td>
-                    <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(yearData.totalIncome)}</td>
-                    <td className="py-3 px-4 text-right font-medium text-destructive">{formatCurrency(yearData.totalExpenses)}</td>
-                    <td className={cn("py-3 px-4 text-right font-medium", yearData.totalProfit >= 0 ? 'text-success' : 'text-destructive')}>
-                      {formatCurrency(yearData.totalProfit)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </CardContent>
         </Card>
