@@ -114,20 +114,27 @@ export default function CampaignDashboard() {
   const years = useMemo(() => {
     return [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
   }, [campaigns]);
+
+  const locations = useMemo(() => {
+    return [...new Set(campaigns.map(c => c.location))].sort();
+  }, [campaigns]);
   
   const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "all");
   const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [selectedLocation, setSelectedLocation] = useState<string>("all"); // New state for location filter
   
-  // 1. Campaigns filtered by Year (used for overall stats and chart)
+  // 1. Campaigns filtered by Year and Location (used for overall stats and chart)
   const yearFilteredCampaigns = useMemo(() => {
     const year = selectedYear === "all" ? null : parseInt(selectedYear);
+    
     return campaigns.filter(c => {
-      if (year !== null && c.year !== year) return false;
-      return true;
+      const yearMatch = year === null || c.year === year;
+      const locationMatch = selectedLocation === "all" || c.location === selectedLocation;
+      return yearMatch && locationMatch;
     });
-  }, [campaigns, selectedYear]);
+  }, [campaigns, selectedYear, selectedLocation]);
 
-  // 2. Campaigns filtered by Year AND Month (used for Strategy/Location analysis cards)
+  // 2. Campaigns filtered by Year, Location AND Month (used for Strategy/Location analysis cards)
   const monthFilteredCampaigns = useMemo(() => {
     if (selectedMonth === "all") {
       return yearFilteredCampaigns;
@@ -154,7 +161,8 @@ export default function CampaignDashboard() {
     
     const filteredCampaignsForChart = campaigns.filter(c => {
       const yearMatch = year === null || c.year === year;
-      return yearMatch; // Do not filter by month here
+      const locationMatch = selectedLocation === "all" || c.location === selectedLocation;
+      return yearMatch && locationMatch;
     });
     
     const monthlyMap = new Map<string, { earnings: number; costs: number }>();
@@ -176,7 +184,7 @@ export default function CampaignDashboard() {
           despesa: data.costs,
         };
       });
-  }, [campaigns, selectedYear]);
+  }, [campaigns, selectedYear, selectedLocation]);
   
   const strategyData = useMemo(() => {
     const strategyMap = new Map<string, { earnings: number; costs: number; sales: number }>();
@@ -257,8 +265,8 @@ export default function CampaignDashboard() {
             <p className="text-sm text-muted-foreground mt-1">Análise de desempenho das campanhas de marketing</p>
           </div>
 
-          {/* Middle Block: Year Selector (occupying the empty space) */}
-          <div className="flex-1 flex items-start justify-center pt-1"> 
+          {/* Middle Block: Year and Location Selectors */}
+          <div className="flex-1 flex items-start justify-center pt-1 gap-2"> 
             <Select value={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className="w-32 h-10">
                 <SelectValue placeholder="Ano" />
@@ -267,6 +275,18 @@ export default function CampaignDashboard() {
                 <SelectItem value="all">Todos os Anos</SelectItem>
                 {years.map(year => (
                   <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <SelectTrigger className="w-32 h-10">
+                <SelectValue placeholder="Local" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Locais</SelectItem>
+                {locations.map(loc => (
+                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -429,49 +449,49 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Estratégia {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3"> {/* Reduced vertical spacing */}
               {strategyData.map(strategy => {
                 const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(strategy.name);
                 return (
                   <Card key={strategy.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className={cn("text-lg flex items-center gap-2", cardTextClass)}>
+                    <CardHeader className="pb-1 pt-4 px-4"> {/* Reduced padding */}
+                      <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
                         <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
                         {strategy.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 p-6 pt-0"> {/* Added p-6 pt-0 for consistent spacing */}
+                    <CardContent className="space-y-3 p-4 pt-0"> {/* Reduced padding and vertical spacing */}
                       {/* Profit/Loss - most prominent */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground">{strategy.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
-                          <p className={cn("text-3xl font-bold", getProfitLossColor(strategy.profit))}>
+                          <p className="text-xs text-muted-foreground">{strategy.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
+                          <p className={cn("text-2xl font-bold", getProfitLossColor(strategy.profit))}> {/* Reduced size */}
                             {formatCurrency(strategy.profit)}
                           </p>
                         </div>
                       </div>
 
                       {/* Revenues and Costs */}
-                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Receitas</p>
-                          <p className="text-lg font-semibold text-success">{formatCurrency(strategy.earnings)}</p>
+                          <p className="text-base font-semibold text-success">{formatCurrency(strategy.earnings)}</p> {/* Reduced size */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Despesas</p>
-                          <p className="text-lg font-semibold text-destructive">{formatCurrency(strategy.costs)}</p>
+                          <p className="text-base font-semibold text-destructive">{formatCurrency(strategy.costs)}</p> {/* Reduced size */}
                         </div>
                       </div>
 
                       {/* Sales and ROI */}
-                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Vendas</p>
-                          <p className="text-lg font-semibold">{strategy.sales}</p>
+                          <p className="text-base font-semibold">{strategy.sales}</p> {/* Reduced size */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">ROI</p>
-                          <p className={cn("text-lg font-semibold", getROIColor(strategy.roi))}>
+                          <p className={cn("text-base font-semibold", getROIColor(strategy.roi))}> {/* Reduced size */}
                             {formatPercent(strategy.roi)}
                           </p>
                         </div>
@@ -489,49 +509,49 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Local {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3"> {/* Reduced vertical spacing */}
               {locationData.map(location => {
                 const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(location.name);
                 return (
                   <Card key={location.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className={cn("text-lg flex items-center gap-2", cardTextClass)}>
+                    <CardHeader className="pb-1 pt-4 px-4"> {/* Reduced padding */}
+                      <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
                         <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
                         {location.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 p-6 pt-0"> {/* Added p-6 pt-0 for consistent spacing */}
+                    <CardContent className="space-y-3 p-4 pt-0"> {/* Reduced padding and vertical spacing */}
                       {/* Profit/Loss - most prominent */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground">{location.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
-                          <p className={cn("text-3xl font-bold", getProfitLossColor(location.profit))}>
+                          <p className="text-xs text-muted-foreground">{location.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
+                          <p className={cn("text-2xl font-bold", getProfitLossColor(location.profit))}> {/* Reduced size */}
                             {formatCurrency(location.profit)}
                           </p>
                         </div>
                       </div>
 
                       {/* Revenues and Costs */}
-                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Receitas</p>
-                          <p className="text-lg font-semibold text-success">{formatCurrency(location.earnings)}</p>
+                          <p className="text-base font-semibold text-success">{formatCurrency(location.earnings)}</p> {/* Reduced size */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Despesas</p>
-                          <p className="text-lg font-semibold text-destructive">{formatCurrency(location.costs)}</p>
+                          <p className="text-base font-semibold text-destructive">{formatCurrency(location.costs)}</p> {/* Reduced size */}
                         </div>
                       </div>
 
                       {/* Sales and ROI */}
-                      <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Vendas</p>
-                          <p className="text-lg font-semibold">{location.sales}</p>
+                          <p className="text-base font-semibold">{location.sales}</p> {/* Reduced size */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">ROI</p>
-                          <p className={cn("text-lg font-semibold", getROIColor(location.roi))}>
+                          <p className={cn("text-base font-semibold", getROIColor(location.roi))}> {/* Reduced size */}
                             {formatPercent(location.roi)}
                           </p>
                         </div>
