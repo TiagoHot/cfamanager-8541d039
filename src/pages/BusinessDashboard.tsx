@@ -55,6 +55,46 @@ const getBusinessLevel = (profit: number): { level: string; message: string; col
   }
 };
 
+// Custom label component for Pie Chart to display name and percentage externally
+const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, index }: any) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const RADIAN = Math.PI / 180;
+  const x = cx + outerRadius * 1.1 * Math.cos(-midAngle * RADIAN);
+  const y = cy + outerRadius * 1.1 * Math.sin(-midAngle * RADIAN);
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (outerRadius + 10) * cos;
+  const sy = cy + (outerRadius + 10) * sin;
+  const mx = cx + (outerRadius + 30) * cos;
+  const my = cy + (outerRadius + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  const ey = my;
+  const textAnchor = cos >= 0 ? 'start' : 'end';
+  const fill = COLORS[index % COLORS.length];
+
+  // Only show label if percentage is significant (e.g., > 1%)
+  if (percent * 100 < 1 && percent > 0) {
+    // For very small slices, just show a small line pointing out
+    return (
+      <g>
+        <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+        <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      </g>
+    );
+  }
+  
+  return (
+    <g>
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill={fill} className="text-xs font-medium">
+        {`${name} (${(percent * 100).toFixed(0)}%)`}
+      </text>
+    </g>
+  );
+};
+
+
 export default function BusinessDashboard() {
   const { incomeExpenses, campaigns, weeklyResults } = useData();
   
@@ -253,7 +293,8 @@ export default function BusinessDashboard() {
                         outerRadius={90}
                         innerRadius={50}
                         fill="#8884d8"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={true}
+                        label={CustomPieLabel}
                         dataKey="value"
                       >
                         {yearData.incomeBreakdown.map((entry, index) => (
@@ -286,7 +327,7 @@ export default function BusinessDashboard() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingDown className="w-5 h-5 text-destructive" />
-              Fonte de Despesas {/* Renomeado aqui */}
+              Fonte de Despesas
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -302,7 +343,8 @@ export default function BusinessDashboard() {
                         outerRadius={90}
                         innerRadius={50}
                         fill="#8884d8"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={true}
+                        label={CustomPieLabel}
                         dataKey="value"
                       >
                         {yearData.expenseBreakdown.map((entry, index) => (
