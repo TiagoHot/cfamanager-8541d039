@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; // Import MONTHS
 
-const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89%, 48%)'];
+const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83% 58%)', 'hsl(199, 89% 48%)', 'hsl(0, 72%, 51%)'];
 
 // Usando MONTHS importado
 const MONTH_ORDER = MONTHS;
@@ -121,13 +121,22 @@ export default function BusinessDashboard() {
       expenseBySource.set(source, (expenseBySource.get(source) || 0) + ie.amount);
     });
     
+    // Convert maps to array of objects and sort by value descending
+    const sortedIncomeBreakdown = Array.from(incomeBySource.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+
+    const sortedExpenseBreakdown = Array.from(expenseBySource.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+    
     return {
       totalIncome,
       totalExpenses,
       totalProfit,
       months,
-      incomeBreakdown: Array.from(incomeBySource.entries()).map(([name, value]) => ({ name, value })),
-      expenseBreakdown: Array.from(expenseBySource.entries()).map(([name, value]) => ({ name, value })),
+      incomeBreakdown: sortedIncomeBreakdown,
+      expenseBreakdown: sortedExpenseBreakdown,
     };
   }, [incomeExpenses, selectedYear]);
   
@@ -145,6 +154,26 @@ export default function BusinessDashboard() {
     warning: 'bg-warning/10 border-warning/30 text-warning',
     info: 'bg-info/10 border-info/30 text-info',
     success: 'bg-success/10 border-success/30 text-success',
+  };
+
+  // Custom Legend formatter for Pie Charts
+  const renderColorfulLegendText = (value: string, entry: any) => {
+    const total = yearData.incomeBreakdown.reduce((sum, item) => sum + item.value, 0) + yearData.expenseBreakdown.reduce((sum, item) => sum + item.value, 0);
+    const dataItem = [...yearData.incomeBreakdown, ...yearData.expenseBreakdown].find(item => item.name === value);
+    const percentage = dataItem && total > 0 ? (dataItem.value / total) * 100 : 0;
+    
+    // Find the correct color for the entry
+    const colorIndex = yearData.incomeBreakdown.findIndex(item => item.name === value) !== -1 
+      ? yearData.incomeBreakdown.findIndex(item => item.name === value) 
+      : yearData.expenseBreakdown.findIndex(item => item.name === value);
+
+    const color = COLORS[colorIndex % COLORS.length];
+
+    return (
+      <span style={{ color: 'hsl(var(--foreground))' }}>
+        {value} ({formatCurrency(dataItem?.value || 0)}) - {percentage.toFixed(1)}%
+      </span>
+    );
   };
 
   if (incomeExpenses.length === 0) {
@@ -233,40 +262,32 @@ export default function BusinessDashboard() {
           </CardHeader>
           <CardContent>
             {yearData.incomeBreakdown.length > 0 ? (
-              <>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={yearData.incomeBreakdown}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={90}
-                        innerRadius={50}
-                        fill="#8884d8"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        dataKey="value"
-                      >
-                        {yearData.incomeBreakdown.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="space-y-2 mt-4">
-                  {yearData.incomeBreakdown.map((item, index) => (
-                    <div key={item.name} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                        <span>{item.name}</span>
-                      </div>
-                      <span className="font-medium">{formatCurrency(item.value)}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={yearData.incomeBreakdown}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      innerRadius={50}
+                      dataKey="value"
+                    >
+                      {yearData.incomeBreakdown.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Legend 
+                      layout="vertical" 
+                      verticalAlign="middle" 
+                      align="right" 
+                      formatter={renderColorfulLegendText}
+                      wrapperStyle={{ paddingLeft: '20px' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <p className="text-center text-muted-foreground py-12">Sem dados de receita</p>
             )}
@@ -277,45 +298,37 @@ export default function BusinessDashboard() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingDown className="w-5 h-5 text-destructive" />
-              Breakdown de Despesas
+              Fontes de Despesas
             </CardTitle>
           </CardHeader>
           <CardContent>
             {yearData.expenseBreakdown.length > 0 ? (
-              <>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={yearData.expenseBreakdown}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={90}
-                        innerRadius={50}
-                        fill="#8884d8"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        dataKey="value"
-                      >
-                        {yearData.expenseBreakdown.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="space-y-2 mt-4">
-                  {yearData.expenseBreakdown.map((item, index) => (
-                    <div key={item.name} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                        <span>{item.name}</span>
-                      </div>
-                      <span className="font-medium">{formatCurrency(item.value)}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={yearData.expenseBreakdown}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={90}
+                      innerRadius={50}
+                      dataKey="value"
+                    >
+                      {yearData.expenseBreakdown.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Legend 
+                      layout="vertical" 
+                      verticalAlign="middle" 
+                      align="right" 
+                      formatter={renderColorfulLegendText}
+                      wrapperStyle={{ paddingLeft: '20px' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <p className="text-center text-muted-foreground py-12">Sem dados de despesa</p>
             )}
