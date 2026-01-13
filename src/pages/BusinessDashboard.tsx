@@ -264,10 +264,10 @@ export default function BusinessDashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="space-y-2 mt-4">
+                <div className="space-y-1 mt-2"> {/* Reduced space-y and mt */}
                   {yearData.incomeBreakdown.map((item, index) => (
                     <div key={item.name} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1"> {/* Reduced gap */}
                         <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                         <span>{item.name}</span>
                       </div>
@@ -286,7 +286,7 @@ export default function BusinessDashboard() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingDown className="w-5 h-5 text-destructive" />
-              Fonte de Despesas {/* Renomeado aqui */}
+              Fonte de Despesas
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -313,10 +313,10 @@ export default function BusinessDashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="space-y-2 mt-4">
+                <div className="space-y-1 mt-2"> {/* Reduced space-y and mt */}
                   {yearData.expenseBreakdown.map((item, index) => (
                     <div key={item.name} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1"> {/* Reduced gap */}
                         <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                         <span>{item.name}</span>
                       </div>
