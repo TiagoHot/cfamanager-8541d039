@@ -62,19 +62,21 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
     return averageTicket * (commissionPercent / 100) * rate;
   }, []);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (valueToSave?: string) => {
+    const finalValue = valueToSave !== undefined ? valueToSave : localValue;
+    
     if (!isEditing) return;
 
-    let newValue: any = localValue;
+    let newValue: any = finalValue;
     let updatedProduct: Product = { ...product };
     let needsRecalculation = false;
 
     if (type === 'number') {
-      newValue = parseFloat(localValue) || 0;
+      newValue = parseFloat(finalValue) || 0;
     } else if (type === 'date') {
-      newValue = localValue;
+      newValue = finalValue;
     } else {
-      newValue = localValue.trim();
+      newValue = finalValue.trim();
     }
 
     // Handle empty string for optional fields like notes
@@ -105,6 +107,9 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
     try {
       await updateProduct(updatedProduct);
       
+      // Update local state to reflect saved value (important for select fields)
+      setLocalValue(String(newValue));
+
       // Only show toast if value actually changed significantly
       const oldValue = product[field];
       const valueChanged = type === 'number' 
@@ -159,16 +164,21 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
   const renderInput = () => {
     switch (type) {
       case 'select':
-        // For select, we rely on onOpenChange to trigger save/close
+        // For select, we trigger save immediately on value change
         return (
           <Select 
             value={localValue} 
             onValueChange={(v) => {
-              setLocalValue(v);
+              // 1. Save the new value immediately
+              handleSave(v);
+              // 2. The handleSave will update localValue and set isEditing(false)
             }}
             open={isEditing}
             onOpenChange={(open) => {
-                if (!open) handleSave();
+                // If the user closes the select without changing the value, we just exit edit mode
+                if (!open && isEditing) {
+                    setIsEditing(false);
+                }
             }}
           >
             <SelectTrigger className={cn("h-8 w-full text-sm", className)}>
@@ -187,7 +197,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
             ref={inputRef as React.RefObject<HTMLTextAreaElement>}
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
-            onBlur={handleSave}
+            onBlur={() => handleSave()}
             onKeyDown={handleKeyDown}
             className={cn("h-20 text-sm", className)}
           />
@@ -199,7 +209,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
             type="date"
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
-            onBlur={handleSave}
+            onBlur={() => handleSave()}
             onKeyDown={handleKeyDown}
             className={cn("h-8 text-sm", className)}
           />
@@ -212,7 +222,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
             step={field === 'commissionPercent' ? "0.1" : "0.01"}
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
-            onBlur={handleSave}
+            onBlur={() => handleSave()}
             onKeyDown={handleKeyDown}
             className={cn("h-8 text-sm", className)}
           />
@@ -225,7 +235,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
             type="text"
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
-            onBlur={handleSave}
+            onBlur={() => handleSave()}
             onKeyDown={handleKeyDown}
             className={cn("h-8 text-sm", className)}
           />
