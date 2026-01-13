@@ -3,7 +3,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
-import { formatCurrency, normalizeMonthToAbbreviation } from "@/lib/formatters"; // Import the new utility
+import { formatCurrency, normalizeMonthToAbbreviation, getProfitLossColor } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, Award, BarChart2 } from "lucide-react";
 import { 
   BarChart, 
@@ -113,6 +113,26 @@ const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, n
           {`${name} (${(percent * 100).toFixed(1)}%)`}
         </text>
       </g>
+    );
+  }
+  return null;
+};
+
+// Custom Tooltip Component for Monthly Bar Chart
+const MonthlyBarTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    // payload contains data for all bars at this index (month)
+    const receita = payload.find((p: any) => p.dataKey === 'receita')?.value || 0;
+    const despesa = payload.find((p: any) => p.dataKey === 'despesa')?.value || 0;
+    const lucroPrejuizo = receita - despesa;
+
+    return (
+      <div className="p-3 bg-card border border-border rounded-lg shadow-lg text-sm">
+        <p className="font-semibold mb-1">{label}</p>
+        <p className="text-success">Receita : {formatCurrency(receita)}</p>
+        <p className="text-destructive">Despesa : {formatCurrency(despesa)}</p>
+        <p className={getProfitLossColor(lucroPrejuizo)}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
+      </div>
     );
   }
   return null;
@@ -407,7 +427,7 @@ export default function BusinessDashboard() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <BarChart2 className="w-5 h-5" />
-              Receitas, Despesas e Lucro por Mês
+              Receitas e Despesas por Mês
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -418,17 +438,18 @@ export default function BusinessDashboard() {
                   <XAxis dataKey="month" className="text-xs" />
                   <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
                   <Tooltip 
-                    formatter={(value: number) => formatCurrency(value)}
-                    contentStyle={{ 
+                    content={<MonthlyBarTooltip />}
+                    wrapperStyle={{ 
                       backgroundColor: 'hsl(var(--card))', 
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      outline: 'none'
                     }}
                   />
                   <Legend />
                   <Bar dataKey="receita" name="Receita" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="despesa" name="Despesa" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="lucro" name="Lucro" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                  {/* Removed Bar dataKey="lucro" */}
                 </BarChart>
               </ResponsiveContainer>
             </div>
