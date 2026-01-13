@@ -57,41 +57,49 @@ const getBusinessLevel = (profit: number): { level: string; message: string; col
 
 // Custom label component for Pie Chart to display name and percentage externally
 const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, index }: any) => {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const RADIAN = Math.PI / 180;
-  const x = cx + outerRadius * 1.1 * Math.cos(-midAngle * RADIAN);
-  const y = cy + outerRadius * 1.1 * Math.sin(-midAngle * RADIAN);
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
-  const sx = cx + (outerRadius + 10) * cos;
-  const sy = cy + (outerRadius + 10) * sin;
-  const mx = cx + (outerRadius + 30) * cos;
-  const my = cy + (outerRadius + 30) * sin;
-  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  
+  // Start point of the line (just outside the pie)
+  const sx = cx + (outerRadius + 5) * cos;
+  const sy = cy + (outerRadius + 5) * sin;
+  
+  // Middle point of the line (extending further)
+  const mx = cx + (outerRadius + 20) * cos;
+  const my = cy + (outerRadius + 20) * sin;
+  
+  // End point of the line (where text starts/ends)
+  const ex = mx + (cos >= 0 ? 1 : -1) * 15; // Horizontal extension
   const ey = my;
+  
   const textAnchor = cos >= 0 ? 'start' : 'end';
   const fill = COLORS[index % COLORS.length];
 
-  // Only show label if percentage is significant (e.g., > 1%)
-  if (percent * 100 < 1 && percent > 0) {
-    // For very small slices, just show a small line pointing out
+  // Ensure the label is drawn if the value is positive
+  if (percent > 0) {
     return (
       <g>
-        <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
-        <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+        {/* Line segment 1: from pie edge to middle point */}
+        <path d={`M${sx},${sy}L${mx},${my}`} stroke={fill} fill="none" />
+        {/* Line segment 2: horizontal extension */}
+        <path d={`M${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+        
+        {/* Text label */}
+        <text 
+          x={ex + (cos >= 0 ? 1 : -1) * 2} 
+          y={ey} 
+          textAnchor={textAnchor} 
+          fill={fill} 
+          className="text-xs font-medium"
+          dominantBaseline="central"
+        >
+          {`${name} (${(percent * 100).toFixed(1)}%)`}
+        </text>
       </g>
     );
   }
-  
-  return (
-    <g>
-      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
-      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill={fill} className="text-xs font-medium">
-        {`${name} (${(percent * 100).toFixed(0)}%)`}
-      </text>
-    </g>
-  );
+  return null;
 };
 
 
@@ -359,11 +367,7 @@ export default function BusinessDashboard() {
                   {yearData.expenseBreakdown.map((item, index) => (
                     <div key={item.name} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        {/* Adicionando o indicador de cor (bola) usando o mapeamento COLORS */}
-                        <span 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }} 
-                        />
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                         <span>{item.name}</span>
                       </div>
                       <span className="font-medium">{formatCurrency(item.value)}</span>
