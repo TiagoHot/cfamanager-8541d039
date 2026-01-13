@@ -42,26 +42,26 @@ const MONTH_ORDER = MONTHS;
 const getBusinessLevel = (profit: number): { level: string; message: string; color: string } => {
   if (profit < 0) {
     return { 
-      level: 'NÍVEL INVESTIDOR', 
-      message: 'Você ainda está negativo, mas não desista! Continue investindo!',
+      level: 'NÍVEL INICIANTE', 
+      message: 'Você ainda está no vermelho, mas não desanime! Você está apenas começando, continue investindo.',
       color: 'destructive'
     };
   } else if (profit === 0) {
     return { 
       level: 'NÍVEL BREAKEVEN', 
-      message: 'Parabéns! Você alcançou o ponto de equilíbrio.',
+      message: 'Parabéns pelo avanço! Você atingiu o ponto em que sua receita cobre seus custos.',
       color: 'warning'
     };
   } else if (profit > 0 && profit < 60000) {
     return { 
       level: 'NÍVEL PAYBACK', 
-      message: 'Parabéns! Seus resultados geram lucro!',
+      message: 'Parabéns! Seus resultados cobrem todos os custos e geram um pequeno lucro. Mas tenha em mente que você ainda não atingiu a independência financeira!',
       color: 'info'
     };
   } else {
     return { 
-      level: 'NÍVEL RETIRADA', 
-      message: 'Pode comemorar! Você é um Liberto!',
+      level: 'NÍVEL DE LIBERDADE', 
+      message: 'Parabéns! Você atingiu sua independência financeira!',
       color: 'success'
     };
   }
@@ -258,32 +258,21 @@ export default function BusinessDashboard() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      {/* Custom Sticky Header */}
-      <div className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6 border-b">
-        <div className="flex items-center justify-between">
-          
-          {/* Left Block: Title and Description */}
-          <div className="flex flex-col min-w-[300px] flex-shrink-0">
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard do Negócio</h1>
-            <p className="text-sm text-muted-foreground mt-1">Visão geral da performance do seu negócio</p>
-          </div>
-
-          {/* Right Block: Year Filter (Moved to the right side, but centered vertically) */}
-          <div className="flex-shrink-0">
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-32 h-10">
-                <SelectValue placeholder="Ano" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map(year => (
-                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-      {/* End Custom Sticky Header */}
+      <PageHeader 
+        title="Dashboard do Negócio" 
+        description="Visão geral da performance do seu negócio"
+      >
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map(year => (
+              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </PageHeader>
 
       {/* Business Level Banner */}
       <Card className={cn("border-2", levelColors[businessLevel.color as keyof typeof levelColors])}>

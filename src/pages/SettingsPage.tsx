@@ -194,29 +194,29 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/10 border border-destructive/20">
                 <div>
-                  <Badge variant="destructive">NÍVEL INVESTIDOR</Badge>
-                  <p className="text-sm text-muted-foreground mt-1">Lucro acumulado negativo</p>
+                  <Badge variant="destructive">NÍVEL INICIANTE</Badge>
+                  <p className="text-sm text-muted-foreground mt-1">Você ainda está no vermelho, mas não desanime! Você está apenas começando, continue investindo.</p>
                 </div>
                 <span className="font-mono">&lt; R$ 0</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
                 <div>
                   <Badge className="bg-warning text-warning-foreground">NÍVEL BREAKEVEN</Badge>
-                  <p className="text-sm text-muted-foreground mt-1">Ponto de equilíbrio</p>
+                  <p className="text-sm text-muted-foreground mt-1">Parabéns pelo avanço! Você atingiu o ponto em que sua receita cobre seus custos.</p>
                 </div>
                 <span className="font-mono">= R$ 0</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-info/10 border border-info/20">
                 <div>
                   <Badge className="bg-info text-info-foreground">NÍVEL PAYBACK</Badge>
-                  <p className="text-sm text-muted-foreground mt-1">Lucro positivo, mas ainda não liberto</p>
+                  <p className="text-sm text-muted-foreground mt-1">Parabéns! Seus resultados cobrem todos os custos e geram um pequeno lucro. Mas tenha em mente que você ainda não atingiu a independência financeira!</p>
                 </div>
                 <span className="font-mono">&gt; R$ 0</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-success/10 border border-success/20">
                 <div>
-                  <Badge className="bg-success text-success-foreground">NÍVEL RETIRADA</Badge>
-                  <p className="text-sm text-muted-foreground mt-1">Independência financeira</p>
+                  <Badge className="bg-success text-success-foreground">NÍVEL DE LIBERDADE</Badge>
+                  <p className="text-sm text-muted-foreground mt-1">Parabéns! Você atingiu sua independência financeira!</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono">&gt;</span>
