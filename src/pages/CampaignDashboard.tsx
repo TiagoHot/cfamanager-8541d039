@@ -98,6 +98,12 @@ const getCategoryStyling = (categoryName: string) => {
       cardTextClass = 'text-chart-6';
       circleBgClass = 'bg-chart-6';
       break;
+    case 'Instream/Feed': // New strategy
+      cardBgClass = 'bg-chart-5/10'; // Using chart-5 (Purple/Magenta) for a 'pink' feel
+      cardBorderClass = 'border-chart-5/30';
+      cardTextClass = 'text-chart-5';
+      circleBgClass = 'bg-chart-5';
+      break;
     default:
       cardBgClass = 'bg-secondary/5';
       cardBorderClass = 'border-secondary/20';
@@ -449,49 +455,49 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Estratégia {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3"> {/* Reduced vertical spacing */}
+            <CardContent className="space-y-2 p-4"> {/* Reduced vertical spacing and padding */}
               {strategyData.map(strategy => {
                 const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(strategy.name);
                 return (
                   <Card key={strategy.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
-                    <CardHeader className="pb-1 pt-4 px-4"> {/* Reduced padding */}
-                      <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
-                        <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
+                    <CardHeader className="pb-1 pt-3 px-3"> {/* Reduced padding */}
+                      <CardTitle className={cn("text-sm flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
+                        <span className={cn("w-2.5 h-2.5 rounded-full", circleBgClass)} />
                         {strategy.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3 p-4 pt-0"> {/* Reduced padding and vertical spacing */}
+                    <CardContent className="space-y-2 p-3 pt-0"> {/* Reduced padding and vertical spacing */}
                       {/* Profit/Loss - most prominent */}
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-muted-foreground">{strategy.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
-                          <p className={cn("text-2xl font-bold", getProfitLossColor(strategy.profit))}> {/* Reduced size */}
+                          <p className={cn("text-xl font-bold", getProfitLossColor(strategy.profit))}> {/* Reduced size to xl */}
                             {formatCurrency(strategy.profit)}
                           </p>
                         </div>
                       </div>
 
                       {/* Revenues and Costs */}
-                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
+                      <div className="grid grid-cols-2 gap-2 border-t pt-2"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Receitas</p>
-                          <p className="text-base font-semibold text-success">{formatCurrency(strategy.earnings)}</p> {/* Reduced size */}
+                          <p className="text-sm font-semibold text-success">{formatCurrency(strategy.earnings)}</p> {/* Reduced size to sm */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Despesas</p>
-                          <p className="text-base font-semibold text-destructive">{formatCurrency(strategy.costs)}</p> {/* Reduced size */}
+                          <p className="text-sm font-semibold text-destructive">{formatCurrency(strategy.costs)}</p> {/* Reduced size to sm */}
                         </div>
                       </div>
 
                       {/* Sales and ROI */}
-                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
+                      <div className="grid grid-cols-2 gap-2 border-t pt-2"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Vendas</p>
-                          <p className="text-base font-semibold">{strategy.sales}</p> {/* Reduced size */}
+                          <p className="text-sm font-semibold">{strategy.sales}</p> {/* Reduced size to sm */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">ROI</p>
-                          <p className={cn("text-base font-semibold", getROIColor(strategy.roi))}> {/* Reduced size */}
+                          <p className={cn("text-sm font-semibold", getROIColor(strategy.roi))}> {/* Reduced size to sm */}
                             {formatPercent(strategy.roi)}
                           </p>
                         </div>
@@ -509,49 +515,49 @@ export default function CampaignDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Análise por Local {selectedMonth !== 'all' && `(${selectedMonth})`}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3"> {/* Reduced vertical spacing */}
+            <CardContent className="space-y-2 p-4"> {/* Reduced vertical spacing and padding */}
               {locationData.map(location => {
                 const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(location.name);
                 return (
                   <Card key={location.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
-                    <CardHeader className="pb-1 pt-4 px-4"> {/* Reduced padding */}
-                      <CardTitle className={cn("text-base flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
-                        <span className={cn("w-3 h-3 rounded-full", circleBgClass)} />
+                    <CardHeader className="pb-1 pt-3 px-3"> {/* Reduced padding */}
+                      <CardTitle className={cn("text-sm flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
+                        <span className={cn("w-2.5 h-2.5 rounded-full", circleBgClass)} />
                         {location.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3 p-4 pt-0"> {/* Reduced padding and vertical spacing */}
+                    <CardContent className="space-y-2 p-3 pt-0"> {/* Reduced padding and vertical spacing */}
                       {/* Profit/Loss - most prominent */}
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-muted-foreground">{location.profit >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}</p>
-                          <p className={cn("text-2xl font-bold", getProfitLossColor(location.profit))}> {/* Reduced size */}
+                          <p className={cn("text-xl font-bold", getProfitLossColor(location.profit))}> {/* Reduced size to xl */}
                             {formatCurrency(location.profit)}
                           </p>
                         </div>
                       </div>
 
                       {/* Revenues and Costs */}
-                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
+                      <div className="grid grid-cols-2 gap-2 border-t pt-2"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Receitas</p>
-                          <p className="text-base font-semibold text-success">{formatCurrency(location.earnings)}</p> {/* Reduced size */}
+                          <p className="text-sm font-semibold text-success">{formatCurrency(location.earnings)}</p> {/* Reduced size to sm */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Despesas</p>
-                          <p className="text-base font-semibold text-destructive">{formatCurrency(location.costs)}</p> {/* Reduced size */}
+                          <p className="text-sm font-semibold text-destructive">{formatCurrency(location.costs)}</p> {/* Reduced size to sm */}
                         </div>
                       </div>
 
                       {/* Sales and ROI */}
-                      <div className="grid grid-cols-2 gap-3 border-t pt-3"> {/* Reduced gap and padding */}
+                      <div className="grid grid-cols-2 gap-2 border-t pt-2"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Vendas</p>
-                          <p className="text-base font-semibold">{location.sales}</p> {/* Reduced size */}
+                          <p className="text-sm font-semibold">{location.sales}</p> {/* Reduced size to sm */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">ROI</p>
-                          <p className={cn("text-base font-semibold", getROIColor(location.roi))}> {/* Reduced size */}
+                          <p className={cn("text-sm font-semibold", getROIColor(location.roi))}> {/* Reduced size to sm */}
                             {formatPercent(location.roi)}
                           </p>
                         </div>
