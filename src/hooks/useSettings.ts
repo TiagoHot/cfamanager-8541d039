@@ -5,12 +5,15 @@ const NICHE_STORAGE_KEY = 'app_settings_niches';
 const TYPE_STORAGE_KEY = 'app_settings_product_types';
 const INCOME_SOURCE_STORAGE_KEY = 'app_settings_income_sources';
 const EXPENSE_SOURCE_STORAGE_KEY = 'app_settings_expense_sources';
+const FREEDOM_THRESHOLD_KEY = 'app_settings_freedom_threshold';
+const DEFAULT_FREEDOM_THRESHOLD = 60000;
 
 interface SettingsContextType {
   niches: string[];
   productTypes: string[];
   incomeSources: string[];
   expenseSources: string[];
+  freedomThreshold: number;
   addNiche: (niche: string) => void;
   removeNiche: (niche: string) => void;
   resetNiches: () => void;
@@ -23,6 +26,8 @@ interface SettingsContextType {
   addExpenseSource: (source: string) => void;
   removeExpenseSource: (source: string) => void;
   resetExpenseSources: () => void;
+  setFreedomThreshold: (value: number) => void;
+  resetFreedomThreshold: () => void;
 }
 
 export function useSettings(): SettingsContextType {
@@ -30,11 +35,12 @@ export function useSettings(): SettingsContextType {
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [incomeSources, setIncomeSources] = useState<string[]>([]);
   const [expenseSources, setExpenseSources] = useState<string[]>([]);
+  const [freedomThreshold, setFreedomThresholdState] = useState<number>(DEFAULT_FREEDOM_THRESHOLD);
 
   // Load from localStorage on mount
   useEffect(() => {
-    // Helper function to load and set state
-    const loadAndSet = (key: string, defaultList: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    // Helper function to load and set state for string arrays
+    const loadAndSetArray = (key: string, defaultList: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
       const stored = localStorage.getItem(key);
       try {
         const parsed = stored ? JSON.parse(stored) : defaultList;
@@ -43,11 +49,19 @@ export function useSettings(): SettingsContextType {
         setter(defaultList.sort());
       }
     };
+    
+    // Helper function to load and set state for number
+    const loadAndSetNumber = (key: string, defaultValue: number, setter: React.Dispatch<React.SetStateAction<number>>) => {
+      const stored = localStorage.getItem(key);
+      const parsed = stored ? parseFloat(stored) : defaultValue;
+      setter(isNaN(parsed) ? defaultValue : parsed);
+    };
 
-    loadAndSet(NICHE_STORAGE_KEY, defaultNiches, setNiches);
-    loadAndSet(TYPE_STORAGE_KEY, defaultProductTypes, setProductTypes);
-    loadAndSet(INCOME_SOURCE_STORAGE_KEY, defaultIncomeSources, setIncomeSources);
-    loadAndSet(EXPENSE_SOURCE_STORAGE_KEY, defaultExpenseSources, setExpenseSources);
+    loadAndSetArray(NICHE_STORAGE_KEY, defaultNiches, setNiches);
+    loadAndSetArray(TYPE_STORAGE_KEY, defaultProductTypes, setProductTypes);
+    loadAndSetArray(INCOME_SOURCE_STORAGE_KEY, defaultIncomeSources, setIncomeSources);
+    loadAndSetArray(EXPENSE_SOURCE_STORAGE_KEY, defaultExpenseSources, setExpenseSources);
+    loadAndSetNumber(FREEDOM_THRESHOLD_KEY, DEFAULT_FREEDOM_THRESHOLD, setFreedomThresholdState);
   }, []);
 
   // Save to localStorage whenever state changes
@@ -74,6 +88,10 @@ export function useSettings(): SettingsContextType {
       localStorage.setItem(EXPENSE_SOURCE_STORAGE_KEY, JSON.stringify(expenseSources));
     }
   }, [expenseSources]);
+  
+  useEffect(() => {
+    localStorage.setItem(FREEDOM_THRESHOLD_KEY, freedomThreshold.toString());
+  }, [freedomThreshold]);
 
   // --- Niche Management ---
   const addNiche = useCallback((niche: string) => {
@@ -166,6 +184,16 @@ export function useSettings(): SettingsContextType {
     setExpenseSources(defaultExpenseSources.sort());
     localStorage.removeItem(EXPENSE_SOURCE_STORAGE_KEY);
   }, []);
+  
+  // --- Freedom Threshold Management ---
+  const setFreedomThreshold = useCallback((value: number) => {
+    setFreedomThresholdState(value);
+  }, []);
+  
+  const resetFreedomThreshold = useCallback(() => {
+    setFreedomThresholdState(DEFAULT_FREEDOM_THRESHOLD);
+    localStorage.removeItem(FREEDOM_THRESHOLD_KEY);
+  }, []);
 
 
   return {
@@ -173,6 +201,7 @@ export function useSettings(): SettingsContextType {
     productTypes,
     incomeSources,
     expenseSources,
+    freedomThreshold,
     addNiche,
     removeNiche,
     resetNiches,
@@ -185,5 +214,7 @@ export function useSettings(): SettingsContextType {
     addExpenseSource,
     removeExpenseSource,
     resetExpenseSources,
+    setFreedomThreshold,
+    resetFreedomThreshold,
   };
 }

@@ -105,6 +105,9 @@ export default function SettingsPage() {
     addExpenseSource,
     removeExpenseSource,
     resetExpenseSources,
+    freedomThreshold,
+    setFreedomThreshold,
+    resetFreedomThreshold,
   } = useSettings();
   
   const [newPlatform, setNewPlatform] = useState('');
@@ -115,6 +118,7 @@ export default function SettingsPage() {
     resetProductTypes();
     resetIncomeSources();
     resetExpenseSources();
+    resetFreedomThreshold(); // Reset threshold
     toast.success('Configurações restauradas para o padrão.');
   };
 
@@ -222,9 +226,9 @@ export default function SettingsPage() {
                   <span className="font-mono">&gt;</span>
                   <Input 
                     type="number" 
-                    defaultValue={60000} 
+                    value={freedomThreshold}
+                    onChange={(e) => setFreedomThreshold(parseFloat(e.target.value) || 0)}
                     className="w-28"
-                    disabled // Disable editing since we don't have persistence for this yet
                   />
                 </div>
               </div>

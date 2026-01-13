@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; // Import MONTHS
+import { useSettings } from "@/hooks/useSettings"; // Import useSettings
 
 // Expanded color palette using chart colors and others
 const COLORS = [
@@ -39,7 +40,7 @@ const COLORS = [
 // Usando MONTHS importado
 const MONTH_ORDER = MONTHS;
 
-const getBusinessLevel = (profit: number): { level: string; message: string; color: string } => {
+const getBusinessLevel = (profit: number, threshold: number): { level: string; message: string; color: string } => {
   if (profit < 0) {
     return { 
       level: 'NÍVEL INICIANTE', 
@@ -52,7 +53,7 @@ const getBusinessLevel = (profit: number): { level: string; message: string; col
       message: 'Parabéns pelo avanço! Você atingiu o ponto em que sua receita cobre seus custos.',
       color: 'warning'
     };
-  } else if (profit > 0 && profit < 60000) {
+  } else if (profit > 0 && profit < threshold) {
     return { 
       level: 'NÍVEL PAYBACK', 
       message: 'Parabéns! Seus resultados cobrem todos os custos e geram um pequeno lucro. Mas tenha em mente que você ainda não atingiu a independência financeira!',
@@ -141,6 +142,7 @@ const MonthlyBarTooltip = ({ active, payload, label }: any) => {
 
 export default function BusinessDashboard() {
   const { incomeExpenses, campaigns, weeklyResults } = useData();
+  const { freedomThreshold } = useSettings(); // Get dynamic threshold
   
   const years = useMemo(() => {
     const allYears = new Set<number>();
@@ -224,7 +226,7 @@ export default function BusinessDashboard() {
     };
   }, [incomeExpenses, selectedYear]);
   
-  const businessLevel = getBusinessLevel(yearData.totalProfit);
+  const businessLevel = getBusinessLevel(yearData.totalProfit, freedomThreshold); // Pass threshold
 
   const monthlyChartData = yearData.months.map(m => ({
     month: m.month, // Already abbreviated
@@ -258,21 +260,32 @@ export default function BusinessDashboard() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <PageHeader 
-        title="Dashboard do Negócio" 
-        description="Visão geral da performance do seu negócio"
-      >
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Ano" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map(year => (
-              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </PageHeader>
+      {/* Custom Sticky Header */}
+      <div className="sticky top-[4rem] z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-6 px-6 pt-6 pb-6 border-b">
+        <div className="flex items-center justify-between">
+          
+          {/* Left Block: Title and Description */}
+          <div className="flex flex-col min-w-[300px] flex-shrink-0">
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard do Negócio</h1>
+            <p className="text-sm text-muted-foreground mt-1">Visão geral da performance do seu negócio</p>
+          </div>
+
+          {/* Right Block: Year Filter (Moved to the right side, but centered vertically) */}
+          <div className="flex-shrink-0">
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-32 h-10">
+                <SelectValue placeholder="Ano" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map(year => (
+                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      {/* End Custom Sticky Header */}
 
       {/* Business Level Banner */}
       <Card className={cn("border-2", levelColors[businessLevel.color as keyof typeof levelColors])}>
