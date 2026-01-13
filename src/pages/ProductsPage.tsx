@@ -77,35 +77,6 @@ export default function ProductsPage() {
       ),
     },
     {
-      key: 'averageTicket',
-      header: 'Ticket Médio',
-      className: 'text-right',
-      render: (item: Product) => (
-        <InlineProductEditor product={item} field="averageTicket" type="number" className="text-right">
-          {formatCurrency(item.averageTicket)}
-        </InlineProductEditor>
-      ),
-    },
-    {
-      key: 'commissionPercent',
-      header: 'Comissão (%)',
-      className: 'text-right',
-      render: (item: Product) => (
-        <InlineProductEditor product={item} field="commissionPercent" type="number" className="text-right">
-          {item.commissionPercent.toFixed(1)}%
-        </InlineProductEditor>
-      ),
-    },
-    {
-      key: 'commissionBRL',
-      header: 'Comissão (R$)',
-      className: 'text-right font-medium text-success',
-      render: (item: Product) => (
-        // Calculated field, not editable inline
-        <span>{formatCurrency(item.commissionBRL)}</span>
-      ),
-    },
-    {
       key: 'notes',
       header: 'Notas',
       className: 'w-20 text-center',
