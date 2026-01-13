@@ -73,10 +73,9 @@ const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, n
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
   
-  // Aumentando o multiplicador de raio para afastar o ponto médio
-  const labelRadiusMultiplier = 1.4; 
-  // Aumentando a extensão horizontal da linha
-  const lineExtension = 40; 
+  // Increase radius multiplier for labels to push them further out
+  const labelRadiusMultiplier = 1.25; 
+  const lineExtension = 25; // Increased line extension
 
   // Start point of the line (just outside the pie)
   const sx = cx + (outerRadius + 5) * cos;
