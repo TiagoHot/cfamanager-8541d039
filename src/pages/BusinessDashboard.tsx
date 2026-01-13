@@ -22,7 +22,19 @@ import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; // Import MONTHS
 
-const COLORS = ['hsl(210, 100%, 52%)', 'hsl(152, 69%, 41%)', 'hsl(38, 92%, 50%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89% 48%)'];
+// Expanded color palette using chart colors and others
+const COLORS = [
+  'hsl(var(--chart-1))', // Blue
+  'hsl(var(--chart-2))', // Green
+  'hsl(var(--chart-3))', // Yellow/Orange
+  'hsl(var(--chart-4))', // Red
+  'hsl(var(--chart-5))', // Purple
+  'hsl(var(--chart-6))', // Cyan
+  'hsl(280 80% 50%)', // Magenta
+  'hsl(100 60% 40%)', // Lime Green
+  'hsl(30 90% 50%)', // Orange
+  'hsl(200 80% 60%)', // Light Blue
+];
 
 // Usando MONTHS importado
 const MONTH_ORDER = MONTHS;
@@ -61,16 +73,20 @@ const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, n
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
   
+  // Increase radius multiplier for labels to push them further out
+  const labelRadiusMultiplier = 1.25; 
+  const lineExtension = 25; // Increased line extension
+
   // Start point of the line (just outside the pie)
   const sx = cx + (outerRadius + 5) * cos;
   const sy = cy + (outerRadius + 5) * sin;
   
   // Middle point of the line (extending further)
-  const mx = cx + (outerRadius + 20) * cos;
-  const my = cy + (outerRadius + 20) * sin;
+  const mx = cx + (outerRadius * labelRadiusMultiplier) * cos;
+  const my = cy + (outerRadius * labelRadiusMultiplier) * sin;
   
   // End point of the line (where text starts/ends)
-  const ex = mx + (cos >= 0 ? 1 : -1) * 15; // Horizontal extension
+  const ex = mx + (cos >= 0 ? 1 : -1) * lineExtension; // Horizontal extension
   const ey = my;
   
   const textAnchor = cos >= 0 ? 'start' : 'end';
@@ -367,7 +383,10 @@ export default function BusinessDashboard() {
                   {yearData.expenseBreakdown.map((item, index) => (
                     <div key={item.name} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        <span 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }} 
+                        />
                         <span>{item.name}</span>
                       </div>
                       <span className="font-medium">{formatCurrency(item.value)}</span>
