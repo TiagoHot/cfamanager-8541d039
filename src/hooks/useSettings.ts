@@ -30,7 +30,7 @@ export function useSettings(): SettingsContextType {
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [incomeSources, setIncomeSources] = useState<string[]>([]);
   const [expenseSources, setExpenseSources] = useState<string[]>([]);
-  const [freedomThreshold, setFreedomThresholdState] = useState<number>(DEFAULT_FREEDOM_THRESHOLD);
+  const [freedomThreshold, setFreedomThresholdState] = useState<number>(DEFAULT_FREEDO M_THRESHOLD);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -85,7 +85,7 @@ export function useSettings(): SettingsContextType {
   }, [incomeSources]);
   
   useEffect(() => {
-    localStorage.setItem(EXPENSE_SOURCE_KEY, JSON.stringify(expenseSources));
+    localStorage.setItem(EXPENSE_SOURCE_STORAGE_KEY, JSON.stringify(expenseSources));
   }, [expenseSources]);
   
   useEffect(() => {
