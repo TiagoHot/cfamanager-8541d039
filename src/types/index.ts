@@ -120,5 +120,5 @@ export const NICHES = [
 ];
 
 export const PRODUCT_TYPES = [
-  'Nutra', 'Infoproduto', 'E-commerce', 'Serviço', 'SaaS', 'Outros'
+  'Nutra', 'Digital', 'E-commerce'
 ];
