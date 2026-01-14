@@ -29,6 +29,8 @@ const ListManager = ({ title, description, items, onAdd, onRemove, badgeColor }:
       onAdd(newItem.trim());
       setNewItem('');
       toast.success(`${title.slice(0, -1)} "${newItem.trim()}" adicionado.`);
+    } else {
+      toast.error(`O campo ${title.toLowerCase().slice(0, -1)} não pode estar vazio.`);
     }
   };
 
@@ -55,7 +57,8 @@ const ListManager = ({ title, description, items, onAdd, onRemove, badgeColor }:
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-2 min-h-10">
+        {/* Adicionando p-1 e m-[-4px] para garantir que o gap funcione bem nas bordas */}
+        <div className="flex flex-wrap gap-2 min-h-10 p-1 m-[-4px]">
           {items.map(item => (
             <Badge 
               key={item} 
