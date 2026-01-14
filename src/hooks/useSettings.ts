@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { NICHES as defaultNiches, PRODUCT_TYPES as defaultProductTypes, INCOME_SOURCES as defaultIncomeSources, EXPENSE_SOURCES as defaultExpenseSources } from '@/types';
+import { NICHES as defaultNiches, PRODUCT_TYPES as defaultProductTypes, INCOME_SOURCES as defaultIncomeSources, EXPENSE_SOURCES as defaultExpenseSources, DEFAULT_PLATFORMS as defaultPlatforms } from '@/types';
 
 const NICHE_STORAGE_KEY = 'app_settings_niches';
 const TYPE_STORAGE_KEY = 'app_settings_product_types';
 const INCOME_SOURCE_STORAGE_KEY = 'app_settings_income_sources';
 const EXPENSE_SOURCE_STORAGE_KEY = 'app_settings_expense_sources';
+const PLATFORM_STORAGE_KEY = 'app_settings_platforms'; // New key
 const FREEDOM_THRESHOLD_KEY = 'app_settings_freedom_threshold';
 const DEFAULT_FREEDOM_THRESHOLD = 60000;
 
@@ -13,6 +14,7 @@ interface SettingsContextType {
   productTypes: string[];
   incomeSources: string[];
   expenseSources: string[];
+  platforms: string[]; // New field
   freedomThreshold: number;
   addNiche: (niche: string) => void;
   removeNiche: (niche: string) => void;
@@ -26,6 +28,9 @@ interface SettingsContextType {
   addExpenseSource: (source: string) => void;
   removeExpenseSource: (source: string) => void;
   resetExpenseSources: () => void;
+  addPlatform: (platform: string) => void; // New function
+  removePlatform: (platform: string) => void; // New function
+  resetPlatforms: () => void; // New function
   setFreedomThreshold: (value: number) => void;
   resetFreedomThreshold: () => void;
 }
@@ -35,6 +40,7 @@ export function useSettings(): SettingsContextType {
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [incomeSources, setIncomeSources] = useState<string[]>([]);
   const [expenseSources, setExpenseSources] = useState<string[]>([]);
+  const [platforms, setPlatforms] = useState<string[]>([]); // New state
   const [freedomThreshold, setFreedomThresholdState] = useState<number>(DEFAULT_FREEDOM_THRESHOLD);
 
   // Load from localStorage on mount
@@ -61,6 +67,7 @@ export function useSettings(): SettingsContextType {
     loadAndSetArray(TYPE_STORAGE_KEY, defaultProductTypes, setProductTypes);
     loadAndSetArray(INCOME_SOURCE_STORAGE_KEY, defaultIncomeSources, setIncomeSources);
     loadAndSetArray(EXPENSE_SOURCE_STORAGE_KEY, defaultExpenseSources, setExpenseSources);
+    loadAndSetArray(PLATFORM_STORAGE_KEY, defaultPlatforms, setPlatforms); // Load platforms
     loadAndSetNumber(FREEDOM_THRESHOLD_KEY, DEFAULT_FREEDOM_THRESHOLD, setFreedomThresholdState);
   }, []);
 
@@ -88,6 +95,12 @@ export function useSettings(): SettingsContextType {
       localStorage.setItem(EXPENSE_SOURCE_STORAGE_KEY, JSON.stringify(expenseSources));
     }
   }, [expenseSources]);
+  
+  useEffect(() => {
+    if (platforms.length > 0) {
+      localStorage.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(platforms));
+    }
+  }, [platforms]); // Save platforms
   
   useEffect(() => {
     localStorage.setItem(FREEDOM_THRESHOLD_KEY, freedomThreshold.toString());
@@ -185,6 +198,29 @@ export function useSettings(): SettingsContextType {
     localStorage.removeItem(EXPENSE_SOURCE_STORAGE_KEY);
   }, []);
   
+  // --- Platform Management ---
+  const addPlatform = useCallback((platform: string) => {
+    const normalizedPlatform = platform.trim();
+    if (!normalizedPlatform) return;
+    
+    setPlatforms(prev => {
+      if (prev.some(p => p.toLowerCase() === normalizedPlatform.toLowerCase())) {
+        return prev;
+      }
+      const newPlatforms = [...prev, normalizedPlatform].sort();
+      return newPlatforms;
+    });
+  }, []);
+
+  const removePlatform = useCallback((platform: string) => {
+    setPlatforms(prev => prev.filter(p => p !== platform).sort());
+  }, []);
+
+  const resetPlatforms = useCallback(() => {
+    setPlatforms(defaultPlatforms.sort());
+    localStorage.removeItem(PLATFORM_STORAGE_KEY);
+  }, []);
+  
   // --- Freedom Threshold Management ---
   const setFreedomThreshold = useCallback((value: number) => {
     setFreedomThresholdState(value);
@@ -201,6 +237,7 @@ export function useSettings(): SettingsContextType {
     productTypes,
     incomeSources,
     expenseSources,
+    platforms, // Export platforms
     freedomThreshold,
     addNiche,
     removeNiche,
@@ -214,6 +251,9 @@ export function useSettings(): SettingsContextType {
     addExpenseSource,
     removeExpenseSource,
     resetExpenseSources,
+    addPlatform, // Export platform functions
+    removePlatform, // Export platform functions
+    resetPlatforms, // Export platform functions
     setFreedomThreshold,
     resetFreedomThreshold,
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useMemo } from 'react';
-import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
+import { Product, CURRENCY_RATES } from '@/types';
 import { useData } from '@/contexts/DataContext';
 import { useSettings } from '@/hooks/useSettings';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
   badgeVariant = 'secondary',
 }) => {
   const { updateProduct } = useData();
-  const { niches, productTypes } = useSettings();
+  const { niches, productTypes, platforms } = useSettings(); // Import platforms
   const [isEditing, setIsEditing] = useState(false);
   
   // Initialize localValue based on current product prop
@@ -57,13 +57,13 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
       case 'niche':
         return niches;
       case 'platform':
-        return PLATFORMS;
+        return platforms; // Use platforms from useSettings
       case 'country':
         return ['Brasil', 'Gringa'];
       default:
         return [];
     }
-  }, [field, options, productTypes, niches]);
+  }, [field, options, productTypes, niches, platforms]);
 
   const calculateCommissionBRL = useCallback((updatedProduct: Product): number => {
     const averageTicket = updatedProduct.averageTicket;

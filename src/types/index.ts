@@ -86,12 +86,7 @@ export interface CashFlowMonth {
 
 export type BusinessLevel = 'INVESTIDOR' | 'BREAKEVEN' | 'PAYBACK' | 'RETIRADA';
 
-export const PLATFORMS = [
-  'Hotmart', 'Monetizze', 'Eduzz', 'Braip', 'Kiwify', 
-  'ClickBank', 'BuyGoods', 'Digistore24', 'MaxWebb', 
-  'Gurumedia', 'Terra Leads', 'Media Scalers', 'Doppus'
-];
-
+// Default lists moved to useSettings, but keeping CURRENCY_RATES and MONTHS here
 export const CURRENCY_RATES = {
   'Real': 1,
   'Dólar': 5.4059,
@@ -101,6 +96,13 @@ export const CURRENCY_RATES = {
 export const MONTHS = [
   'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
   'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+];
+
+// Default values for settings management
+export const DEFAULT_PLATFORMS = [
+  'Hotmart', 'Monetizze', 'Eduzz', 'Braip', 'Kiwify', 
+  'ClickBank', 'BuyGoods', 'Digistore24', 'MaxWebb', 
+  'Gurumedia', 'Terra Leads', 'Media Scalers', 'Doppus'
 ];
 
 export const INCOME_SOURCES = [

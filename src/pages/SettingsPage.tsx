@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight, Trash2 } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-// Componente auxiliar para gerenciar listas (Niches, Types, Sources)
+// Componente auxiliar para gerenciar listas (Niches, Types, Sources, Platforms)
 interface ListManagerProps {
   title: string;
   description: string;
@@ -27,16 +28,10 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
   
   const handleAdd = () => {
     if (newItem.trim()) {
-      // Use the exact trimmed input value
       onAdd(newItem.trim());
       setNewItem('');
       toast.success(`${title.slice(0, -1)} "${newItem.trim()}" adicionado.`);
     }
-  };
-
-  const handleRemove = (item: string) => {
-    onRemove(item);
-    toast.info(`${title.slice(0, -1)} "${item}" removido.`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -59,13 +54,34 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
       <CardContent>
         <div className="flex flex-wrap gap-2 min-h-10">
           {items.map(item => (
-            <Badge 
-              key={item} 
-              className={`text-sm cursor-pointer transition-colors ${badgeVariant}`} 
-              onClick={() => handleRemove(item)}
-            >
-              {item} <X className="w-3 h-3 ml-1" />
-            </Badge>
+            <AlertDialog key={item}>
+              <AlertDialogTrigger asChild>
+                <Badge 
+                  className={`text-sm cursor-pointer transition-colors ${badgeVariant}`} 
+                >
+                  {item} <X className="w-3 h-3 ml-1" />
+                </Badge>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja remover "{item}" da lista de {title.toLowerCase()}?
+                    Isso não afetará os produtos já cadastrados, mas removerá a opção para novos cadastros.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => onRemove(item)}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Remover
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           ))}
         </div>
         <Separator className="my-4" />
@@ -106,6 +122,10 @@ export default function SettingsPage() {
     addExpenseSource,
     removeExpenseSource,
     resetExpenseSources,
+    platforms, // New: Platforms from hook
+    addPlatform, // New: Platform functions
+    removePlatform, // New: Platform functions
+    resetPlatforms, // New: Platform functions
     freedomThreshold,
     setFreedomThreshold,
     resetFreedomThreshold,
@@ -115,7 +135,6 @@ export default function SettingsPage() {
   const [newStrategy, setNewStrategy] = useState('');
 
   // Temporary effect to ensure default types are loaded correctly after the last change
-  // If old translated values or hyphenated values are found, reset the list.
   useEffect(() => {
     const needsReset = productTypes.some(t => 
       t === 'Comércio eletrônico' || t === 'E-commerce'
@@ -132,15 +151,16 @@ export default function SettingsPage() {
     resetProductTypes();
     resetIncomeSources();
     resetExpenseSources();
+    resetPlatforms(); // Reset platforms
     resetFreedomThreshold(); // Reset threshold
     toast.success('Configurações restauradas para o padrão.');
   };
 
-  // Placeholder functions for other settings management (Platforms, Strategies)
+  // Placeholder functions for other settings management (Strategies)
   const handleAddPlatform = () => {
+    // This function is now redundant as ListManager handles it, but keeping it for consistency if needed elsewhere.
     if (newPlatform.trim()) {
-      // Logic to add platform (currently hardcoded in types/index.ts)
-      toast.info(`Plataforma "${newPlatform.trim()}" adicionada (Apenas visual, lista fixa no código).`);
+      addPlatform(newPlatform);
       setNewPlatform('');
     }
   };
@@ -294,32 +314,16 @@ export default function SettingsPage() {
           badgeColor="default"
         />
 
-        {/* Platforms (Placeholder for future dynamic management) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Plataformas de Afiliados</CardTitle>
-            <CardDescription>Lista de plataformas disponíveis para cadastro</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {['Hotmart', 'Monetizze', 'Eduzz', 'Braip', 'Kiwify', 'ClickBank', 'BuyGoods', 'Digistore24', 'MaxWebb', 'Gurumedia', 'Terra Leads', 'Media Scalers', 'Doppus'].map(platform => (
-                <Badge key={platform} variant="secondary" className="text-sm">
-                  {platform}
-                </Badge>
-              ))}
-            </div>
-            <Separator className="my-4" />
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Nova plataforma..." 
-                className="flex-1" 
-                value={newPlatform}
-                onChange={(e) => setNewPlatform(e.target.value)}
-              />
-              <Button variant="outline" size="sm" onClick={handleAddPlatform}>Adicionar</Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Platforms (Now managed by ListManager) */}
+        <ListManager
+          title="Plataformas de Afiliados"
+          description="Gerencie a lista de plataformas disponíveis para cadastro."
+          items={platforms}
+          onAdd={addPlatform}
+          onRemove={removePlatform}
+          onReset={resetPlatforms}
+          badgeColor="default"
+        />
       </div>
     </div>
   );

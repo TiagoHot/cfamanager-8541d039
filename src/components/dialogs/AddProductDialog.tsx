@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
+import { Product, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,18 +16,18 @@ interface AddProductDialogProps {
 }
 
 export function AddProductDialog({ onAdd, children, existingProductsCount }: AddProductDialogProps) {
-  const { niches, productTypes } = useSettings();
+  const { niches, productTypes, platforms } = useSettings();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     type: productTypes[0] || '',
     niche: niches[0] || '',
-    platform: 'Hotmart',
+    platform: platforms[0] || 'Hotmart',
     country: 'Brasil',
     currency: 'Real',
     averageTicket: '',
-    commissionPercent: '',
     date: new Date().toISOString().split('T')[0],
+    commissionPercent: '',
     notes: '', // New field
   });
 
@@ -67,7 +67,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       name: '',
       type: productTypes[0] || '',
       niche: niches[0] || '',
-      platform: 'Hotmart',
+      platform: platforms[0] || 'Hotmart',
       country: 'Brasil',
       currency: 'Real',
       averageTicket: '',
@@ -131,7 +131,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {PLATFORMS.map(p => (
+                  {platforms.map(p => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
                 </SelectContent>

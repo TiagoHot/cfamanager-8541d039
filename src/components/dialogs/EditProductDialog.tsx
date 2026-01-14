@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product, PLATFORMS, CURRENCY_RATES } from '@/types';
+import { Product, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { Pencil, Save } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
@@ -17,7 +17,7 @@ interface EditProductDialogProps {
 }
 
 export function EditProductDialog({ product, onUpdate, children }: EditProductDialogProps) {
-  const { niches, productTypes } = useSettings();
+  const { niches, productTypes, platforms } = useSettings();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: product.name,
@@ -140,7 +140,7 @@ export function EditProductDialog({ product, onUpdate, children }: EditProductDi
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {PLATFORMS.map(p => (
+                  {platforms.map(p => (
                     <SelectItem key={p} value={p}>{p}</SelectItem>
                   ))}
                 </SelectContent>
