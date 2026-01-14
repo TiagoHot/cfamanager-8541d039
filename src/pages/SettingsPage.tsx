@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Import useEffect
 import { toast } from "sonner";
 
 // Componente auxiliar para gerenciar listas (Niches, Types, Sources)
@@ -27,6 +27,7 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
   
   const handleAdd = () => {
     if (newItem.trim()) {
+      // Use the exact trimmed input value
       onAdd(newItem.trim());
       setNewItem('');
       toast.success(`${title.slice(0, -1)} "${newItem.trim()}" adicionado.`);
@@ -112,6 +113,15 @@ export default function SettingsPage() {
   
   const [newPlatform, setNewPlatform] = useState('');
   const [newStrategy, setNewStrategy] = useState('');
+
+  // Temporary effect to ensure default types are loaded correctly after the last change
+  // This helps clear any old 'Comércio eletrônico' value from localStorage if it exists.
+  useEffect(() => {
+    if (productTypes.length > 0 && productTypes.includes('Comércio eletrônico')) {
+      resetProductTypes();
+    }
+  }, [productTypes, resetProductTypes]);
+
 
   const handleResetAll = () => {
     resetNiches();
