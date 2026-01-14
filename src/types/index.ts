@@ -114,9 +114,28 @@ export const EXPENSE_SOURCES = [
 ];
 
 export const NICHES = [
-  'Saúde & Bem-Estar', 'Finanças & Investimentos', 'Desenvolvimento Pessoal', 
-  'Marketing Digital', 'Culinária & Receitas', 'Hobbies & Artesanato', 
-  'Relacionamentos', 'Idiomas', 'Tecnologia', 'Outros'
+  'Articulação',
+  'Diabetes',
+  'Disfunção Erétil',
+  'Edema',
+  'Emagrecimento',
+  'Energia',
+  'Fungus',
+  'Herpes',
+  'Insônia',
+  'Memória',
+  'Nervos',
+  'Outro',
+  'Próstata',
+  'Saúde Bucal',
+  'Saúde Cardiovascular',
+  'Saúde da Pele',
+  'Saúde dos Pets',
+  'Saúde Feminina',
+  'Saúde Intestinal',
+  'Tinnitus',
+  'Vertigem',
+  'Visão'
 ];
 
 export const PRODUCT_TYPES = [
