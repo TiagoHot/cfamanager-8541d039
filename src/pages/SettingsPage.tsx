@@ -189,12 +189,7 @@ export default function SettingsPage() {
         title="Parâmetros Auxiliares" 
         description="Configure as taxas de câmbio e parâmetros do sistema"
       >
-        {/* Removed AlertDialog for global reset */}
-        
-        <Button size="sm" disabled>
-          <Save className="w-4 h-4 mr-2" />
-          Salvar Alterações
-        </Button>
+        {/* Removed Save Button */}
       </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
