@@ -34,7 +34,18 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
   const { updateProduct } = useData();
   const { niches, productTypes } = useSettings();
   const [isEditing, setIsEditing] = useState(false);
-  const [localValue, setLocalValue] = useState(String(product[field] ?? ''));
+  
+  // Initialize localValue based on current product prop
+  const initialValue = String(product[field] ?? '');
+  const [localValue, setLocalValue] = useState(initialValue);
+  
+  // Reset localValue if product prop changes while not editing
+  React.useEffect(() => {
+    if (!isEditing) {
+      setLocalValue(initialValue);
+    }
+  }, [initialValue, isEditing]);
+
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
   // Determine options dynamically if not provided
@@ -79,17 +90,16 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
       newValue = finalValue.trim();
     }
 
-    // Handle empty string for optional fields like notes
-    if (type === 'textarea' && newValue === '') {
-        newValue = '';
-    } else if (type !== 'number' && type !== 'date' && newValue === String(product[field] ?? '')) {
-      setIsEditing(false);
-      return;
-    } else if (type === 'number' && newValue === product[field]) {
+    // Check if value actually changed before saving
+    const oldValue = product[field];
+    const valueChanged = type === 'number' 
+        ? Math.abs((oldValue as number || 0) - (newValue as number || 0)) > 0.001 
+        : oldValue !== newValue;
+
+    if (!valueChanged && !(type === 'textarea' && newValue === '')) {
       setIsEditing(false);
       return;
     }
-
 
     // 1. Update the specific field
     updatedProduct = { ...product, [field]: newValue };
@@ -107,14 +117,8 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
     try {
       await updateProduct(updatedProduct);
       
-      // Update local state to reflect saved value (important for select fields)
+      // Update local state to reflect saved value
       setLocalValue(String(newValue));
-
-      // Only show toast if value actually changed significantly
-      const oldValue = product[field];
-      const valueChanged = type === 'number' 
-        ? Math.abs(oldValue as number - newValue) > 0.001 
-        : oldValue !== newValue;
 
       if (valueChanged) {
         toast.success(`Campo ${field} atualizado.`);
@@ -135,7 +139,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
       handleSave();
     }
     if (e.key === 'Escape') {
-      setLocalValue(String(product[field] ?? ''));
+      setLocalValue(initialValue);
       setIsEditing(false);
     }
   };
@@ -146,7 +150,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
 
     setIsEditing(true);
     // Ensure local value is up-to-date when starting edit
-    setLocalValue(String(product[field] ?? ''));
+    setLocalValue(initialValue);
     
     // For select fields, we don't need to focus an input, the Select component handles opening itself
     if (type !== 'select') {
@@ -169,13 +173,14 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
           <Select 
             value={localValue} 
             onValueChange={(v) => {
-              // 1. Save the new value immediately
+              // Update local state immediately for visual feedback
+              setLocalValue(v);
+              // Save the new value immediately
               handleSave(v);
-              // 2. The handleSave will update localValue and set isEditing(false)
             }}
             open={isEditing}
             onOpenChange={(open) => {
-                // If the user closes the select without changing the value, we just exit edit mode
+                // If the user closes the select without selecting a new value, we just exit edit mode
                 if (!open && isEditing) {
                     setIsEditing(false);
                 }
