@@ -100,9 +100,7 @@ export const MONTHS = [
 
 // Default values for settings management
 export const DEFAULT_PLATFORMS = [
-  'Hotmart', 'Monetizze', 'Eduzz', 'Braip', 'Kiwify', 
-  'ClickBank', 'BuyGoods', 'Digistore24', 'MaxWebb', 
-  'Gurumedia', 'Terra Leads', 'Media Scalers', 'Doppus'
+  'Hotmart', 'Kiwify', 'Braip', 'Monetizze', 'Buygoods', 'Clickbank', 'Digistore24'
 ];
 
 export const INCOME_SOURCES = [
