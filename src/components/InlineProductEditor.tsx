@@ -76,7 +76,6 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
     } else if (type === 'date') {
       newValue = finalValue;
     } else {
-      // For text/select/textarea, only trim the value, do not change case
       newValue = finalValue.trim();
     }
 

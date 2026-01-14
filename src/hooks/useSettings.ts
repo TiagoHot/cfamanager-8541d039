@@ -37,24 +37,13 @@ export function useSettings(): SettingsContextType {
     // Helper function to load and set state for string arrays
     const loadAndSetArray = (key: string, defaultList: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
       const stored = localStorage.getItem(key);
-      let finalArray = defaultList;
-      
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
-            finalArray = parsed;
-          } else {
-            console.warn(`Settings: Invalid data found in localStorage for key ${key}. Resetting to default.`);
-            // If data is invalid, we use the default list and overwrite localStorage later
-          }
-        } catch (e) {
-          console.error(`Settings: Failed to parse JSON from localStorage for key ${key}. Resetting to default.`, e);
-        }
+      try {
+        const parsed = stored ? JSON.parse(stored) : defaultList;
+        // Ensure the list is sorted upon loading
+        setter(Array.isArray(parsed) ? parsed.sort() : defaultList.sort());
+      } catch {
+        setter(defaultList.sort());
       }
-      
-      // Ensure the list is sorted upon loading
-      setter(finalArray.sort());
     };
     
     // Helper function to load and set state for number
@@ -73,19 +62,27 @@ export function useSettings(): SettingsContextType {
 
   // Save to localStorage whenever state changes
   useEffect(() => {
-    localStorage.setItem(NICHE_STORAGE_KEY, JSON.stringify(niches));
+    if (niches.length > 0) {
+      localStorage.setItem(NICHE_STORAGE_KEY, JSON.stringify(niches));
+    }
   }, [niches]);
 
   useEffect(() => {
-    localStorage.setItem(TYPE_STORAGE_KEY, JSON.stringify(productTypes));
+    if (productTypes.length > 0) {
+      localStorage.setItem(TYPE_STORAGE_KEY, JSON.stringify(productTypes));
+    }
   }, [productTypes]);
   
   useEffect(() => {
-    localStorage.setItem(INCOME_SOURCE_STORAGE_KEY, JSON.stringify(incomeSources));
+    if (incomeSources.length > 0) {
+      localStorage.setItem(INCOME_SOURCE_STORAGE_KEY, JSON.stringify(incomeSources));
+    }
   }, [incomeSources]);
   
   useEffect(() => {
-    localStorage.setItem(EXPENSE_SOURCE_STORAGE_KEY, JSON.stringify(expenseSources));
+    if (expenseSources.length > 0) {
+      localStorage.setItem(EXPENSE_SOURCE_STORAGE_KEY, JSON.stringify(expenseSources));
+    }
   }, [expenseSources]);
   
   useEffect(() => {
