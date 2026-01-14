@@ -115,9 +115,13 @@ export default function SettingsPage() {
   const [newStrategy, setNewStrategy] = useState('');
 
   // Temporary effect to ensure default types are loaded correctly after the last change
-  // This helps clear any old 'Comércio eletrônico' value from localStorage if it exists.
+  // If old translated values or hyphenated values are found, reset the list.
   useEffect(() => {
-    if (productTypes.length > 0 && productTypes.includes('Comércio eletrônico')) {
+    const needsReset = productTypes.some(t => 
+      t === 'Comércio eletrônico' || t === 'E-commerce'
+    );
+    
+    if (needsReset) {
       resetProductTypes();
     }
   }, [productTypes, resetProductTypes]);
