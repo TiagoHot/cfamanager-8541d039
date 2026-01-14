@@ -172,15 +172,7 @@ export default function SettingsPage() {
   }, [productTypes, resetProductTypes]);
 
 
-  const handleResetAll = () => {
-    resetNiches();
-    resetProductTypes();
-    resetIncomeSources();
-    resetExpenseSources();
-    resetPlatforms(); // Reset platforms
-    resetFreedomThreshold(); // Reset threshold
-    toast.success('Configurações restauradas para o padrão.');
-  };
+  // Removed handleResetAll as the button is being removed.
 
   // Placeholder functions for other settings management (Strategies)
   const handleAddPlatform = () => {
@@ -197,30 +189,7 @@ export default function SettingsPage() {
         title="Parâmetros Auxiliares" 
         description="Configure as taxas de câmbio e parâmetros do sistema"
       >
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Restaurar Padrões
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Restaurar TODAS as Configurações?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza que deseja restaurar TODAS as configurações (listas e limiares) para os valores padrão? 
-                Esta ação não pode ser desfeita.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleResetAll}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Restaurar Tudo
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Removed AlertDialog for global reset */}
         
         <Button size="sm" disabled>
           <Save className="w-4 h-4 mr-2" />
