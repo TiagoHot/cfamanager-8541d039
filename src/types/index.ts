@@ -114,30 +114,11 @@ export const EXPENSE_SOURCES = [
 ];
 
 export const NICHES = [
-  'Articulação',
-  'Diabetes',
-  'Disfunção Erétil',
-  'Edema',
-  'Emagrecimento',
-  'Energia',
-  'Fungus',
-  'Herpes',
-  'Insônia',
-  'Memória',
-  'Nervos',
-  'Outro',
-  'Próstata',
-  'Saúde Bucal',
-  'Saúde Cardiovascular',
-  'Saúde da Pele',
-  'Saúde dos Pets',
-  'Saúde Feminina',
-  'Saúde Intestinal',
-  'Tinnitus',
-  'Vertigem',
-  'Visão',
+  'Saúde & Bem-Estar', 'Finanças & Investimentos', 'Desenvolvimento Pessoal', 
+  'Marketing Digital', 'Culinária & Receitas', 'Hobbies & Artesanato', 
+  'Relacionamentos', 'Idiomas', 'Tecnologia', 'Outros'
 ];
 
 export const PRODUCT_TYPES = [
-  'Digital', 'Nutra', 'Ecommerce'
+  'Nutra', 'Infoproduto', 'E-commerce', 'Serviço', 'SaaS', 'Outros'
 ];
