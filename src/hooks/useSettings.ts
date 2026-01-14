@@ -16,18 +16,13 @@ interface SettingsContextType {
   freedomThreshold: number;
   addNiche: (niche: string) => void;
   removeNiche: (niche: string) => void;
-  resetNiches: () => void;
   addProductType: (type: string) => void;
   removeProductType: (type: string) => void;
-  resetProductTypes: () => void;
   addIncomeSource: (source: string) => void;
   removeIncomeSource: (source: string) => void;
-  resetIncomeSources: () => void;
   addExpenseSource: (source: string) => void;
   removeExpenseSource: (source: string) => void;
-  resetExpenseSources: () => void;
   setFreedomThreshold: (value: number) => void;
-  resetFreedomThreshold: () => void;
 }
 
 export function useSettings(): SettingsContextType {
@@ -44,6 +39,7 @@ export function useSettings(): SettingsContextType {
       const stored = localStorage.getItem(key);
       try {
         const parsed = stored ? JSON.parse(stored) : defaultList;
+        // Ensure the list is sorted upon loading
         setter(Array.isArray(parsed) ? parsed.sort() : defaultList.sort());
       } catch {
         setter(defaultList.sort());
@@ -110,11 +106,6 @@ export function useSettings(): SettingsContextType {
   const removeNiche = useCallback((niche: string) => {
     setNiches(prev => prev.filter(n => n !== niche).sort());
   }, []);
-
-  const resetNiches = useCallback(() => {
-    setNiches(defaultNiches.sort());
-    localStorage.removeItem(NICHE_STORAGE_KEY);
-  }, []);
   
   // --- Product Type Management ---
   const addProductType = useCallback((type: string) => {
@@ -132,11 +123,6 @@ export function useSettings(): SettingsContextType {
 
   const removeProductType = useCallback((type: string) => {
     setProductTypes(prev => prev.filter(t => t !== type).sort());
-  }, []);
-
-  const resetProductTypes = useCallback(() => {
-    setProductTypes(defaultProductTypes.sort());
-    localStorage.removeItem(TYPE_STORAGE_KEY);
   }, []);
   
   // --- Income Source Management ---
@@ -157,11 +143,6 @@ export function useSettings(): SettingsContextType {
     setIncomeSources(prev => prev.filter(s => s !== source).sort());
   }, []);
 
-  const resetIncomeSources = useCallback(() => {
-    setIncomeSources(defaultIncomeSources.sort());
-    localStorage.removeItem(INCOME_SOURCE_STORAGE_KEY);
-  }, []);
-
   // --- Expense Source Management ---
   const addExpenseSource = useCallback((source: string) => {
     const normalizedSource = source.trim();
@@ -179,22 +160,11 @@ export function useSettings(): SettingsContextType {
   const removeExpenseSource = useCallback((source: string) => {
     setExpenseSources(prev => prev.filter(s => s !== source).sort());
   }, []);
-
-  const resetExpenseSources = useCallback(() => {
-    setExpenseSources(defaultExpenseSources.sort());
-    localStorage.removeItem(EXPENSE_SOURCE_STORAGE_KEY);
-  }, []);
   
   // --- Freedom Threshold Management ---
   const setFreedomThreshold = useCallback((value: number) => {
     setFreedomThresholdState(value);
   }, []);
-  
-  const resetFreedomThreshold = useCallback(() => {
-    setFreedomThresholdState(DEFAULT_FREEDOM_THRESHOLD);
-    localStorage.removeItem(FREEDOM_THRESHOLD_KEY);
-  }, []);
-
 
   return {
     niches,
@@ -204,17 +174,12 @@ export function useSettings(): SettingsContextType {
     freedomThreshold,
     addNiche,
     removeNiche,
-    resetNiches,
     addProductType,
     removeProductType,
-    resetProductTypes,
     addIncomeSource,
     removeIncomeSource,
-    resetIncomeSources,
     addExpenseSource,
     removeExpenseSource,
-    resetExpenseSources,
     setFreedomThreshold,
-    resetFreedomThreshold,
   };
 }

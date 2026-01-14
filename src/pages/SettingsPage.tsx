@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useState } from "react";
@@ -18,11 +18,10 @@ interface ListManagerProps {
   items: string[];
   onAdd: (item: string) => void;
   onRemove: (item: string) => void;
-  onReset: () => void;
   badgeColor: 'default' | 'success' | 'destructive';
 }
 
-const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badgeColor }: ListManagerProps) => {
+const ListManager = ({ title, description, items, onAdd, onRemove, badgeColor }: ListManagerProps) => {
   const [newItem, setNewItem] = useState('');
   
   const handleAdd = () => {
@@ -78,9 +77,6 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
           />
           <Button variant="outline" size="sm" onClick={handleAdd}>Adicionar</Button>
         </div>
-        <Button variant="link" size="sm" onClick={onReset} className="mt-2 p-0 text-xs text-muted-foreground">
-          Restaurar padrões
-        </Button>
       </CardContent>
     </Card>
   );
@@ -92,35 +88,20 @@ export default function SettingsPage() {
     niches, 
     addNiche, 
     removeNiche, 
-    resetNiches,
     productTypes,
     addProductType,
     removeProductType,
-    resetProductTypes,
     incomeSources,
     addIncomeSource,
     removeIncomeSource,
-    resetIncomeSources,
     expenseSources,
     addExpenseSource,
     removeExpenseSource,
-    resetExpenseSources,
     freedomThreshold,
     setFreedomThreshold,
-    resetFreedomThreshold,
   } = useSettings();
   
   const [newPlatform, setNewPlatform] = useState('');
-  const [newStrategy, setNewStrategy] = useState('');
-
-  const handleResetAll = () => {
-    resetNiches();
-    resetProductTypes();
-    resetIncomeSources();
-    resetExpenseSources();
-    resetFreedomThreshold(); // Reset threshold
-    toast.success('Configurações restauradas para o padrão.');
-  };
 
   // Placeholder functions for other settings management (Platforms, Strategies)
   const handleAddPlatform = () => {
@@ -137,10 +118,6 @@ export default function SettingsPage() {
         title="Parâmetros Auxiliares" 
         description="Configure as taxas de câmbio e parâmetros do sistema"
       >
-        <Button variant="outline" size="sm" onClick={handleResetAll}>
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Restaurar Padrões
-        </Button>
         <Button size="sm" disabled>
           <Save className="w-4 h-4 mr-2" />
           Salvar Alterações
@@ -243,7 +220,6 @@ export default function SettingsPage() {
           items={incomeSources}
           onAdd={addIncomeSource}
           onRemove={removeIncomeSource}
-          onReset={resetIncomeSources}
           badgeColor="success"
         />
 
@@ -254,7 +230,6 @@ export default function SettingsPage() {
           items={expenseSources}
           onAdd={addExpenseSource}
           onRemove={removeExpenseSource}
-          onReset={resetExpenseSources}
           badgeColor="destructive"
         />
 
@@ -265,7 +240,6 @@ export default function SettingsPage() {
           items={productTypes}
           onAdd={addProductType}
           onRemove={removeProductType}
-          onReset={resetProductTypes}
           badgeColor="default"
         />
 
@@ -276,7 +250,6 @@ export default function SettingsPage() {
           items={niches}
           onAdd={addNiche}
           onRemove={removeNiche}
-          onReset={resetNiches}
           badgeColor="default"
         />
 
