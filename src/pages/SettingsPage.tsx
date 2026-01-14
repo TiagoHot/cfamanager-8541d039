@@ -182,7 +182,7 @@ export default function SettingsPage() {
       </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Currency Rates */}
+        {/* 1. Currency Rates (Top Left) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Taxas de Câmbio</CardTitle>
@@ -222,7 +222,62 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Business Level Thresholds */}
+        {/* 2. Income Sources */}
+        <ListManager
+          title="Fontes de Receita"
+          description="Gerencie as categorias de entrada de dinheiro."
+          items={incomeSources}
+          onAdd={addIncomeSource}
+          onRemove={removeIncomeSource}
+          onReset={resetIncomeSources}
+          badgeColor="success"
+        />
+
+        {/* 3. Expense Sources */}
+        <ListManager
+          title="Fontes de Despesa"
+          description="Gerencie as categorias de saída de dinheiro."
+          items={expenseSources}
+          onAdd={addExpenseSource}
+          onRemove={removeExpenseSource}
+          onReset={resetExpenseSources}
+          badgeColor="destructive"
+        />
+
+        {/* 4. Product Types */}
+        <ListManager
+          title="Tipos de Produto"
+          description="Gerencie a lista de tipos de produtos (Nutra, Digital, etc.)."
+          items={productTypes}
+          onAdd={addProductType}
+          onRemove={removeProductType}
+          onReset={resetProductTypes}
+          badgeColor="default"
+        />
+
+        {/* 5. Niches */}
+        <ListManager
+          title="Nichos de Produtos"
+          description="Gerencie a lista de nichos disponíveis para categorização de produtos."
+          items={niches}
+          onAdd={addNiche}
+          onRemove={removeNiche}
+          onReset={resetNiches}
+          badgeColor="default"
+        />
+
+        {/* 6. Platforms */}
+        <ListManager
+          title="Plataformas de Afiliados"
+          description="Gerencie a lista de plataformas disponíveis para cadastro."
+          items={platforms}
+          onAdd={addPlatform}
+          onRemove={removePlatform}
+          onReset={resetPlatforms}
+          badgeColor="default"
+        />
+        
+        {/* 7. Business Level Thresholds (Moved to the end) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Níveis do Negócio</CardTitle>
@@ -269,61 +324,6 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        
-        {/* Income Sources */}
-        <ListManager
-          title="Fontes de Receita"
-          description="Gerencie as categorias de entrada de dinheiro."
-          items={incomeSources}
-          onAdd={addIncomeSource}
-          onRemove={removeIncomeSource}
-          onReset={resetIncomeSources}
-          badgeColor="success"
-        />
-
-        {/* Expense Sources */}
-        <ListManager
-          title="Fontes de Despesa"
-          description="Gerencie as categorias de saída de dinheiro."
-          items={expenseSources}
-          onAdd={addExpenseSource}
-          onRemove={removeExpenseSource}
-          onReset={resetExpenseSources}
-          badgeColor="destructive"
-        />
-
-        {/* Product Types */}
-        <ListManager
-          title="Tipos de Produto"
-          description="Gerencie a lista de tipos de produtos (Nutra, Digital, etc.)."
-          items={productTypes}
-          onAdd={addProductType}
-          onRemove={removeProductType}
-          onReset={resetProductTypes}
-          badgeColor="default"
-        />
-
-        {/* Niches */}
-        <ListManager
-          title="Nichos de Produtos"
-          description="Gerencie a lista de nichos disponíveis para categorização de produtos."
-          items={niches}
-          onAdd={addNiche}
-          onRemove={removeNiche}
-          onReset={resetNiches}
-          badgeColor="default"
-        />
-
-        {/* Platforms (Now managed by ListManager) */}
-        <ListManager
-          title="Plataformas de Afiliados"
-          description="Gerencie a lista de plataformas disponíveis para cadastro."
-          items={platforms}
-          onAdd={addPlatform}
-          onRemove={removePlatform}
-          onReset={resetPlatforms}
-          badgeColor="default"
-        />
       </div>
     </div>
   );
