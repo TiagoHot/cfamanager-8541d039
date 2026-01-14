@@ -41,6 +41,11 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
     }
   };
 
+  const handleResetConfirm = () => {
+    onReset();
+    toast.success(`${title} restaurados para os padrões.`);
+  };
+
   const badgeVariant = badgeColor === 'success' ? 'bg-success/10 text-success border-success/20' : 
                        badgeColor === 'destructive' ? 'bg-destructive/10 text-destructive border-destructive/20' : 
                        'secondary';
@@ -95,9 +100,30 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
           />
           <Button variant="outline" size="sm" onClick={handleAdd}>Adicionar</Button>
         </div>
-        <Button variant="link" size="sm" onClick={onReset} className="mt-2 p-0 text-xs text-muted-foreground">
-          Restaurar padrões
-        </Button>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="link" size="sm" className="mt-2 p-0 text-xs text-muted-foreground">
+              Restaurar padrões
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Restaurar Padrões?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja restaurar a lista de {title.toLowerCase()} para os valores padrão? 
+                Todas as suas adições e remoções personalizadas serão perdidas.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleResetConfirm}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Restaurar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
@@ -171,10 +197,31 @@ export default function SettingsPage() {
         title="Parâmetros Auxiliares" 
         description="Configure as taxas de câmbio e parâmetros do sistema"
       >
-        <Button variant="outline" size="sm" onClick={handleResetAll}>
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Restaurar Padrões
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Restaurar Padrões
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Restaurar TODAS as Configurações?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja restaurar TODAS as configurações (listas e limiares) para os valores padrão? 
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleResetAll}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Restaurar Tudo
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
         <Button size="sm" disabled>
           <Save className="w-4 h-4 mr-2" />
           Salvar Alterações
