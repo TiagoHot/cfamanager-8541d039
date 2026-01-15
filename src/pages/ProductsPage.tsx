@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Upload, Pencil, MessageSquare, Trash2 } from "lucide-react";
+import { Plus, Download, Upload, Pencil, MessageSquare, Trash2, MoreHorizontal } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { Product } from "@/types";
 import { useData } from "@/contexts/DataContext";
@@ -27,6 +27,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export default function ProductsPage() {
   const { products, importData, addProduct, updateProduct, removeProduct } = useData();
@@ -120,39 +127,55 @@ export default function ProductsPage() {
     {
       key: 'actions',
       header: 'Ações',
-      className: 'w-24 text-center',
+      className: 'w-16 text-center', // Reduced width
       render: (item: Product) => (
-        <div className="flex items-center justify-center gap-1">
-          <EditProductDialog product={item} onUpdate={updateProduct}>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Pencil className="w-4 h-4" />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Abrir menu</span>
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
-          </EditProductDialog>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Remover Produto</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Tem certeza que deseja remover o produto <strong>{item.name}</strong>? Esta ação não pode ser desfeita.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => removeProduct(item.id)}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <EditProductDialog product={item} onUpdate={updateProduct}>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                <Pencil className="mr-2 h-4 w-4" />
+                Editar
+              </DropdownMenuItem>
+            </EditProductDialog>
+            
+            <DropdownMenuSeparator />
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem 
+                  onSelect={(e) => e.preventDefault()} // Prevent dropdown close on trigger click
+                  className="text-destructive focus:text-destructive cursor-pointer"
                 >
-                  Remover
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Excluir
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Remover Produto</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja remover o produto <strong>{item.name}</strong>? Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => removeProduct(item.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Remover
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ),
     },
   ], [updateProduct, removeProduct]);
