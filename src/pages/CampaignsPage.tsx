@@ -92,6 +92,7 @@ export default function CampaignsPage() {
       key: 'impressions',
       header: 'Impressões',
       className: 'text-right',
+      sortable: true, // Adicionado ordenação
       render: (item: CampaignResult) => (
         <span>{formatNumber(item.impressions)}</span>
       ),
@@ -100,6 +101,7 @@ export default function CampaignsPage() {
       key: 'clicks',
       header: 'Cliques',
       className: 'text-right',
+      sortable: true, // Adicionado ordenação
       render: (item: CampaignResult) => (
         <span>{formatNumber(item.clicks)}</span>
       ),
@@ -108,6 +110,7 @@ export default function CampaignsPage() {
       key: 'sales',
       header: 'Vendas',
       className: 'text-center',
+      sortable: true, // Adicionado ordenação
       render: (item: CampaignResult) => (
         <span className={cn("font-bold", item.sales > 0 ? "text-warning" : "text-muted-foreground")}>
           {item.sales}
@@ -118,6 +121,7 @@ export default function CampaignsPage() {
       key: 'earnings',
       header: 'Ganhos',
       className: 'text-right',
+      sortable: true, // Adicionado ordenação
       render: (item: CampaignResult) => (
         <span className="text-success">{formatCurrency(item.earnings)}</span>
       ),
@@ -126,6 +130,7 @@ export default function CampaignsPage() {
       key: 'costs',
       header: 'Custos',
       className: 'text-right',
+      sortable: true, // Adicionado ordenação
       render: (item: CampaignResult) => (
         <span className="text-destructive">{formatCurrency(item.costs)}</span>
       ),
@@ -134,6 +139,7 @@ export default function CampaignsPage() {
       key: 'profitLoss',
       header: 'Lucro/Prejuízo',
       className: 'text-right',
+      sortable: true, // Adicionado ordenação
       render: (item: CampaignResult) => (
         <span className={cn("font-medium", getProfitLossColor(item.profitLoss))}>
           {formatCurrency(item.profitLoss)}
@@ -144,6 +150,12 @@ export default function CampaignsPage() {
       key: 'roi',
       header: 'ROI',
       className: 'text-right',
+      // Usamos uma função de ordenação customizada para garantir que o cálculo seja feito corretamente
+      sortFn: (a: CampaignResult, b: CampaignResult) => {
+        const roiA = calculateROI(a.profitLoss, a.costs);
+        const roiB = calculateROI(b.profitLoss, b.costs);
+        return roiA - roiB;
+      },
       render: (item: CampaignResult) => {
         // Recalcula o ROI na exibição para garantir precisão
         const calculatedRoi = calculateROI(item.profitLoss, item.costs);
