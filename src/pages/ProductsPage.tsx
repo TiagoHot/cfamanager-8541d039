@@ -1,9 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Upload, Pencil, MessageSquare } from "lucide-react";
+import { Plus, Download, Upload, Pencil, MessageSquare, Trash2 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { Product } from "@/types";
 import { useData } from "@/contexts/DataContext";
@@ -16,9 +16,20 @@ import { PageContent } from "@/components/PageContent";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import InlineProductEditor from "@/components/InlineProductEditor";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function ProductsPage() {
-  const { products, importData, addProduct, updateProduct } = useData();
+  const { products, importData, addProduct, updateProduct, removeProduct } = useData();
 
   // Define columns inside the component to use updateProduct hook
   const columns = useMemo(() => [
@@ -109,16 +120,42 @@ export default function ProductsPage() {
     {
       key: 'actions',
       header: 'Ações',
-      className: 'w-20 text-center',
+      className: 'w-24 text-center',
       render: (item: Product) => (
-        <EditProductDialog product={item} onUpdate={updateProduct}>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Pencil className="w-4 h-4" />
-          </Button>
-        </EditProductDialog>
+        <div className="flex items-center justify-center gap-1">
+          <EditProductDialog product={item} onUpdate={updateProduct}>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Pencil className="w-4 h-4" />
+            </Button>
+          </EditProductDialog>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Remover Produto</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza que deseja remover o produto <strong>{item.name}</strong>? Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => removeProduct(item.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Remover
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       ),
     },
-  ], [updateProduct]);
+  ], [updateProduct, removeProduct]);
 
   // Sort products primarily by productNumber descending (most recent product number first)
   const sortedProducts = useMemo(() => {

@@ -32,17 +32,20 @@ export function useSupabaseData() {
       return [];
     }
 
-    return data.map((p) => ({
+    return data.map((p: any) => ({
       id: p.id,
       date: p.date || '',
       productNumber: p.product_number,
       name: p.name,
+      type: p.type || '',
+      niche: p.niche || '',
       platform: p.platform || '',
       country: p.country || 'Brasil',
       currency: p.currency || 'Real',
       averageTicket: p.average_ticket || 0,
       commissionPercent: p.commission_percent || 0,
       commissionBRL: p.commission_brl || 0,
+      notes: p.notes || '',
     }));
   }, [user]);
 
@@ -152,6 +155,8 @@ export function useSupabaseData() {
         user_id: user.id,
         product_number: p.productNumber,
         name: p.name,
+        type: p.type || null,
+        niche: p.niche || null,
         date: formatDateToISO(p.date),
         platform: p.platform || null,
         country: p.country || 'Brasil',
@@ -159,6 +164,7 @@ export function useSupabaseData() {
         average_ticket: p.averageTicket || null,
         commission_percent: p.commissionPercent || null,
         commission_brl: p.commissionBRL || null,
+        notes: p.notes || null,
       }))
     );
 

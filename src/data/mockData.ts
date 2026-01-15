@@ -1,16 +1,16 @@
 import { Product, CampaignResult, WeeklyResult, IncomeExpense, CURRENCY_RATES } from '@/types';
 
 export const mockProducts: Product[] = [
-  { id: '1', date: '2023-01-01', productNumber: 1, name: 'Hidraliso', platform: 'Monetizze', country: 'Brasil', currency: 'Real', averageTicket: 197, commissionPercent: 50, commissionBRL: 98.50 },
-  { id: '2', date: '2023-01-01', productNumber: 2, name: 'Trinoxidiu', platform: 'Monetizze', country: 'Brasil', currency: 'Real', averageTicket: 297, commissionPercent: 50, commissionBRL: 148.50 },
-  { id: '3', date: '2023-01-01', productNumber: 3, name: 'Top hair gummy', platform: 'Monetizze', country: 'Brasil', currency: 'Real', averageTicket: 297, commissionPercent: 50, commissionBRL: 148.50 },
-  { id: '4', date: '2023-07-12', productNumber: 4, name: 'O especialista de robalo', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 449, commissionPercent: 50, commissionBRL: 224.50 },
-  { id: '5', date: '2023-07-12', productNumber: 5, name: 'Monografis orientador tcc', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 397, commissionPercent: 51, commissionBRL: 200.49 },
-  { id: '6', date: '2023-07-12', productNumber: 6, name: 'Fábrica de laços e tiaras', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 197, commissionPercent: 80, commissionBRL: 157.60 },
-  { id: '7', date: '2023-09-05', productNumber: 21, name: 'Experto em datos DP', platform: 'Hotmart', country: 'Gringa', currency: 'Dólar', averageTicket: 297, commissionPercent: 50, commissionBRL: 802.78 },
-  { id: '8', date: '2024-01-18', productNumber: 48, name: 'UGC Rafaela Chagas', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 497, commissionPercent: 40, commissionBRL: 198.80 },
-  { id: '9', date: '2025-09-16', productNumber: 90, name: 'Flash Burn', platform: 'BuyGoods', country: 'Gringa', currency: 'Dólar', averageTicket: 207, commissionPercent: 60, commissionBRL: 671.41 },
-  { id: '10', date: '2025-10-11', productNumber: 98, name: 'Fit Burn', platform: 'BuyGoods', country: 'Gringa', currency: 'Dólar', averageTicket: 207, commissionPercent: 65, commissionBRL: 727.36 },
+  { id: '1', date: '2023-01-01', productNumber: 1, name: 'Hidraliso', type: 'Nutra', niche: 'Emagrecimento', platform: 'Monetizze', country: 'Brasil', currency: 'Real', averageTicket: 197, commissionPercent: 50, commissionBRL: 98.50, notes: '' },
+  { id: '2', date: '2023-01-01', productNumber: 2, name: 'Trinoxidiu', type: 'Nutra', niche: 'Saúde da Pele', platform: 'Monetizze', country: 'Brasil', currency: 'Real', averageTicket: 297, commissionPercent: 50, commissionBRL: 148.50, notes: '' },
+  { id: '3', date: '2023-01-01', productNumber: 3, name: 'Top hair gummy', type: 'Nutra', niche: 'Saúde da Pele', platform: 'Monetizze', country: 'Brasil', currency: 'Real', averageTicket: 297, commissionPercent: 50, commissionBRL: 148.50, notes: '' },
+  { id: '4', date: '2023-07-12', productNumber: 4, name: 'O especialista de robalo', type: 'Digital', niche: 'Outro', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 449, commissionPercent: 50, commissionBRL: 224.50, notes: '' },
+  { id: '5', date: '2023-07-12', productNumber: 5, name: 'Monografis orientador tcc', type: 'Digital', niche: 'Outro', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 397, commissionPercent: 51, commissionBRL: 200.49, notes: '' },
+  { id: '6', date: '2023-07-12', productNumber: 6, name: 'Fábrica de laços e tiaras', type: 'Digital', niche: 'Outro', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 197, commissionPercent: 80, commissionBRL: 157.60, notes: '' },
+  { id: '7', date: '2023-09-05', productNumber: 21, name: 'Experto em datos DP', type: 'Digital', niche: 'Outro', platform: 'Hotmart', country: 'Gringa', currency: 'Dólar', averageTicket: 297, commissionPercent: 50, commissionBRL: 802.78, notes: '' },
+  { id: '8', date: '2024-01-18', productNumber: 48, name: 'UGC Rafaela Chagas', type: 'Digital', niche: 'Outro', platform: 'Hotmart', country: 'Brasil', currency: 'Real', averageTicket: 497, commissionPercent: 40, commissionBRL: 198.80, notes: '' },
+  { id: '9', date: '2025-09-16', productNumber: 90, name: 'Flash Burn', type: 'Nutra', niche: 'Emagrecimento', platform: 'BuyGoods', country: 'Gringa', currency: 'Dólar', averageTicket: 207, commissionPercent: 60, commissionBRL: 671.41, notes: '' },
+  { id: '10', date: '2025-10-11', productNumber: 98, name: 'Fit Burn', type: 'Nutra', niche: 'Emagrecimento', platform: 'BuyGoods', country: 'Gringa', currency: 'Dólar', averageTicket: 207, commissionPercent: 65, commissionBRL: 727.36, notes: '' },
 ];
 
 export const mockCampaignResults: CampaignResult[] = [
