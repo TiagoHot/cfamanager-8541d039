@@ -89,14 +89,14 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      className: 'w-28 text-left',
+      className: 'w-28 text-left', // Keeping sales bar aligned left
       render: (item: WeeklyResult) => {
         const barWidth = (item.sales / maxSales) * 100;
         return (
           <div className="flex items-center gap-2">
             <div className="relative h-5 w-16 rounded-sm bg-muted">
               <div
-                className="absolute left-0 top-0 h-full rounded-sm bg-warning/70"
+                className="absolute left-0 top-0 h-full rounded-sm bg-success/70" // Alterado para verde (success)
                 style={{ width: `${barWidth}%` }}
               />
             </div>
@@ -174,7 +174,7 @@ export default function WeeklyResultsPage() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem 
-                  onSelect={(e) => e.preventDefault()}
+                  onSelect={(e) => e.preventDefault()} // Prevent dropdown close on trigger click
                   className="text-destructive focus:text-destructive cursor-pointer"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
