@@ -185,9 +185,9 @@ export default function CashFlowPage() {
                       <Line 
                         type="monotone" 
                         dataKey="acumulado" 
-                        stroke="hsl(var(--accent))" 
+                        stroke="hsl(var(--chart-5))" // Usando chart-5 (roxo/magenta)
                         strokeWidth={3}
-                        dot={{ fill: 'hsl(var(--accent))' }}
+                        dot={{ fill: 'hsl(var(--chart-5))' }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -253,7 +253,7 @@ export default function CashFlowPage() {
                       <th className="text-right py-3 px-4 font-semibold text-success">Receitas</th>
                       <th className="text-right py-3 px-4 font-semibold text-destructive">Despesas</th>
                       <th className="text-right py-3 px-4 font-semibold">Saldo</th>
-                      <th className="text-right py-3 px-4 font-semibold text-accent">Acumulado</th>
+                      <th className="text-right py-3 px-4 font-semibold text-chart-5">Acumulado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -265,7 +265,7 @@ export default function CashFlowPage() {
                         <td className={cn("py-3 px-4 text-right font-medium", month.balance >= 0 ? 'text-success' : 'text-destructive')}>
                           {formatCurrency(month.balance)}
                         </td>
-                        <td className="py-3 px-4 text-right font-medium text-accent">{formatCurrency(month.accumulatedBalance)}</td>
+                        <td className="py-3 px-4 text-right font-medium text-chart-5">{formatCurrency(month.accumulatedBalance)}</td>
                       </tr>
                     ))}
                     <tr className="bg-muted/50 font-bold">
@@ -275,7 +275,7 @@ export default function CashFlowPage() {
                       <td className={cn("py-3 px-4 text-right font-medium", cashFlowData.totalProfit >= 0 ? 'text-success' : 'text-destructive')}>
                         {formatCurrency(cashFlowData.totalProfit)}
                       </td>
-                      <td className="py-3 px-4 text-right font-medium text-accent">{formatCurrency(cashFlowData.totalProfit)}</td>
+                      <td className="py-3 px-4 text-right font-medium text-chart-5">{formatCurrency(cashFlowData.totalProfit)}</td>
                     </tr>
                   </tbody>
                 </table>
