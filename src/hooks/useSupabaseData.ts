@@ -37,15 +37,12 @@ export function useSupabaseData() {
       date: p.date || '',
       productNumber: p.product_number,
       name: p.name,
-      type: p.type || '', // Ensure type is mapped on fetch
-      niche: p.niche || '', // Ensure niche is mapped on fetch
       platform: p.platform || '',
       country: p.country || 'Brasil',
       currency: p.currency || 'Real',
       averageTicket: p.average_ticket || 0,
       commissionPercent: p.commission_percent || 0,
       commissionBRL: p.commission_brl || 0,
-      notes: p.notes || '', // Ensure notes is mapped on fetch
     }));
   }, [user]);
 
@@ -72,7 +69,6 @@ export function useSupabaseData() {
       endDate: c.end_date || '',
       daysRunning: c.days_running || 0,
       productName: c.product_name,
-      niche: c.niche || '', // Ensure niche is mapped on fetch
       location: c.location || '',
       strategy: c.strategy || '',
       commissionBRL: c.commission_brl || 0,
@@ -156,8 +152,6 @@ export function useSupabaseData() {
         user_id: user.id,
         product_number: p.productNumber,
         name: p.name,
-        type: p.type || null, // Added type
-        niche: p.niche || null, // Added niche
         date: formatDateToISO(p.date),
         platform: p.platform || null,
         country: p.country || 'Brasil',
@@ -165,7 +159,6 @@ export function useSupabaseData() {
         average_ticket: p.averageTicket || null,
         commission_percent: p.commissionPercent || null,
         commission_brl: p.commissionBRL || null,
-        notes: p.notes || null, // Added notes
       }))
     );
 
@@ -194,7 +187,6 @@ export function useSupabaseData() {
         end_date: formatDateToISO(c.endDate),
         days_running: c.daysRunning ? Math.round(c.daysRunning) : null,
         product_name: c.productName,
-        niche: c.niche || null, // Added niche
         location: c.location || null,
         strategy: c.strategy || null,
         commission_brl: c.commissionBRL || null,
