@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product, CURRENCY_RATES } from '@/types';
+import { Product } from '@/types';
 import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,10 +24,7 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
     niche: niches[0] || '',
     platform: platforms[0] || 'Hotmart',
     country: 'Brasil',
-    currency: 'Real',
-    averageTicket: '',
     date: new Date().toISOString().split('T')[0],
-    commissionPercent: '',
     notes: '', // New field
   });
 
@@ -39,11 +36,8 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       return;
     }
 
-    const averageTicket = parseFloat(formData.averageTicket) || 0;
-    const commissionPercent = parseFloat(formData.commissionPercent) || 0;
-    const rate = CURRENCY_RATES[formData.currency as keyof typeof CURRENCY_RATES] || 1;
-    const commissionBRL = averageTicket * (commissionPercent / 100) * rate;
-
+    // Campos removidos: averageTicket, commissionPercent, currency.
+    // commissionBRL é definido como 0, pois o cálculo não é mais feito aqui.
     const newProduct: Product = {
       id: `prod-new-${Date.now()}`,
       date: formData.date,
@@ -53,10 +47,10 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       niche: formData.niche,
       platform: formData.platform,
       country: formData.country,
-      currency: formData.currency,
-      averageTicket,
-      commissionPercent,
-      commissionBRL,
+      currency: 'Real', // Default value, but not used for calculation here
+      averageTicket: 0, // Default value
+      commissionPercent: 0, // Default value
+      commissionBRL: 0, // Set to 0 since calculation fields were removed
       notes: formData.notes.trim(),
     };
 
@@ -69,9 +63,6 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
       niche: niches[0] || '',
       platform: platforms[0] || 'Hotmart',
       country: 'Brasil',
-      currency: 'Real',
-      averageTicket: '',
-      commissionPercent: '',
       date: new Date().toISOString().split('T')[0],
       notes: '',
     });
@@ -152,20 +143,6 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
             </div>
 
             <div>
-              <Label htmlFor="currency">Moeda</Label>
-              <Select value={formData.currency} onValueChange={(v) => setFormData(prev => ({ ...prev, currency: v }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Real">Real</SelectItem>
-                  <SelectItem value="Dólar">Dólar</SelectItem>
-                  <SelectItem value="Euro">Euro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
               <Label htmlFor="date">Data de Cadastro</Label>
               <Input
                 id="date"
@@ -174,30 +151,8 @@ export function AddProductDialog({ onAdd, children, existingProductsCount }: Add
                 onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
               />
             </div>
-
-            <div>
-              <Label htmlFor="averageTicket">Ticket Médio</Label>
-              <Input
-                id="averageTicket"
-                type="number"
-                step="0.01"
-                value={formData.averageTicket}
-                onChange={(e) => setFormData(prev => ({ ...prev, averageTicket: e.target.value }))}
-                placeholder="0.00"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="commissionPercent">Comissão (%)</Label>
-              <Input
-                id="commissionPercent"
-                type="number"
-                step="0.1"
-                value={formData.commissionPercent}
-                onChange={(e) => setFormData(prev => ({ ...prev, commissionPercent: e.target.value }))}
-                placeholder="0"
-              />
-            </div>
+            
+            {/* Campos removidos: Moeda, Ticket Médio, Comissão (%) */}
             
             <div className="col-span-2">
               <Label htmlFor="notes">Notas</Label>
