@@ -107,25 +107,25 @@ export default function WeeklyResultsPage() {
     {
       key: 'campaignEarnings',
       header: 'Ganhos Campanhas',
-      className: 'text-right',
+      className: 'text-right bg-success/5', // Fundo verde suave
       render: (item: WeeklyResult) => (
-        <span className="text-success">{formatCurrency(item.campaignEarnings)}</span>
+        <span className="text-foreground">{formatCurrency(item.campaignEarnings)}</span>
       ),
     },
     {
       key: 'organicEarnings',
       header: 'Ganhos Orgânico',
-      className: 'text-right',
+      className: 'text-right bg-success/5', // Fundo verde suave
       render: (item: WeeklyResult) => (
-        <span className="text-success">{formatCurrency(item.organicEarnings)}</span>
+        <span className="text-foreground">{formatCurrency(item.organicEarnings)}</span>
       ),
     },
     {
       key: 'adsenseEarnings',
       header: 'Adsense',
-      className: 'text-right',
+      className: 'text-right bg-success/5', // Fundo verde suave
       render: (item: WeeklyResult) => (
-        <span className="text-success">{formatCurrency(item.adsenseEarnings)}</span>
+        <span className="text-foreground">{formatCurrency(item.adsenseEarnings)}</span>
       ),
     },
     {
