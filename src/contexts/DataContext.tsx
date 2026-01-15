@@ -16,10 +16,11 @@ interface DataContextType {
   setIncomeExpenses: (items: IncomeExpense[]) => void;
   addProduct: (product: Product) => void;
   updateProduct: (product: Product) => void;
+  removeProduct: (id: string) => void;
   addCampaign: (campaign: CampaignResult) => void;
   addWeeklyResult: (result: WeeklyResult) => void;
-  updateWeeklyResult: (result: WeeklyResult) => void; // Added
-  removeWeeklyResult: (id: string) => void; // Added
+  updateWeeklyResult: (result: WeeklyResult) => void;
+  removeWeeklyResult: (id: string) => void;
   addIncomeExpense: (item: IncomeExpense) => void;
   importData: (data: {
     products: Product[];
@@ -140,6 +141,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setProducts(newProducts);
   }, [products, setProducts]);
 
+  const removeProduct = useCallback((id: string) => {
+    const newProducts = products.filter(p => p.id !== id);
+    setProducts(newProducts);
+    toast.success('Produto removido com sucesso.');
+  }, [products, setProducts]);
+
   const addCampaign = useCallback((campaign: CampaignResult) => {
     const newCampaigns = [...campaigns, campaign];
     setCampaigns(newCampaigns);
@@ -227,6 +234,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setIncomeExpenses,
         addProduct,
         updateProduct,
+        removeProduct,
         addCampaign,
         addWeeklyResult,
         updateWeeklyResult,

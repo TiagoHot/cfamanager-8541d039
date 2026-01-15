@@ -414,7 +414,18 @@ export default function CampaignDashboard() {
                   <XAxis 
                     dataKey="month" 
                     className="text-xs" 
-                    tick={{ angle: -45, textAnchor: 'end' }}
+                    tick={(props: any) => (
+                      <text 
+                        x={props.x} 
+                        y={props.y} 
+                        dy={10} 
+                        textAnchor="end" 
+                        transform={`rotate(-45, ${props.x}, ${props.y})`}
+                        className="text-xs fill-current"
+                      >
+                        {props.payload.value}
+                      </text>
+                    )}
                     height={60}
                   />
                   <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
