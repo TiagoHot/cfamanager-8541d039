@@ -35,6 +35,12 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
+// Helper para recalcular ROI na exibição
+const calculateROI = (profitLoss: number, costs: number): number => {
+  if (costs === 0) return 0;
+  return (profitLoss / costs) * 100;
+};
+
 export default function CampaignsPage() {
   const { campaigns, products, importData, addCampaign, updateCampaign, removeCampaign } = useData();
   
@@ -138,11 +144,16 @@ export default function CampaignsPage() {
       key: 'roi',
       header: 'ROI',
       className: 'text-right',
-      render: (item: CampaignResult) => (
-        <span className={cn("font-bold", getROIColor(item.roi))}>
-          {formatPercent(item.roi)}
-        </span>
-      ),
+      render: (item: CampaignResult) => {
+        // Recalcula o ROI na exibição para garantir precisão
+        const calculatedRoi = calculateROI(item.profitLoss, item.costs);
+        
+        return (
+          <span className={cn("font-bold", getROIColor(calculatedRoi))}>
+            {formatPercent(calculatedRoi)}
+          </span>
+        );
+      },
     },
     {
       key: 'actions',
