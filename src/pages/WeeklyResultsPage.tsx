@@ -57,6 +57,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'week',
       header: 'Semana',
+      className: 'text-left', // Explicitly setting text columns to left
       render: (item: WeeklyResult) => (
         <span className="font-bold">{item.week}</span>
       ),
@@ -64,6 +65,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'period',
       header: 'Período',
+      className: 'text-left', // Explicitly setting text columns to left
       render: (item: WeeklyResult) => (
         <span className="text-sm">{item.period}</span>
       ),
@@ -71,6 +73,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'month',
       header: 'Mês',
+      className: 'text-left', // Explicitly setting text columns to left
       render: (item: WeeklyResult) => (
         <span className="font-medium">{item.month}</span>
       ),
@@ -86,14 +89,14 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      className: 'w-28 text-left',
+      className: 'w-28 text-left', // Keeping sales bar aligned left
       render: (item: WeeklyResult) => {
         const barWidth = (item.sales / maxSales) * 100;
         return (
           <div className="flex items-center gap-2">
             <div className="relative h-5 w-16 rounded-sm bg-muted">
               <div
-                className="absolute left-0 top-0 h-full rounded-sm bg-warning/70" // Alterado para laranja (warning)
+                className="absolute left-0 top-0 h-full rounded-sm bg-warning/70"
                 style={{ width: `${barWidth}%` }}
               />
             </div>
@@ -107,7 +110,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'campaignEarnings',
       header: 'Ganhos Campanhas',
-      className: 'text-right bg-success/5', // Fundo verde suave
+      className: 'text-right bg-success/5',
       render: (item: WeeklyResult) => (
         <span className="text-foreground">{formatCurrency(item.campaignEarnings)}</span>
       ),
@@ -115,7 +118,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'organicEarnings',
       header: 'Ganhos Orgânico',
-      className: 'text-right bg-success/5', // Fundo verde suave
+      className: 'text-right bg-success/5',
       render: (item: WeeklyResult) => (
         <span className="text-foreground">{formatCurrency(item.organicEarnings)}</span>
       ),
@@ -123,7 +126,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'adsenseEarnings',
       header: 'Adsense',
-      className: 'text-right bg-success/5', // Fundo verde suave
+      className: 'text-right bg-success/5',
       render: (item: WeeklyResult) => (
         <span className="text-foreground">{formatCurrency(item.adsenseEarnings)}</span>
       ),
@@ -149,7 +152,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'actions',
       header: 'Ações',
-      className: 'w-16 text-center', // Reduced width
+      className: 'w-16 text-center',
       render: (item: WeeklyResult) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
