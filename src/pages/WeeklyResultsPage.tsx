@@ -57,7 +57,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'week',
       header: 'Semana',
-      className: 'text-left', // Explicitly setting text columns to left
+      className: 'text-left bg-warning/5', // Fundo amarelo suave
       render: (item: WeeklyResult) => (
         <span className="font-bold">{item.week}</span>
       ),
@@ -65,7 +65,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'period',
       header: 'Período',
-      className: 'text-left', // Explicitly setting text columns to left
+      className: 'text-left bg-warning/5', // Fundo amarelo suave
       render: (item: WeeklyResult) => (
         <span className="text-sm">{item.period}</span>
       ),
@@ -73,7 +73,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'month',
       header: 'Mês',
-      className: 'text-left', // Explicitly setting text columns to left
+      className: 'text-left bg-warning/5', // Fundo amarelo suave
       render: (item: WeeklyResult) => (
         <span className="font-medium">{item.month}</span>
       ),
@@ -89,7 +89,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      className: 'w-28 text-left', // Keeping sales bar aligned left
+      className: 'w-28 text-left',
       render: (item: WeeklyResult) => {
         const barWidth = (item.sales / maxSales) * 100;
         return (
@@ -174,7 +174,7 @@ export default function WeeklyResultsPage() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem 
-                  onSelect={(e) => e.preventDefault()} // Prevent dropdown close on trigger click
+                  onSelect={(e) => e.preventDefault()}
                   className="text-destructive focus:text-destructive cursor-pointer"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
