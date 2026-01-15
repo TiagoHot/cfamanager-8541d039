@@ -234,7 +234,7 @@ export default function CashFlowPage() {
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead>
+                <thead className="sticky top-0 bg-card shadow-sm z-10"> {/* Adicionado sticky top-0 e z-10 */}
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 font-semibold">Mês</th>
                     <th className="text-right py-3 px-4 font-semibold text-success">Receitas</th>
