@@ -20,6 +20,7 @@ import { useState, useMemo } from "react";
 import { MONTHS } from "@/types"; 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge"; // Import Badge
 
 const MONTH_ORDER = MONTHS;
 
@@ -47,71 +48,71 @@ const getCategoryStyling = (categoryName: string) => {
   let cardBgClass = '';
   let cardBorderClass = '';
   let cardTextClass = '';
-  let circleBgClass = '';
+  let circleBgClass = ''; // Renamed to badgeClass for clarity in usage
 
   switch (categoryName) {
     case 'Brasil':
       cardBgClass = 'bg-warning/5'; // Changed from success to warning
       cardBorderClass = 'border-warning/20';
       cardTextClass = 'text-warning';
-      circleBgClass = 'bg-warning';
+      circleBgClass = 'bg-warning text-warning-foreground'; // Badge styling
       break;
     case 'Gringa':
       cardBgClass = 'bg-info/5';
       cardBorderClass = 'border-info/20';
       cardTextClass = 'text-info';
-      circleBgClass = 'bg-info';
+      circleBgClass = 'bg-info text-info-foreground'; // Badge styling
       break;
     case 'Pesquisa':
       cardBgClass = 'bg-success/5'; // Using success for Pesquisa
       cardBorderClass = 'border-success/20';
       cardTextClass = 'text-success';
-      circleBgClass = 'bg-success';
+      circleBgClass = 'bg-success text-success-foreground'; // Badge styling
       break;
     case 'Display':
       cardBgClass = 'bg-chart-5/5'; // Purple-ish
       cardBorderClass = 'border-chart-5/20';
       cardTextClass = 'text-chart-5';
-      circleBgClass = 'bg-chart-5';
+      circleBgClass = 'bg-chart-5 text-white'; // Badge styling
       break;
     case 'YouTube':
       cardBgClass = 'bg-chart-1/5'; // Blue
       cardBorderClass = 'border-chart-1/20';
       cardTextClass = 'text-chart-1';
-      circleBgClass = 'bg-chart-1';
+      circleBgClass = 'bg-chart-1 text-white'; // Badge styling
       break;
     case 'Shopping':
       cardBgClass = 'bg-chart-2/5'; // Green
       cardBorderClass = 'border-chart-2/20';
       cardTextClass = 'text-chart-2';
-      circleBgClass = 'bg-chart-2';
+      circleBgClass = 'bg-chart-2 text-white'; // Badge styling
       break;
     case 'Performance Max':
       cardBgClass = 'bg-chart-3/5'; // Yellow/Orange
       cardBorderClass = 'border-chart-3/20';
       cardTextClass = 'text-chart-3';
-      circleBgClass = 'bg-chart-3';
+      circleBgClass = 'bg-chart-3 text-white'; // Badge styling
       break;
     case 'Discovery':
       cardBgClass = 'bg-chart-6/5'; // Another blue
       cardBorderClass = 'border-chart-6/20';
       cardTextClass = 'text-chart-6';
-      circleBgClass = 'bg-chart-6';
+      circleBgClass = 'bg-chart-6 text-white'; // Badge styling
       break;
     case 'Instream/Feed': // New strategy - Changed to use chart-4 (Red/Destructive)
       cardBgClass = 'bg-chart-4/10'; 
       cardBorderClass = 'border-chart-4/30';
       cardTextClass = 'text-chart-4';
-      circleBgClass = 'bg-chart-4';
+      circleBgClass = 'bg-chart-4 text-white'; // Badge styling
       break;
     default:
       cardBgClass = 'bg-secondary/5';
       cardBorderClass = 'border-secondary/20';
       cardTextClass = 'text-secondary-foreground';
-      circleBgClass = 'bg-secondary';
+      circleBgClass = 'bg-secondary text-secondary-foreground'; // Badge styling
       break;
   }
-  return { cardBgClass, cardBorderClass, cardTextClass, circleBgClass };
+  return { cardBgClass, cardBorderClass, cardTextClass, badgeClass: circleBgClass };
 };
 
 export default function CampaignDashboard() {
@@ -468,13 +469,12 @@ export default function CampaignDashboard() {
             </CardHeader>
             <CardContent className="space-y-2 p-4"> {/* Reduced vertical spacing and padding */}
               {strategyData.map(strategy => {
-                const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(strategy.name);
+                const { cardBgClass, cardBorderClass, badgeClass } = getCategoryStyling(strategy.name);
                 return (
                   <Card key={strategy.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
                     <CardHeader className="pb-1 pt-3 px-3"> {/* Reduced padding */}
-                      <CardTitle className={cn("text-sm flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
-                        <span className={cn("w-2.5 h-2.5 rounded-full", circleBgClass)} />
-                        {strategy.name}
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Badge className={cn("text-xs font-medium", badgeClass)}>{strategy.name}</Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 p-3 pt-0"> {/* Reduced padding and vertical spacing */}
@@ -528,13 +528,12 @@ export default function CampaignDashboard() {
             </CardHeader>
             <CardContent className="space-y-2 p-4"> {/* Reduced vertical spacing and padding */}
               {locationData.map(location => {
-                const { cardBgClass, cardBorderClass, cardTextClass, circleBgClass } = getCategoryStyling(location.name);
+                const { cardBgClass, cardBorderClass, badgeClass } = getCategoryStyling(location.name);
                 return (
                   <Card key={location.name} className={cn("card-hover", cardBgClass, cardBorderClass)}>
                     <CardHeader className="pb-1 pt-3 px-3"> {/* Reduced padding */}
-                      <CardTitle className={cn("text-sm flex items-center gap-2", cardTextClass)}> {/* Reduced title size */}
-                        <span className={cn("w-2.5 h-2.5 rounded-full", circleBgClass)} />
-                        {location.name}
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Badge className={cn("text-xs font-medium", badgeClass)}>{location.name}</Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 p-3 pt-0"> {/* Reduced padding and vertical spacing */}
