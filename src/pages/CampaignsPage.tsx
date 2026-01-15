@@ -103,7 +103,7 @@ export default function CampaignsPage() {
       header: 'Vendas',
       className: 'text-center',
       render: (item: CampaignResult) => (
-        <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
+        <span className={cn("font-bold", item.sales > 0 ? "text-warning" : "text-muted-foreground")}>
           {item.sales}
         </span>
       ),
