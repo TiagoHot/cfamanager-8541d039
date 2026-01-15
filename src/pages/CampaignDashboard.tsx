@@ -492,7 +492,7 @@ export default function CampaignDashboard() {
                       <div className="grid grid-cols-2 gap-2 border-t pt-2"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Receitas</p>
-                          <p className="text-sm font-semibold text-success">{formatCurrency(strategy.earnings)}</p> {/* Reduced size to sm */}
+                          <p className="text-sm font-semibold text-primary">{formatCurrency(strategy.earnings)}</p> {/* Changed text-success to text-primary */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Despesas</p>
@@ -552,7 +552,7 @@ export default function CampaignDashboard() {
                       <div className="grid grid-cols-2 gap-2 border-t pt-2"> {/* Reduced gap and padding */}
                         <div>
                           <p className="text-xs text-muted-foreground">Receitas</p>
-                          <p className="text-sm font-semibold text-success">{formatCurrency(location.earnings)}</p> {/* Reduced size to sm */}
+                          <p className="text-sm font-semibold text-primary">{formatCurrency(location.earnings)}</p> {/* Changed text-success to text-primary */}
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Despesas</p>
