@@ -109,7 +109,7 @@ export default function WeeklyResultsPage() {
       header: 'Ganhos Campanhas',
       className: 'text-right',
       render: (item: WeeklyResult) => (
-        <span>{formatCurrency(item.campaignEarnings)}</span>
+        <span className="text-success">{formatCurrency(item.campaignEarnings)}</span>
       ),
     },
     {
@@ -117,7 +117,7 @@ export default function WeeklyResultsPage() {
       header: 'Ganhos Orgânico',
       className: 'text-right',
       render: (item: WeeklyResult) => (
-        <span>{formatCurrency(item.organicEarnings)}</span>
+        <span className="text-success">{formatCurrency(item.organicEarnings)}</span>
       ),
     },
     {
@@ -125,7 +125,7 @@ export default function WeeklyResultsPage() {
       header: 'Adsense',
       className: 'text-right',
       render: (item: WeeklyResult) => (
-        <span>{formatCurrency(item.adsenseEarnings)}</span>
+        <span className="text-success">{formatCurrency(item.adsenseEarnings)}</span>
       ),
     },
     {
