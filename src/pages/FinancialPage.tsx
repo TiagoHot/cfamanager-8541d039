@@ -3,13 +3,13 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload, Pencil, Trash2 } from "lucide-react";
+import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload, Pencil, Trash2, MoreHorizontal } from "lucide-react";
 import { formatCurrency, formatDate, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { IncomeExpense, MONTHS } from "@/types";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 import { AddIncomeExpenseDialog } from "@/components/dialogs/AddIncomeExpenseDialog";
-import { EditIncomeExpenseDialog } from "@/components/dialogs/EditIncomeExpenseDialog"; // NEW
+import { EditIncomeExpenseDialog } from "@/components/dialogs/EditIncomeExpenseDialog";
 import { exportIncomeExpenses } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,7 +26,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // NEW
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 // Helper para obter o número do mês para ordenação (1 para Jan, 12 para Dez)
 const getMonthNumber = (month: string): number => {
@@ -49,38 +56,54 @@ export default function FinancialPage() {
 
   // Define action column renderer
   const actionColumn = (item: IncomeExpense) => (
-    <div className="flex items-center justify-center gap-1">
-      <EditIncomeExpenseDialog item={item} onUpdate={updateIncomeExpense}>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Pencil className="w-4 h-4" />
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Abrir menu</span>
+          <MoreHorizontal className="h-4 w-4" />
         </Button>
-      </EditIncomeExpenseDialog>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover Registro</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja remover o registro de {item.type === 'income' ? 'Receita' : 'Despesa'} 
-              de <strong>{formatCurrency(item.amount)}</strong> ({item.source})? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => removeIncomeExpense(item.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <EditIncomeExpenseDialog item={item} onUpdate={updateIncomeExpense}>
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
+          </DropdownMenuItem>
+        </EditIncomeExpenseDialog>
+        
+        <DropdownMenuSeparator />
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem 
+              onSelect={(e) => e.preventDefault()} // Prevent dropdown close on trigger click
+              className="text-destructive focus:text-destructive cursor-pointer"
             >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Excluir
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remover Registro</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja remover o registro de {item.type === 'income' ? 'Receita' : 'Despesa'} 
+                de <strong>{formatCurrency(item.amount)}</strong> ({item.source})? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => removeIncomeExpense(item.id)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Remover
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   // Colunas específicas para Receitas (coluna da esquerda)
@@ -118,7 +141,7 @@ export default function FinancialPage() {
     {
       key: 'actions',
       header: 'Ações',
-      className: 'w-24 text-center',
+      className: 'w-16 text-center', // Reduced width
       render: actionColumn,
     },
   ], [updateIncomeExpense, removeIncomeExpense]);
@@ -158,7 +181,7 @@ export default function FinancialPage() {
     {
       key: 'actions',
       header: 'Ações',
-      className: 'w-24 text-center',
+      className: 'w-16 text-center', // Reduced width
       render: actionColumn,
     },
   ], [updateIncomeExpense, removeIncomeExpense]);
