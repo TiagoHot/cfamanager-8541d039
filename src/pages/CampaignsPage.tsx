@@ -47,7 +47,6 @@ export default function CampaignsPage() {
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
   const [productFilter, setProductFilter] = useState<string>("all"); 
-  const [strategyFilter, setStrategyFilter] = useState<string>("all"); // Novo filtro de estratégia
 
   // Define columns inside the component to use updateCampaign/removeCampaign
   const columns = useMemo(() => [
@@ -212,18 +211,10 @@ export default function CampaignsPage() {
     },
   ], [updateCampaign, removeCampaign, products]);
 
-  // Get unique years, products, and strategies for filters
+  // Get unique years for filters
   const years = useMemo(() => {
     const uniqueYears = [...new Set(campaigns.map(c => c.year))].sort((a, b) => b - a);
     return uniqueYears;
-  }, [campaigns]);
-  
-  const productNames = useMemo(() => {
-    return [...new Set(campaigns.map(c => c.productName))].sort();
-  }, [campaigns]);
-  
-  const strategies = useMemo(() => {
-    return [...new Set(campaigns.map(c => c.strategy))].filter(s => s).sort();
   }, [campaigns]);
 
   // Filter campaigns
@@ -233,7 +224,6 @@ export default function CampaignsPage() {
       // Normaliza o mês da campanha para comparação com o filtro
       if (monthFilter !== "all" && normalizeMonthToAbbreviation(c.month) !== monthFilter) return false;
       if (productFilter !== "all" && c.productName !== productFilter) return false;
-      if (strategyFilter !== "all" && c.strategy !== strategyFilter) return false; // Aplicando filtro de estratégia
       return true;
     }).sort((a, b) => {
       // Sort by date descending for consistent display order within groups
@@ -241,7 +231,7 @@ export default function CampaignsPage() {
       const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
       return dateB - dateA;
     });
-  }, [campaigns, yearFilter, monthFilter, productFilter, strategyFilter]);
+  }, [campaigns, yearFilter, monthFilter, productFilter]);
 
   // Helper para obter o número do mês da primeira parte de uma string (ex: 'Jan/Fev' -> 0)
   const getFirstMonthIndex = (monthStr: string) => {
@@ -329,32 +319,6 @@ export default function CampaignsPage() {
             <SelectItem value="all">Todos os Meses</SelectItem>
             {MONTHS.map(m => (
               <SelectItem key={m} value={m}>{m}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        {/* Filtro de Produto (Select) */}
-        <Select value={productFilter} onValueChange={setProductFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Produto" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os Produtos</SelectItem>
-            {productNames.map(p => (
-              <SelectItem key={p} value={p}>{p}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        {/* Filtro de Estratégia (Select) */}
-        <Select value={strategyFilter} onValueChange={setStrategyFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Estratégia" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as Estratégias</SelectItem>
-            {strategies.map(s => (
-              <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
           </SelectContent>
         </Select>
