@@ -80,7 +80,7 @@ export default function WeeklyResultsPage() {
       header: 'Custo Campanhas',
       className: 'text-right',
       render: (item: WeeklyResult) => (
-        <span className="text-destructive">{formatCurrency(item.campaignCosts)}</span>
+        <span className="text-high-contrast">{formatCurrency(item.campaignCosts)}</span>
       ),
     },
     {
@@ -93,7 +93,7 @@ export default function WeeklyResultsPage() {
           <div className="flex items-center gap-2">
             <div className="relative h-5 w-16 rounded-sm bg-muted">
               <div
-                className="absolute left-0 top-0 h-full rounded-sm bg-success/70"
+                className="absolute left-0 top-0 h-full rounded-sm bg-warning/70" // Alterado para laranja (warning)
                 style={{ width: `${barWidth}%` }}
               />
             </div>
