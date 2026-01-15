@@ -120,13 +120,17 @@ export default function ProductsPage() {
     },
   ], [updateProduct]);
 
-  // Sort products by date descending (most recent first, then by productNumber descending)
+  // Sort products primarily by productNumber descending (most recent product number first)
   const sortedProducts = useMemo(() => {
     return [...products].sort((a, b) => {
+      // Primary sort: productNumber descending
+      if (b.productNumber !== a.productNumber) {
+        return b.productNumber - a.productNumber;
+      }
+      // Secondary sort (optional, but good practice): date descending
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
-      if (dateB !== dateA) return dateB - dateA;
-      return b.productNumber - a.productNumber;
+      return dateB - dateA;
     });
   }, [products]);
 
