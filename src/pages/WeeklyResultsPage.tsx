@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Plus, Download, Upload, Filter, X, Pencil, Trash2 } from "lucide-react";
+import { Plus, Download, Upload, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency, getProfitLossColor, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { WeeklyResult, MONTHS } from "@/types";
 import { cn } from "@/lib/utils";
@@ -13,11 +13,9 @@ import { EditWeeklyResultDialog } from "@/components/dialogs/EditWeeklyResultDia
 import { exportWeeklyResults } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
 import { PageContent } from "@/components/PageContent";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -30,7 +28,7 @@ const getWeekNumber = (week: string): number => {
 // Get month number from month name (handles abbreviations and composite months like Jan/Fev)
 const getMonthNumber = (month: string): number => {
   // Normaliza a string do mês para sua abreviação antes de encontrar o índice
-  const normalizedAbbr = normalizeMonthToAbbreviation(month.split('/')[0].trim()); // Usa a nova utilidade
+  const normalizedAbbr = normalizeMonthToAbbreviation(month.split('/')[0].trim());
   const index = MONTHS.findIndex(m => m === normalizedAbbr);
   // Return 1-based month number (1 for Jan, 12 for Dez). If not found, return 0.
   return index >= 0 ? index + 1 : 0;
@@ -44,7 +42,7 @@ export default function WeeklyResultsPage() {
 
   // Calculate max sales across all results for consistent bar scaling
   const maxSales = useMemo(() => {
-    return Math.max(...weeklyResults.map(r => r.sales), 1); // Ensure at least 1 to prevent division by zero
+    return Math.max(...weeklyResults.map(r => r.sales), 1);
   }, [weeklyResults]);
 
   // Define columns inside the component to use updateWeeklyResult and removeWeeklyResult
@@ -65,7 +63,7 @@ export default function WeeklyResultsPage() {
     },
     {
       key: 'month',
-      header: 'Mês', // Changed from 'Mês/Ano' as year is now in card title
+      header: 'Mês',
       render: (item: WeeklyResult) => (
         <span className="font-medium">{item.month}</span>
       ),
@@ -81,12 +79,12 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      className: 'w-28 text-left', // Adjusted width for the column
+      className: 'w-28 text-left',
       render: (item: WeeklyResult) => {
-        const barWidth = (item.sales / maxSales) * 100; // Percentage width
+        const barWidth = (item.sales / maxSales) * 100;
         return (
           <div className="flex items-center gap-2">
-            <div className="relative h-5 w-16 rounded-sm bg-muted"> {/* Adjusted width for the bar container */}
+            <div className="relative h-5 w-16 rounded-sm bg-muted">
               <div
                 className="absolute left-0 top-0 h-full rounded-sm bg-success/70"
                 style={{ width: `${barWidth}%` }}
@@ -196,20 +194,14 @@ export default function WeeklyResultsPage() {
       filtered = filtered.filter(r => r.year === parseInt(yearFilter));
     }
     if (monthFilter !== "all") {
-      // Normaliza o mês do resultado para comparação com o filtro
       filtered = filtered.filter(r => normalizeMonthToAbbreviation(r.month) === monthFilter);
     }
 
     return [...filtered].sort((a, b) => {
-      // 1. Compare by year (descending)
       if (b.year !== a.year) return b.year - a.year;
-      
-      // 2. Then by month (descending) - using the first month for sorting
       const monthA = getMonthNumber(a.month);
       const monthB = getMonthNumber(b.month);
       if (monthB !== monthA) return monthB - monthA;
-      
-      // 3. Finally by week number (descending)
       return getWeekNumber(b.week) - getWeekNumber(a.week);
     });
   }, [weeklyResults, yearFilter, monthFilter]);
@@ -223,16 +215,8 @@ export default function WeeklyResultsPage() {
       }
       groups.get(result.year)!.push(result);
     }
-    // Sort years descending
     return Array.from(groups.entries()).sort((a, b) => b[0] - a[0]);
   }, [filteredAndSortedResults]);
-
-  const hasFilters = yearFilter !== "all" || monthFilter !== "all";
-
-  const clearFilters = () => {
-    setYearFilter("all");
-    setMonthFilter("all");
-  };
 
   const handleExport = () => {
     if (filteredAndSortedResults.length === 0) {
@@ -250,7 +234,7 @@ export default function WeeklyResultsPage() {
         description="Acompanhe seus resultados semana a semana"
       >
         <Select value={yearFilter} onValueChange={setYearFilter}>
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-36">
             <SelectValue placeholder="Ano" />
           </SelectTrigger>
           <SelectContent>
@@ -261,42 +245,17 @@ export default function WeeklyResultsPage() {
           </SelectContent>
         </Select>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={hasFilters ? "border-primary" : ""}>
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-              {hasFilters && <Badge className="ml-2" variant="secondary">Ativos</Badge>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64" align="end">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Filtros</h4>
-                {hasFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    <X className="w-4 h-4 mr-1" />
-                    Limpar
-                  </Button>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mês</label>
-                <Select value={monthFilter} onValueChange={setMonthFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MONTHS.map(m => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Select value={monthFilter} onValueChange={setMonthFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Mês" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Meses</SelectItem>
+            {MONTHS.map(m => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <ImportExcelDialog onImportComplete={importData}>
           <Button variant="outline" size="sm">

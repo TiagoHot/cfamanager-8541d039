@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-// Removed ThemeToggle import
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -33,6 +33,8 @@ export function AppLayout() {
             <SidebarTrigger className="-ml-2" />
             <div className="flex-1" />
             
+            <ThemeToggle />
+
             {isLoading && (
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -40,7 +42,7 @@ export function AppLayout() {
               </div>
             )}
 
-            {/* Removed ThemeToggle component */}
+            
 
             {user && (
               <DropdownMenu>

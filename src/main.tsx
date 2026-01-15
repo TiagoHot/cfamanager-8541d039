@@ -1,9 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-// Removed ThemeProvider import
+import { ThemeProvider } from "./components/ThemeProvider";
 
 createRoot(document.getElementById("root")!).render(
-  // Removed ThemeProvider wrapper
-  <App />
+  <ThemeProvider defaultTheme="dark" storageKey="cfa-ui-theme">
+    <App />
+  </ThemeProvider>
 );
