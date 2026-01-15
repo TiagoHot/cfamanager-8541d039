@@ -51,10 +51,10 @@ const getCategoryStyling = (categoryName: string) => {
 
   switch (categoryName) {
     case 'Brasil':
-      cardBgClass = 'bg-success/5'; // Lighter background
-      cardBorderClass = 'border-success/20';
-      cardTextClass = 'text-success';
-      circleBgClass = 'bg-success';
+      cardBgClass = 'bg-warning/5'; // Changed from success to warning
+      cardBorderClass = 'border-warning/20';
+      cardTextClass = 'text-warning';
+      circleBgClass = 'bg-warning';
       break;
     case 'Gringa':
       cardBgClass = 'bg-info/5';
@@ -63,10 +63,10 @@ const getCategoryStyling = (categoryName: string) => {
       circleBgClass = 'bg-info';
       break;
     case 'Pesquisa':
-      cardBgClass = 'bg-warning/5';
-      cardBorderClass = 'border-warning/20';
-      cardTextClass = 'text-warning';
-      circleBgClass = 'bg-warning';
+      cardBgClass = 'bg-success/5'; // Using success for Pesquisa
+      cardBorderClass = 'border-success/20';
+      cardTextClass = 'text-success';
+      circleBgClass = 'bg-success';
       break;
     case 'Display':
       cardBgClass = 'bg-chart-5/5'; // Purple-ish
@@ -98,11 +98,11 @@ const getCategoryStyling = (categoryName: string) => {
       cardTextClass = 'text-chart-6';
       circleBgClass = 'bg-chart-6';
       break;
-    case 'Instream/Feed': // New strategy
-      cardBgClass = 'bg-chart-5/10'; // Using chart-5 (Purple/Magenta) for a 'pink' feel
-      cardBorderClass = 'border-chart-5/30';
-      cardTextClass = 'text-chart-5';
-      circleBgClass = 'bg-chart-5';
+    case 'Instream/Feed': // New strategy - Changed to use chart-4 (Red/Destructive)
+      cardBgClass = 'bg-chart-4/10'; 
+      cardBorderClass = 'border-chart-4/30';
+      cardTextClass = 'text-chart-4';
+      circleBgClass = 'bg-chart-4';
       break;
     default:
       cardBgClass = 'bg-secondary/5';
