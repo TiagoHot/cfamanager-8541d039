@@ -54,6 +54,8 @@ export default function CampaignsPage() {
       key: 'daysRunning',
       header: 'Dias',
       className: 'w-16 text-center',
+      accessorKey: 'daysRunning', // Adicionado accessorKey
+      sortable: true, // Tornando dias rodando ordenável também
       render: (item: CampaignResult) => (
         <span>{item.daysRunning}</span>
       ),
@@ -61,6 +63,7 @@ export default function CampaignsPage() {
     {
       key: 'productName',
       header: 'Produto',
+      accessorKey: 'productName',
       render: (item: CampaignResult) => (
         <span className="font-medium">{item.productName}</span>
       ),
@@ -68,6 +71,7 @@ export default function CampaignsPage() {
     {
       key: 'location',
       header: 'Local',
+      accessorKey: 'location',
       render: (item: CampaignResult) => {
         const isBrasil = item.location === 'Brasil';
         const variantClass = isBrasil 
@@ -84,6 +88,7 @@ export default function CampaignsPage() {
     {
       key: 'strategy',
       header: 'Estratégia',
+      accessorKey: 'strategy',
       render: (item: CampaignResult) => (
         <Badge variant="outline">{item.strategy}</Badge>
       ),
@@ -92,7 +97,8 @@ export default function CampaignsPage() {
       key: 'impressions',
       header: 'Impressões',
       className: 'text-right',
-      sortable: true, // Adicionado ordenação
+      accessorKey: 'impressions', // Adicionado accessorKey
+      sortable: true, 
       render: (item: CampaignResult) => (
         <span>{formatNumber(item.impressions)}</span>
       ),
@@ -101,7 +107,8 @@ export default function CampaignsPage() {
       key: 'clicks',
       header: 'Cliques',
       className: 'text-right',
-      sortable: true, // Adicionado ordenação
+      accessorKey: 'clicks', // Adicionado accessorKey
+      sortable: true, 
       render: (item: CampaignResult) => (
         <span>{formatNumber(item.clicks)}</span>
       ),
@@ -110,7 +117,8 @@ export default function CampaignsPage() {
       key: 'sales',
       header: 'Vendas',
       className: 'text-center',
-      sortable: true, // Adicionado ordenação
+      accessorKey: 'sales', // Adicionado accessorKey
+      sortable: true, 
       render: (item: CampaignResult) => (
         <span className={cn("font-bold", item.sales > 0 ? "text-warning" : "text-muted-foreground")}>
           {item.sales}
@@ -121,7 +129,8 @@ export default function CampaignsPage() {
       key: 'earnings',
       header: 'Ganhos',
       className: 'text-right',
-      sortable: true, // Adicionado ordenação
+      accessorKey: 'earnings', // Adicionado accessorKey
+      sortable: true, 
       render: (item: CampaignResult) => (
         <span className="text-success">{formatCurrency(item.earnings)}</span>
       ),
@@ -130,7 +139,8 @@ export default function CampaignsPage() {
       key: 'costs',
       header: 'Custos',
       className: 'text-right',
-      sortable: true, // Adicionado ordenação
+      accessorKey: 'costs', // Adicionado accessorKey
+      sortable: true, 
       render: (item: CampaignResult) => (
         <span className="text-destructive">{formatCurrency(item.costs)}</span>
       ),
@@ -139,7 +149,8 @@ export default function CampaignsPage() {
       key: 'profitLoss',
       header: 'Lucro/Prejuízo',
       className: 'text-right',
-      sortable: true, // Adicionado ordenação
+      accessorKey: 'profitLoss', // Adicionado accessorKey
+      sortable: true, 
       render: (item: CampaignResult) => (
         <span className={cn("font-medium", getProfitLossColor(item.profitLoss))}>
           {formatCurrency(item.profitLoss)}
@@ -150,6 +161,7 @@ export default function CampaignsPage() {
       key: 'roi',
       header: 'ROI',
       className: 'text-right',
+      accessorKey: 'roi', // Adicionado accessorKey, mas o sortFn é mais importante aqui
       // Usamos uma função de ordenação customizada para garantir que o cálculo seja feito corretamente
       sortFn: (a: CampaignResult, b: CampaignResult) => {
         const roiA = calculateROI(a.profitLoss, a.costs);
@@ -377,7 +389,7 @@ export default function CampaignsPage() {
                   columns={columns}
                   // Removendo sticky header, pois o PageContent já gerencia a rolagem
                 />
-              </CardContent>
+              </燴Content>
             </Card>
           ))
         )}
