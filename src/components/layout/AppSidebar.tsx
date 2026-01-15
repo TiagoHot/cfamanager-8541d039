@@ -70,7 +70,7 @@ export function AppSidebar() {
           {/* Mantendo o Collapsible aberto por padrão para visibilidade total */}
           <Collapsible defaultOpen={true}>
             <CollapsibleTrigger className="w-full">
-              <SidebarGroupLabel className="flex items-center justify-between px-2 text-sm font-semibold text-sidebar-foreground/80 hover:text-sidebar-foreground transition-colors cursor-pointer">
+              <SidebarGroupLabel className="flex items-center justify-between px-2 text-base font-semibold text-sidebar-foreground/80 hover:text-sidebar-foreground transition-colors cursor-pointer">
                 <span>Dados</span>
                 <ChevronDown className="w-4 h-4" />
               </SidebarGroupLabel>
@@ -96,7 +96,7 @@ export function AppSidebar() {
           {/* Mantendo o Collapsible aberto por padrão para visibilidade total */}
           <Collapsible defaultOpen={true}>
             <CollapsibleTrigger className="w-full">
-              <SidebarGroupLabel className="flex items-center justify-between px-2 text-sm font-semibold text-sidebar-foreground/80 hover:text-sidebar-foreground transition-colors cursor-pointer">
+              <SidebarGroupLabel className="flex items-center justify-between px-2 text-base font-semibold text-sidebar-foreground/80 hover:text-sidebar-foreground transition-colors cursor-pointer">
                 <span>Dashboards</span>
                 <ChevronDown className="w-4 h-4" />
               </SidebarGroupLabel>
