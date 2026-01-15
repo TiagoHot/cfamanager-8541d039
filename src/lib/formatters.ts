@@ -39,9 +39,9 @@ export function getProfitLossColor(value: number): string {
 }
 
 export function getROIColor(value: number): string {
-  if (value > 50) return 'text-success';
-  if (value > 0) return 'text-warning';
-  return 'text-destructive';
+  if (value > 0) return 'text-success'; // Qualquer ROI positivo é verde
+  if (value < 0) return 'text-destructive'; // Qualquer ROI negativo é vermelho
+  return 'text-warning'; // ROI zero (breakeven) é laranja
 }
 
 // Mapeamento de nomes de meses completos para abreviações
