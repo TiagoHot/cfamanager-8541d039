@@ -185,7 +185,7 @@ export default function CashFlowPage() {
                       <Line 
                         type="monotone" 
                         dataKey="acumulado" 
-                        stroke="hsl(var(--chart-5))" // Usando chart-5 (roxo/magenta)
+                        stroke="hsl(var(--chart-5))" 
                         strokeWidth={3}
                         dot={{ fill: 'hsl(var(--chart-5))' }}
                       />
@@ -252,8 +252,8 @@ export default function CashFlowPage() {
                       <th className="text-left py-3 px-4 font-semibold">Mês</th>
                       <th className="text-right py-3 px-4 font-semibold text-success">Receitas</th>
                       <th className="text-right py-3 px-4 font-semibold text-destructive">Despesas</th>
-                      <th className="text-right py-3 px-4 font-semibold">Saldo</th>
-                      <th className="text-right py-3 px-4 font-semibold text-chart-5">Acumulado</th>
+                      <th className="text-right py-3 px-4 font-semibold text-info">Saldo</th>
+                      <th className="text-right py-3 px-4 font-semibold text-primary-foreground">Acumulado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -262,20 +262,20 @@ export default function CashFlowPage() {
                         <td className="py-3 px-4 font-medium">{month.month}</td>
                         <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(month.income)}</td>
                         <td className="py-3 px-4 text-right font-medium text-destructive">{formatCurrency(month.expenses)}</td>
-                        <td className={cn("py-3 px-4 text-right font-medium", month.balance >= 0 ? 'text-success' : 'text-destructive')}>
+                        <td className="py-3 px-4 text-right font-medium text-info">
                           {formatCurrency(month.balance)}
                         </td>
-                        <td className="py-3 px-4 text-right font-medium text-chart-5">{formatCurrency(month.accumulatedBalance)}</td>
+                        <td className="py-3 px-4 text-right font-medium text-primary-foreground">{formatCurrency(month.accumulatedBalance)}</td>
                       </tr>
                     ))}
                     <tr className="bg-muted/50 font-bold">
                       <td className="py-3 px-4">Total</td>
                       <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(cashFlowData.totalIncome)}</td>
                       <td className="py-3 px-4 text-right font-medium text-destructive">{formatCurrency(cashFlowData.totalExpenses)}</td>
-                      <td className={cn("py-3 px-4 text-right font-medium", cashFlowData.totalProfit >= 0 ? 'text-success' : 'text-destructive')}>
+                      <td className="py-3 px-4 text-right font-medium text-info">
                         {formatCurrency(cashFlowData.totalProfit)}
                       </td>
-                      <td className="py-3 px-4 text-right font-medium text-chart-5">{formatCurrency(cashFlowData.totalProfit)}</td>
+                      <td className="py-3 px-4 text-right font-medium text-primary-foreground">{formatCurrency(cashFlowData.totalProfit)}</td>
                     </tr>
                   </tbody>
                 </table>
