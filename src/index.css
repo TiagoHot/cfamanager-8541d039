@@ -197,6 +197,14 @@
   .bg-info {
     background-color: hsl(var(--info));
   }
+  
+  /* High contrast white/black text for visibility */
+  .text-high-contrast {
+    color: hsl(var(--foreground)); /* Black in light mode */
+  }
+  .dark .text-high-contrast {
+    color: #ffffff; /* White in dark mode */
+  }
 
   .card-hover {
     @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;

@@ -253,7 +253,7 @@ export default function CashFlowPage() {
                       <th className="text-right py-3 px-4 font-semibold text-success">Receitas</th>
                       <th className="text-right py-3 px-4 font-semibold text-destructive">Despesas</th>
                       <th className="text-right py-3 px-4 font-semibold text-info">Saldo</th>
-                      <th className="text-right py-3 px-4 font-semibold text-primary-foreground">Acumulado</th>
+                      <th className="text-right py-3 px-4 font-semibold text-high-contrast">Acumulado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -265,7 +265,7 @@ export default function CashFlowPage() {
                         <td className="py-3 px-4 text-right font-medium text-info">
                           {formatCurrency(month.balance)}
                         </td>
-                        <td className="py-3 px-4 text-right font-medium text-primary-foreground">{formatCurrency(month.accumulatedBalance)}</td>
+                        <td className="py-3 px-4 text-right font-medium text-high-contrast">{formatCurrency(month.accumulatedBalance)}</td>
                       </tr>
                     ))}
                     <tr className="bg-muted/50 font-bold">
@@ -275,7 +275,7 @@ export default function CashFlowPage() {
                       <td className="py-3 px-4 text-right font-medium text-info">
                         {formatCurrency(cashFlowData.totalProfit)}
                       </td>
-                      <td className="py-3 px-4 text-right font-medium text-primary-foreground">{formatCurrency(cashFlowData.totalProfit)}</td>
+                      <td className="py-3 px-4 text-right font-medium text-high-contrast">{formatCurrency(cashFlowData.totalProfit)}</td>
                     </tr>
                   </tbody>
                 </table>
