@@ -3,18 +3,30 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload } from "lucide-react";
+import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency, formatDate, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { IncomeExpense, MONTHS } from "@/types";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 import { AddIncomeExpenseDialog } from "@/components/dialogs/AddIncomeExpenseDialog";
+import { EditIncomeExpenseDialog } from "@/components/dialogs/EditIncomeExpenseDialog"; // NEW
 import { exportIncomeExpenses } from "@/lib/exportData";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageContent } from "@/components/PageContent";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // NEW
 
 // Helper para obter o número do mês para ordenação (1 para Jan, 12 para Dez)
 const getMonthNumber = (month: string): number => {
@@ -23,76 +35,8 @@ const getMonthNumber = (month: string): number => {
   return index >= 0 ? index + 1 : 0;
 };
 
-// Colunas específicas para Receitas (coluna da esquerda)
-const incomeColumns = [
-  {
-    key: 'date',
-    header: 'Data',
-    className: 'w-20',
-    render: (item: IncomeExpense) => formatDate(item.date),
-  },
-  {
-    key: 'source',
-    header: 'Fonte',
-    render: (item: IncomeExpense) => (
-      <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
-        {item.source}
-      </Badge>
-    ),
-  },
-  {
-    key: 'details',
-    header: 'Nota',
-    render: (item: IncomeExpense) => (
-      <span className="text-sm text-muted-foreground">{item.details || '-'}</span>
-    ),
-  },
-  {
-    key: 'amount',
-    header: 'Valor',
-    className: 'text-right w-24',
-    render: (item: IncomeExpense) => (
-      <span className="font-medium text-success">{formatCurrency(item.amount)}</span>
-    ),
-  },
-];
-
-// Colunas específicas para Despesas (coluna da direita)
-const expenseColumns = [
-  {
-    key: 'date',
-    header: 'Data',
-    className: 'w-20',
-    render: (item: IncomeExpense) => formatDate(item.date),
-  },
-  {
-    key: 'source',
-    header: 'Fonte',
-    render: (item: IncomeExpense) => (
-      <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
-        {item.source}
-      </Badge>
-    ),
-  },
-  {
-    key: 'details',
-    header: 'Nota',
-    render: (item: IncomeExpense) => (
-      <span className="text-sm text-muted-foreground">{item.details || '-'}</span>
-    ),
-  },
-  {
-    key: 'amount',
-    header: 'Valor',
-    className: 'text-right w-24',
-    render: (item: IncomeExpense) => (
-      <span className="font-medium text-destructive">{formatCurrency(item.amount)}</span>
-    ),
-  },
-];
-
 export default function FinancialPage() {
-  const { incomeExpenses, importData, addIncomeExpense } = useData();
+  const { incomeExpenses, importData, addIncomeExpense, updateIncomeExpense, removeIncomeExpense } = useData();
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
@@ -102,6 +46,122 @@ export default function FinancialPage() {
     const uniqueYears = [...new Set(incomeExpenses.map(i => i.year))].sort((a, b) => b - a);
     return uniqueYears;
   }, [incomeExpenses]);
+
+  // Define action column renderer
+  const actionColumn = (item: IncomeExpense) => (
+    <div className="flex items-center justify-center gap-1">
+      <EditIncomeExpenseDialog item={item} onUpdate={updateIncomeExpense}>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Pencil className="w-4 h-4" />
+        </Button>
+      </EditIncomeExpenseDialog>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Registro</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover o registro de {item.type === 'income' ? 'Receita' : 'Despesa'} 
+              de <strong>{formatCurrency(item.amount)}</strong> ({item.source})? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removeIncomeExpense(item.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+
+  // Colunas específicas para Receitas (coluna da esquerda)
+  const incomeColumns = useMemo(() => [
+    {
+      key: 'date',
+      header: 'Data',
+      className: 'w-20',
+      render: (item: IncomeExpense) => formatDate(item.date),
+    },
+    {
+      key: 'source',
+      header: 'Fonte',
+      render: (item: IncomeExpense) => (
+        <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+          {item.source}
+        </Badge>
+      ),
+    },
+    {
+      key: 'details',
+      header: 'Nota',
+      render: (item: IncomeExpense) => (
+        <span className="text-sm text-muted-foreground">{item.details || '-'}</span>
+      ),
+    },
+    {
+      key: 'amount',
+      header: 'Valor',
+      className: 'text-right w-24',
+      render: (item: IncomeExpense) => (
+        <span className="font-medium text-success">{formatCurrency(item.amount)}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Ações',
+      className: 'w-24 text-center',
+      render: actionColumn,
+    },
+  ], [updateIncomeExpense, removeIncomeExpense]);
+
+  // Colunas específicas para Despesas (coluna da direita)
+  const expenseColumns = useMemo(() => [
+    {
+      key: 'date',
+      header: 'Data',
+      className: 'w-20',
+      render: (item: IncomeExpense) => formatDate(item.date),
+    },
+    {
+      key: 'source',
+      header: 'Fonte',
+      render: (item: IncomeExpense) => (
+        <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
+          {item.source}
+        </Badge>
+      ),
+    },
+    {
+      key: 'details',
+      header: 'Nota',
+      render: (item: IncomeExpense) => (
+        <span className="text-sm text-muted-foreground">{item.details || '-'}</span>
+      ),
+    },
+    {
+      key: 'amount',
+      header: 'Valor',
+      className: 'text-right w-24',
+      render: (item: IncomeExpense) => (
+        <span className="font-medium text-destructive">{formatCurrency(item.amount)}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Ações',
+      className: 'w-24 text-center',
+      render: actionColumn,
+    },
+  ], [updateIncomeExpense, removeIncomeExpense]);
 
   // Filter items
   const filteredItems = useMemo(() => {
@@ -271,7 +331,6 @@ export default function FinancialPage() {
                       <DataTable 
                         data={monthlyIncomes} 
                         columns={incomeColumns}
-                        // Removendo sticky header aqui, pois a rolagem é gerenciada pelo PageContent
                       />
                     </div>
 

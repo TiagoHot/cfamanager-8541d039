@@ -1,0 +1,378 @@
+import { useState, useMemo, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { CampaignResult, MONTHS, Product } from '@/types';
+import { toast } from 'sonner';
+import { Globe, Flag, Pencil, Save } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { differenceInDays, parseISO } from 'date-fns';
+import { useData } from '@/contexts/DataContext';
+
+interface EditCampaignDialogProps {
+  campaign: CampaignResult;
+  onUpdate: (campaign: CampaignResult) => void;
+  children: React.ReactNode;
+  products: Product[];
+}
+
+const STRATEGIES = ['Pesquisa', 'Display', 'YouTube', 'Shopping', 'Performance Max', 'Discovery'];
+const LOCATIONS = ['Brasil', 'Gringa'];
+
+export function EditCampaignDialog({ campaign, onUpdate, children, products }: EditCampaignDialogProps) {
+  const [open, setOpen] = useState(false);
+  const currentYear = new Date().getFullYear();
+  
+  const [formData, setFormData] = useState({
+    productName: campaign.productName,
+    year: campaign.year.toString(),
+    month: campaign.month,
+    monthNumber: campaign.monthNumber,
+    startDate: campaign.startDate,
+    endDate: campaign.endDate,
+    location: campaign.location,
+    strategy: campaign.strategy,
+    impressions: campaign.impressions.toString(),
+    clicks: campaign.clicks.toString(),
+    sales: campaign.sales.toString(),
+    earnings: campaign.earnings.toString(),
+    costs: campaign.costs.toString(),
+  });
+
+  // Reset form data when dialog opens or campaign prop changes
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        productName: campaign.productName,
+        year: campaign.year.toString(),
+        month: campaign.month,
+        monthNumber: campaign.monthNumber,
+        startDate: campaign.startDate,
+        endDate: campaign.endDate,
+        location: campaign.location,
+        strategy: campaign.strategy,
+        impressions: campaign.impressions.toString(),
+        clicks: campaign.clicks.toString(),
+        sales: campaign.sales.toString(),
+        earnings: campaign.earnings.toString(),
+        costs: campaign.costs.toString(),
+      });
+    }
+  }, [open, campaign]);
+
+  // Calculate daysRunning dynamically
+  const daysRunning = useMemo(() => {
+    if (formData.startDate && formData.endDate) {
+      try {
+        const start = parseISO(formData.startDate);
+        const end = parseISO(formData.endDate);
+        const days = differenceInDays(end, start) + 1;
+        return days > 0 ? days : 0;
+      } catch {
+        return 0;
+      }
+    }
+    return 0;
+  }, [formData.startDate, formData.endDate]);
+
+  // Filter products based on selected location
+  const filteredProducts = useMemo(() => {
+    const location = formData.location;
+    return products
+      .filter(p => p.country === location)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [products, formData.location]);
+
+  // Handle location change and ensure product name is valid
+  const handleLocationChange = (newLocation: string) => {
+    setFormData(prev => {
+      const productsInNewLocation = products.filter(p => p.country === newLocation);
+      const isCurrentProductValid = productsInNewLocation.some(p => p.name === prev.productName);
+      return {
+        ...prev,
+        location: newLocation,
+        productName: isCurrentProductValid ? prev.productName : '', // Clear product if invalid
+      };
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.productName.trim()) {
+      toast.error('Nome do produto é obrigatório');
+      return;
+    }
+    
+    if (!formData.endDate) {
+      toast.error('Data Fim é obrigatória para calcular os dias rodando');
+      return;
+    }
+
+    const calculatedDaysRunning = daysRunning;
+    if (calculatedDaysRunning <= 0) {
+      toast.error('A Data Fim deve ser igual ou posterior à Data Início');
+      return;
+    }
+
+    const earnings = parseFloat(formData.earnings) || 0;
+    const costs = parseFloat(formData.costs) || 0;
+    const clicks = parseInt(formData.clicks) || 0;
+    const profitLoss = earnings - costs;
+    const roi = costs > 0 ? ((earnings - costs) / costs) * 100 : 0;
+    const cpc = clicks > 0 ? costs / clicks : 0;
+    
+    // Find commission BRL from the product list (or use existing if product not found)
+    const product = products.find(p => p.name === formData.productName);
+    const commissionBRL = product?.commissionBRL || campaign.commissionBRL;
+
+    const updatedCampaign: CampaignResult = {
+      ...campaign,
+      year: parseInt(formData.year),
+      monthNumber: formData.monthNumber,
+      month: formData.month,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      daysRunning: calculatedDaysRunning,
+      productName: formData.productName,
+      niche: product?.niche || campaign.niche,
+      location: formData.location,
+      strategy: formData.strategy,
+      commissionBRL,
+      impressions: parseInt(formData.impressions) || 0,
+      clicks,
+      sales: parseInt(formData.sales) || 0,
+      cpc,
+      earnings,
+      costs,
+      profitLoss,
+      roi,
+    };
+
+    onUpdate(updatedCampaign);
+    toast.success('Campanha atualizada com sucesso!');
+    setOpen(false);
+  };
+
+  const handleMonthChange = (month: string) => {
+    const monthIndex = MONTHS.findIndex(m => m === month);
+    setFormData(prev => ({
+      ...prev,
+      month,
+      monthNumber: monthIndex + 1,
+    }));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil className="w-5 h-5" />
+            Editar Campanha: {campaign.productName} ({campaign.month}/{campaign.year})
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Location Selector */}
+          <div className="space-y-2">
+            <Label>Localização da Campanha *</Label>
+            <ToggleGroup 
+              type="single" 
+              value={formData.location} 
+              onValueChange={(v) => v && handleLocationChange(v)}
+              className="grid grid-cols-2 gap-2"
+            >
+              {LOCATIONS.map(loc => (
+                <ToggleGroupItem 
+                  key={loc} 
+                  value={loc} 
+                  className={cn(
+                    "py-3 px-4 rounded-lg border transition-all duration-200",
+                    formData.location === loc 
+                      ? "bg-warning/10 border-warning text-warning shadow-md" 
+                      : "bg-secondary/50 border-secondary text-secondary-foreground hover:bg-secondary"
+                  )}
+                >
+                  {loc === 'Brasil' ? <Flag className="w-4 h-4 mr-2" /> : <Globe className="w-4 h-4 mr-2" />}
+                  {loc}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <Label htmlFor="productName">Nome do Produto *</Label>
+              <Select 
+                value={formData.productName} 
+                onValueChange={(v) => setFormData(prev => ({ ...prev, productName: v }))}
+                disabled={filteredProducts.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={filteredProducts.length > 0 ? "Selecione um produto" : `Nenhum produto em ${formData.location}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredProducts.map(p => (
+                    <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="year">Ano</Label>
+              <Select value={formData.year} onValueChange={(v) => setFormData(prev => ({ ...prev, year: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[currentYear, currentYear - 1, currentYear - 2].map(y => (
+                    <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="month">Mês</Label>
+              <Select value={formData.month} onValueChange={handleMonthChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map(m => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="startDate">Data Início *</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="endDate">Data Fim *</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="daysRunningDisplay">Dias Rodando</Label>
+              <Input
+                id="daysRunningDisplay"
+                value={daysRunning > 0 ? daysRunning : '-'}
+                readOnly
+                disabled
+                className="bg-muted/50 text-center font-bold"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="strategy">Estratégia</Label>
+              <Select value={formData.strategy} onValueChange={(v) => setFormData(prev => ({ ...prev, strategy: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STRATEGIES.map(s => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <h4 className="font-medium mb-3">Métricas da Campanha</h4>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="impressions">Impressões</Label>
+                <Input
+                  id="impressions"
+                  type="number"
+                  value={formData.impressions}
+                  onChange={(e) => setFormData(prev => ({ ...prev, impressions: e.target.value }))}
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="clicks">Cliques</Label>
+                <Input
+                  id="clicks"
+                  type="number"
+                  value={formData.clicks}
+                  onChange={(e) => setFormData(prev => ({ ...prev, clicks: e.target.value }))}
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="sales">Vendas</Label>
+                <Input
+                  id="sales"
+                  type="number"
+                  value={formData.sales}
+                  onChange={(e) => setFormData(prev => ({ ...prev, sales: e.target.value }))}
+                  placeholder="0"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="earnings">Ganhos (R$)</Label>
+                <Input
+                  id="earnings"
+                  type="number"
+                  step="0.01"
+                  value={formData.earnings}
+                  onChange={(e) => setFormData(prev => ({ ...prev, earnings: e.target.value }))}
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="costs">Custos (R$)</Label>
+                <Input
+                  id="costs"
+                  type="number"
+                  step="0.01"
+                  value={formData.costs}
+                  onChange={(e) => setFormData(prev => ({ ...prev, costs: e.target.value }))}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit">
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Alterações
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

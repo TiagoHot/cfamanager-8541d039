@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Filter, Upload, X } from "lucide-react";
+import { Plus, Download, Upload, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency, formatNumber, formatPercent, getProfitLossColor, getROIColor, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { CampaignResult, MONTHS } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,122 +11,171 @@ import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
 import { AddCampaignDialog } from "@/components/dialogs/AddCampaignDialog";
+import { EditCampaignDialog } from "@/components/dialogs/EditCampaignDialog"; // NEW
 import { exportCampaigns } from "@/lib/exportData";
 import { toast } from "sonner";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PageContent } from "@/components/PageContent";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Colunas da tabela (sem a coluna Mês/Ano, que agora está no Card Header)
-const columns = [
-  {
-    key: 'daysRunning',
-    header: 'Dias',
-    className: 'w-16 text-center',
-    render: (item: CampaignResult) => (
-      <span>{item.daysRunning}</span>
-    ),
-  },
-  {
-    key: 'productName',
-    header: 'Produto',
-    render: (item: CampaignResult) => (
-      <span className="font-medium">{item.productName}</span>
-    ),
-  },
-  {
-    key: 'location',
-    header: 'Local',
-    render: (item: CampaignResult) => {
-      const isBrasil = item.location === 'Brasil';
-      const variantClass = isBrasil 
-        ? "bg-success/10 text-success border-success/20 hover:bg-success/20" 
-        : "bg-info/10 text-info border-info/20 hover:bg-info/20";
-      
-      return (
-        <Badge className={cn("text-xs font-medium", variantClass)}>
-          {item.location}
-        </Badge>
-      );
-    },
-  },
-  {
-    key: 'strategy',
-    header: 'Estratégia',
-    render: (item: CampaignResult) => (
-      <Badge variant="outline">{item.strategy}</Badge>
-    ),
-  },
-  {
-    key: 'impressions',
-    header: 'Impressões',
-    className: 'text-right',
-    render: (item: CampaignResult) => (
-      <span>{formatNumber(item.impressions)}</span>
-    ),
-  },
-  {
-    key: 'clicks',
-    header: 'Cliques',
-    className: 'text-right',
-    render: (item: CampaignResult) => (
-      <span>{formatNumber(item.clicks)}</span>
-    ),
-  },
-  {
-    key: 'sales',
-    header: 'Vendas',
-    className: 'text-center',
-    render: (item: CampaignResult) => (
-      <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
-        {item.sales}
-      </span>
-    ),
-  },
-  {
-    key: 'earnings',
-    header: 'Ganhos',
-    className: 'text-right',
-    render: (item: CampaignResult) => (
-      <span className="text-success">{formatCurrency(item.earnings)}</span>
-    ),
-  },
-  {
-    key: 'costs',
-    header: 'Custos',
-    className: 'text-right',
-    render: (item: CampaignResult) => (
-      <span className="text-destructive">{formatCurrency(item.costs)}</span>
-    ),
-  },
-  {
-    key: 'profitLoss',
-    header: 'Lucro/Prejuízo',
-    className: 'text-right',
-    render: (item: CampaignResult) => (
-      <span className={cn("font-medium", getProfitLossColor(item.profitLoss))}>
-        {formatCurrency(item.profitLoss)}
-      </span>
-    ),
-  },
-  {
-    key: 'roi',
-    header: 'ROI',
-    className: 'text-right',
-    render: (item: CampaignResult) => (
-      <span className={cn("font-bold", getROIColor(item.roi))}>
-        {formatPercent(item.roi)}
-      </span>
-    ),
-  },
-];
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // NEW
 
 export default function CampaignsPage() {
-  const { campaigns, products, importData, addCampaign } = useData();
+  const { campaigns, products, importData, addCampaign, updateCampaign, removeCampaign } = useData();
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
   const [productFilter, setProductFilter] = useState<string>("all"); 
+
+  // Define columns inside the component to use updateCampaign/removeCampaign
+  const columns = useMemo(() => [
+    {
+      key: 'daysRunning',
+      header: 'Dias',
+      className: 'w-16 text-center',
+      render: (item: CampaignResult) => (
+        <span>{item.daysRunning}</span>
+      ),
+    },
+    {
+      key: 'productName',
+      header: 'Produto',
+      render: (item: CampaignResult) => (
+        <span className="font-medium">{item.productName}</span>
+      ),
+    },
+    {
+      key: 'location',
+      header: 'Local',
+      render: (item: CampaignResult) => {
+        const isBrasil = item.location === 'Brasil';
+        const variantClass = isBrasil 
+          ? "bg-success/10 text-success border-success/20 hover:bg-success/20" 
+          : "bg-info/10 text-info border-info/20 hover:bg-info/20";
+        
+        return (
+          <Badge className={cn("text-xs font-medium", variantClass)}>
+            {item.location}
+          </Badge>
+        );
+      },
+    },
+    {
+      key: 'strategy',
+      header: 'Estratégia',
+      render: (item: CampaignResult) => (
+        <Badge variant="outline">{item.strategy}</Badge>
+      ),
+    },
+    {
+      key: 'impressions',
+      header: 'Impressões',
+      className: 'text-right',
+      render: (item: CampaignResult) => (
+        <span>{formatNumber(item.impressions)}</span>
+      ),
+    },
+    {
+      key: 'clicks',
+      header: 'Cliques',
+      className: 'text-right',
+      render: (item: CampaignResult) => (
+        <span>{formatNumber(item.clicks)}</span>
+      ),
+    },
+    {
+      key: 'sales',
+      header: 'Vendas',
+      className: 'text-center',
+      render: (item: CampaignResult) => (
+        <span className={cn("font-bold", item.sales > 0 ? "text-success" : "text-muted-foreground")}>
+          {item.sales}
+        </span>
+      ),
+    },
+    {
+      key: 'earnings',
+      header: 'Ganhos',
+      className: 'text-right',
+      render: (item: CampaignResult) => (
+        <span className="text-success">{formatCurrency(item.earnings)}</span>
+      ),
+    },
+    {
+      key: 'costs',
+      header: 'Custos',
+      className: 'text-right',
+      render: (item: CampaignResult) => (
+        <span className="text-destructive">{formatCurrency(item.costs)}</span>
+      ),
+    },
+    {
+      key: 'profitLoss',
+      header: 'Lucro/Prejuízo',
+      className: 'text-right',
+      render: (item: CampaignResult) => (
+        <span className={cn("font-medium", getProfitLossColor(item.profitLoss))}>
+          {formatCurrency(item.profitLoss)}
+        </span>
+      ),
+    },
+    {
+      key: 'roi',
+      header: 'ROI',
+      className: 'text-right',
+      render: (item: CampaignResult) => (
+        <span className={cn("font-bold", getROIColor(item.roi))}>
+          {formatPercent(item.roi)}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Ações',
+      className: 'w-24 text-center',
+      render: (item: CampaignResult) => (
+        <div className="flex items-center justify-center gap-1">
+          <EditCampaignDialog campaign={item} onUpdate={updateCampaign} products={products}>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Pencil className="w-4 h-4" />
+            </Button>
+          </EditCampaignDialog>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Remover Campanha</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza que deseja remover a campanha <strong>{item.productName} ({item.month}/{item.year})</strong>? Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => removeCampaign(item.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Remover
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      ),
+    },
+  ], [updateCampaign, removeCampaign, products]);
 
   // Get unique years for filters
   const years = useMemo(() => {

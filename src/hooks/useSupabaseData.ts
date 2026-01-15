@@ -213,6 +213,57 @@ export function useSupabaseData() {
     }
     return true;
   }, [user]);
+  
+  const updateCampaignInDB = useCallback(async (campaign: CampaignResult): Promise<boolean> => {
+    if (!user) return false;
+    
+    const { error } = await supabase
+      .from('campaign_results')
+      .update({
+        year: campaign.year,
+        month_number: campaign.monthNumber,
+        month: campaign.month,
+        start_date: formatDateToISO(campaign.startDate),
+        end_date: formatDateToISO(campaign.endDate),
+        days_running: campaign.daysRunning ? Math.round(campaign.daysRunning) : null,
+        product_name: campaign.productName,
+        location: campaign.location || null,
+        strategy: campaign.strategy || null,
+        commission_brl: campaign.commissionBRL || null,
+        impressions: campaign.impressions ? Math.round(campaign.impressions) : null,
+        clicks: campaign.clicks ? Math.round(campaign.clicks) : null,
+        sales: campaign.sales ? Math.round(campaign.sales) : null,
+        cpc: campaign.cpc || null,
+        earnings: campaign.earnings || null,
+        costs: campaign.costs || null,
+        profit_loss: campaign.profitLoss || null,
+        roi: campaign.roi || null,
+      })
+      .eq('id', campaign.id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error updating campaign:', error);
+      return false;
+    }
+    return true;
+  }, [user]);
+
+  const deleteCampaignFromDB = useCallback(async (id: string): Promise<boolean> => {
+    if (!user) return false;
+    
+    const { error } = await supabase
+      .from('campaign_results')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error deleting campaign:', error);
+      return false;
+    }
+    return true;
+  }, [user]);
 
   const saveWeeklyResults = useCallback(async (results: WeeklyResult[]): Promise<boolean> => {
     if (!user) return false;
@@ -273,6 +324,46 @@ export function useSupabaseData() {
     }
     return true;
   }, [user]);
+  
+  const updateIncomeExpenseInDB = useCallback(async (item: IncomeExpense): Promise<boolean> => {
+    if (!user) return false;
+    
+    const { error } = await supabase
+      .from('income_expenses')
+      .update({
+        type: item.type,
+        year: item.year,
+        month: item.month,
+        date: formatDateToISO(item.date) || new Date().toISOString().split('T')[0],
+        source: item.source || null,
+        details: item.details || null,
+        amount: item.amount,
+      })
+      .eq('id', item.id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error updating income/expense:', error);
+      return false;
+    }
+    return true;
+  }, [user]);
+
+  const deleteIncomeExpenseFromDB = useCallback(async (id: string): Promise<boolean> => {
+    if (!user) return false;
+    
+    const { error } = await supabase
+      .from('income_expenses')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error deleting income/expense:', error);
+      return false;
+    }
+    return true;
+  }, [user]);
 
   return {
     fetchProducts,
@@ -283,5 +374,9 @@ export function useSupabaseData() {
     saveCampaigns,
     saveWeeklyResults,
     saveIncomeExpenses,
+    updateCampaignInDB,
+    deleteCampaignFromDB,
+    updateIncomeExpenseInDB,
+    deleteIncomeExpenseFromDB,
   };
 }
