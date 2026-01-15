@@ -389,7 +389,7 @@ export default function CampaignsPage() {
                   columns={columns}
                   // Removendo sticky header, pois o PageContent já gerencia a rolagem
                 />
-              </CardContent>
+              </燴Content>
             </Card>
           ))
         )}
