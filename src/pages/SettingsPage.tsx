@@ -11,6 +11,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils"; // Import cn
 
 // Componente auxiliar para gerenciar listas (Niches, Types, Sources, Platforms)
 interface ListManagerProps {
@@ -20,10 +21,11 @@ interface ListManagerProps {
   onAdd: (item: string) => void;
   onRemove: (item: string) => void;
   onReset: () => void;
-  badgeColor: 'default' | 'success' | 'destructive';
+  // Alterado para aceitar uma string de classe Tailwind customizada
+  badgeClass: string; 
 }
 
-const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badgeColor }: ListManagerProps) => {
+const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badgeClass }: ListManagerProps) => {
   const [newItem, setNewItem] = useState('');
   
   const handleAdd = () => {
@@ -46,10 +48,6 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
     toast.success(`${title} restaurados para os padrões.`);
   };
 
-  const badgeVariant = badgeColor === 'success' ? 'bg-success/10 text-success border-success/20' : 
-                       badgeColor === 'destructive' ? 'bg-destructive/10 text-destructive border-destructive/20' : 
-                       'secondary';
-
   return (
     <Card>
       <CardHeader>
@@ -62,7 +60,7 @@ const ListManager = ({ title, description, items, onAdd, onRemove, onReset, badg
             <AlertDialog key={item}>
               <AlertDialogTrigger asChild>
                 <Badge 
-                  className={`text-sm cursor-pointer transition-colors ${badgeVariant}`} 
+                  className={cn("text-sm cursor-pointer transition-colors", badgeClass)} 
                 >
                   {item} <X className="w-3 h-3 ml-1" />
                 </Badge>
@@ -223,7 +221,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
         
-        {/* 2. Strategies (Moved to position 2) */}
+        {/* 2. Strategies (Laranja/Warning) */}
         <ListManager
           title="Estratégias de Campanha"
           description="Gerencie as estratégias de tráfego pago (Pesquisa, Display, etc.)."
@@ -231,10 +229,10 @@ export default function SettingsPage() {
           onAdd={addStrategy}
           onRemove={removeStrategy}
           onReset={resetStrategies}
-          badgeColor="default"
+          badgeClass="bg-warning/10 text-warning border-warning/20 hover:bg-warning/20"
         />
 
-        {/* 3. Income Sources (Moved from 2 to 3) */}
+        {/* 3. Income Sources (Verde/Success) */}
         <ListManager
           title="Fontes de Receita"
           description="Gerencie as categorias de entrada de dinheiro."
@@ -242,10 +240,10 @@ export default function SettingsPage() {
           onAdd={addIncomeSource}
           onRemove={removeIncomeSource}
           onReset={resetIncomeSources}
-          badgeColor="success"
+          badgeClass="bg-success/10 text-success border-success/20 hover:bg-success/20"
         />
 
-        {/* 4. Expense Sources (Moved from 3 to 4) */}
+        {/* 4. Expense Sources (Vermelho/Destructive) */}
         <ListManager
           title="Fontes de Despesa"
           description="Gerencie as categorias de saída de dinheiro."
@@ -253,10 +251,10 @@ export default function SettingsPage() {
           onAdd={addExpenseSource}
           onRemove={removeExpenseSource}
           onReset={resetExpenseSources}
-          badgeColor="destructive"
+          badgeClass="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20"
         />
 
-        {/* 5. Product Types (Moved from 4 to 5) */}
+        {/* 5. Product Types (Padrão/Secondary) */}
         <ListManager
           title="Tipos de Produto"
           description="Gerencie a lista de tipos de produtos (Nutra, Digital, etc.)."
@@ -264,10 +262,10 @@ export default function SettingsPage() {
           onAdd={addProductType}
           onRemove={removeProductType}
           onReset={resetProductTypes}
-          badgeColor="default"
+          badgeClass="bg-secondary/50 text-secondary-foreground border-secondary hover:bg-secondary"
         />
 
-        {/* 6. Niches (Moved from 5 to 6) */}
+        {/* 6. Niches (Lilás/Chart-5) */}
         <ListManager
           title="Nichos de Produtos"
           description="Gerencie a lista de nichos disponíveis para categorização de produtos."
@@ -275,10 +273,10 @@ export default function SettingsPage() {
           onAdd={addNiche}
           onRemove={removeNiche}
           onReset={resetNiches}
-          badgeColor="default"
+          badgeClass="bg-chart-5/10 text-chart-5 border-chart-5/20 hover:bg-chart-5/20"
         />
 
-        {/* 7. Platforms (Moved from 6 to 7) */}
+        {/* 7. Platforms (Vinho/Chart-4 - usando Destructive/Red para simular vinho escuro) */}
         <ListManager
           title="Plataformas de Afiliados"
           description="Gerencie a lista de plataformas disponíveis para cadastro."
@@ -286,10 +284,10 @@ export default function SettingsPage() {
           onAdd={addPlatform}
           onRemove={removePlatform}
           onReset={resetPlatforms}
-          badgeColor="default"
+          badgeClass="bg-chart-4/10 text-chart-4 border-chart-4/20 hover:bg-chart-4/20"
         />
         
-        {/* 8. Business Level Thresholds (Position 8, unchanged) */}
+        {/* 8. Business Level Thresholds */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Níveis do Negócio</CardTitle>
