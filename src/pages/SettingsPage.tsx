@@ -276,7 +276,7 @@ export default function SettingsPage() {
           badgeClass="bg-chart-5/10 text-chart-5 border-chart-5/20 hover:bg-chart-5/20"
         />
 
-        {/* 7. Platforms (Vinho/Chart-4 - usando Destructive/Red para simular vinho escuro) */}
+        {/* 7. Platforms (Azul/Chart-1) */}
         <ListManager
           title="Plataformas de Afiliados"
           description="Gerencie a lista de plataformas disponíveis para cadastro."
@@ -284,7 +284,7 @@ export default function SettingsPage() {
           onAdd={addPlatform}
           onRemove={removePlatform}
           onReset={resetPlatforms}
-          badgeClass="bg-chart-4/10 text-chart-4 border-chart-4/20 hover:bg-chart-4/20"
+          badgeClass="bg-chart-1/10 text-chart-1 border-chart-1/20 hover:bg-chart-1/20"
         />
         
         {/* 8. Business Level Thresholds */}
