@@ -69,6 +69,7 @@
     --chart-4: 0 72% 51%;
     --chart-5: 262 83% 58%;
     --chart-6: 199 89% 48%;
+    --chart-7: 330 80% 50%; /* New Pink/Magenta */
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(222 47% 18%) 100%);
@@ -141,6 +142,7 @@
     --chart-4: 0 72% 60%;
     --chart-5: 262 83% 65%;
     --chart-6: 199 89% 55%;
+    --chart-7: 330 80% 60%; /* New Pink/Magenta */
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(210 100% 52%) 100%);

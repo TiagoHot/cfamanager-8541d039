@@ -254,7 +254,7 @@ export default function SettingsPage() {
           badgeClass="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20"
         />
 
-        {/* 5. Product Types (Padrão/Secondary) */}
+        {/* 5. Product Types (Rosa/Chart-7) */}
         <ListManager
           title="Tipos de Produto"
           description="Gerencie a lista de tipos de produtos (Nutra, Digital, etc.)."
@@ -262,7 +262,7 @@ export default function SettingsPage() {
           onAdd={addProductType}
           onRemove={removeProductType}
           onReset={resetProductTypes}
-          badgeClass="bg-secondary/50 text-secondary-foreground border-secondary hover:bg-secondary"
+          badgeClass="bg-chart-7/10 text-chart-7 border-chart-7/20 hover:bg-chart-7/20"
         />
 
         {/* 6. Niches (Lilás/Chart-5) */}
