@@ -103,6 +103,10 @@ export const DEFAULT_PLATFORMS = [
   'Hotmart', 'Kiwify', 'Braip', 'Monetizze', 'Buygoods', 'Clickbank', 'Digistore24', 'Maxweb'
 ];
 
+export const DEFAULT_STRATEGIES = [
+  'Pesquisa', 'Display', 'YouTube', 'Shopping', 'Performance Max', 'Discovery', 'Instream/Feed'
+];
+
 export const INCOME_SOURCES = [
   'Campanhas', 'Orgânico', 'Mentorias', 'Prestação de Serviço',
   'Rendimentos', 'Salário', 'Investimentos', 'Adsense', 'Outras Receitas'

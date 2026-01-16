@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Globe, Flag, Pencil, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { differenceInDays, parseISO } from 'date-fns';
-import { useData } from '@/contexts/DataContext';
+import { useSettings } from '@/hooks/useSettings'; // Import useSettings
 
 interface EditCampaignDialogProps {
   campaign: CampaignResult;
@@ -19,10 +19,10 @@ interface EditCampaignDialogProps {
   products: Product[];
 }
 
-const STRATEGIES = ['Pesquisa', 'Display', 'YouTube', 'Shopping', 'Performance Max', 'Discovery'];
 const LOCATIONS = ['Brasil', 'Gringa'];
 
 export function EditCampaignDialog({ campaign, onUpdate, children, products }: EditCampaignDialogProps) {
+  const { strategies } = useSettings(); // Get dynamic strategies
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   
@@ -292,7 +292,7 @@ export function EditCampaignDialog({ campaign, onUpdate, children, products }: E
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {STRATEGIES.map(s => (
+                  {strategies.map(s => (
                     <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}
                 </SelectContent>

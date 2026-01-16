@@ -148,18 +148,19 @@ export default function SettingsPage() {
     addExpenseSource,
     removeExpenseSource,
     resetExpenseSources,
-    platforms, // New: Platforms from hook
-    addPlatform, // New: Platform functions
-    removePlatform, // New: Platform functions
-    resetPlatforms, // New: Platform functions
+    platforms,
+    addPlatform,
+    removePlatform,
+    resetPlatforms,
+    strategies, // New: Strategies from hook
+    addStrategy, // New: Strategy functions
+    removeStrategy, // New: Strategy functions
+    resetStrategies, // New: Strategy functions
     freedomThreshold,
     setFreedomThreshold,
     resetFreedomThreshold,
   } = useSettings();
   
-  const [newPlatform, setNewPlatform] = useState('');
-  const [newStrategy, setNewStrategy] = useState('');
-
   // Temporary effect to ensure default types are loaded correctly after the last change
   useEffect(() => {
     const needsReset = productTypes.some(t => 
@@ -171,17 +172,6 @@ export default function SettingsPage() {
     }
   }, [productTypes, resetProductTypes]);
 
-
-  // Removed handleResetAll as the button is being removed.
-
-  // Placeholder functions for other settings management (Strategies)
-  const handleAddPlatform = () => {
-    // This function is now redundant as ListManager handles it, but keeping it for consistency if needed elsewhere.
-    if (newPlatform.trim()) {
-      addPlatform(newPlatform);
-      setNewPlatform('');
-    }
-  };
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -288,7 +278,18 @@ export default function SettingsPage() {
           badgeColor="default"
         />
         
-        {/* 7. Business Level Thresholds (Moved to the end) */}
+        {/* 7. Strategies (NEW) */}
+        <ListManager
+          title="Estratégias de Campanha"
+          description="Gerencie as estratégias de tráfego pago (Pesquisa, Display, etc.)."
+          items={strategies}
+          onAdd={addStrategy}
+          onRemove={removeStrategy}
+          onReset={resetStrategies}
+          badgeColor="default"
+        />
+        
+        {/* 8. Business Level Thresholds (Moved to the end) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Níveis do Negócio</CardTitle>
@@ -313,7 +314,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-3 rounded-lg bg-info/10 border border-info/20">
                 <div>
                   <Badge className="bg-info text-info-foreground">NÍVEL PAYBACK</Badge>
-                  <p className="text-sm text-muted-foreground mt-1">Parabéns! Seus resultados cobrem todos os custos e geram um pequeno lucro. Mas tenha em mente que você ainda não atingiu a independência financeira!</p>
+                  <p className="text-sm text-muted-foreground mt-1">Parabéns! Seus resultados cobrem todos os custos e geram lucro. Mas tenha em mente que você ainda não atingiu a independência financeira!</p>
                 </div>
                 <span className="font-mono">&gt; R$ 0</span>
               </div>

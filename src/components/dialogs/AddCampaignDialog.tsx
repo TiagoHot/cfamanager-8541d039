@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Globe, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { differenceInDays, parseISO } from 'date-fns';
+import { useSettings } from '@/hooks/useSettings'; // Import useSettings
 
 interface AddCampaignDialogProps {
   onAdd: (campaign: CampaignResult) => void;
@@ -17,10 +18,10 @@ interface AddCampaignDialogProps {
   products: Product[]; // Using Product interface now
 }
 
-const STRATEGIES = ['Pesquisa', 'Display', 'YouTube', 'Shopping', 'Performance Max', 'Discovery'];
 const LOCATIONS = ['Brasil', 'Gringa'];
 
 export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDialogProps) {
+  const { strategies } = useSettings(); // Get dynamic strategies
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
@@ -33,7 +34,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     location: 'Brasil', // Default location
-    strategy: 'Pesquisa',
+    strategy: strategies[0] || 'Pesquisa', // Use first strategy or default
     impressions: '',
     clicks: '',
     sales: '',
@@ -145,7 +146,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
       startDate: new Date().toISOString().split('T')[0],
       endDate: '',
       location: 'Brasil',
-      strategy: 'Pesquisa',
+      strategy: strategies[0] || 'Pesquisa',
       impressions: '',
       clicks: '',
       sales: '',
@@ -287,7 +288,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {STRATEGIES.map(s => (
+                  {strategies.map(s => (
                     <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}
                 </SelectContent>

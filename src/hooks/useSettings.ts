@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { NICHES as defaultNiches, PRODUCT_TYPES as defaultProductTypes, INCOME_SOURCES as defaultIncomeSources, EXPENSE_SOURCES as defaultExpenseSources, DEFAULT_PLATFORMS as defaultPlatforms } from '@/types';
+import { NICHES as defaultNiches, PRODUCT_TYPES as defaultProductTypes, INCOME_SOURCES as defaultIncomeSources, EXPENSE_SOURCES as defaultExpenseSources, DEFAULT_PLATFORMS as defaultPlatforms, DEFAULT_STRATEGIES as defaultStrategies } from '@/types';
 
 const NICHE_STORAGE_KEY = 'app_settings_niches';
 const TYPE_STORAGE_KEY = 'app_settings_product_types';
 const INCOME_SOURCE_STORAGE_KEY = 'app_settings_income_sources';
 const EXPENSE_SOURCE_STORAGE_KEY = 'app_settings_expense_sources';
-const PLATFORM_STORAGE_KEY = 'app_settings_platforms'; // New key
+const PLATFORM_STORAGE_KEY = 'app_settings_platforms';
+const STRATEGY_STORAGE_KEY = 'app_settings_strategies'; // New key
 const FREEDOM_THRESHOLD_KEY = 'app_settings_freedom_threshold';
 const DEFAULT_FREEDOM_THRESHOLD = 60000;
 
@@ -14,7 +15,8 @@ interface SettingsContextType {
   productTypes: string[];
   incomeSources: string[];
   expenseSources: string[];
-  platforms: string[]; // New field
+  platforms: string[];
+  strategies: string[]; // New field
   freedomThreshold: number;
   addNiche: (niche: string) => void;
   removeNiche: (niche: string) => void;
@@ -28,9 +30,12 @@ interface SettingsContextType {
   addExpenseSource: (source: string) => void;
   removeExpenseSource: (source: string) => void;
   resetExpenseSources: () => void;
-  addPlatform: (platform: string) => void; // New function
-  removePlatform: (platform: string) => void; // New function
-  resetPlatforms: () => void; // New function
+  addPlatform: (platform: string) => void;
+  removePlatform: (platform: string) => void;
+  resetPlatforms: () => void;
+  addStrategy: (strategy: string) => void; // New function
+  removeStrategy: (strategy: string) => void; // New function
+  resetStrategies: () => void; // New function
   setFreedomThreshold: (value: number) => void;
   resetFreedomThreshold: () => void;
 }
@@ -40,7 +45,8 @@ export function useSettings(): SettingsContextType {
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [incomeSources, setIncomeSources] = useState<string[]>([]);
   const [expenseSources, setExpenseSources] = useState<string[]>([]);
-  const [platforms, setPlatforms] = useState<string[]>([]); // New state
+  const [platforms, setPlatforms] = useState<string[]>([]);
+  const [strategies, setStrategies] = useState<string[]>([]); // New state
   const [freedomThreshold, setFreedomThresholdState] = useState<number>(DEFAULT_FREEDOM_THRESHOLD);
 
   // Load from localStorage on mount
@@ -67,7 +73,8 @@ export function useSettings(): SettingsContextType {
     loadAndSetArray(TYPE_STORAGE_KEY, defaultProductTypes, setProductTypes);
     loadAndSetArray(INCOME_SOURCE_STORAGE_KEY, defaultIncomeSources, setIncomeSources);
     loadAndSetArray(EXPENSE_SOURCE_STORAGE_KEY, defaultExpenseSources, setExpenseSources);
-    loadAndSetArray(PLATFORM_STORAGE_KEY, defaultPlatforms, setPlatforms); // Load platforms
+    loadAndSetArray(PLATFORM_STORAGE_KEY, defaultPlatforms, setPlatforms);
+    loadAndSetArray(STRATEGY_STORAGE_KEY, defaultStrategies, setStrategies); // Load strategies
     loadAndSetNumber(FREEDOM_THRESHOLD_KEY, DEFAULT_FREEDOM_THRESHOLD, setFreedomThresholdState);
   }, []);
 
@@ -100,7 +107,13 @@ export function useSettings(): SettingsContextType {
     if (platforms.length > 0) {
       localStorage.setItem(PLATFORM_STORAGE_KEY, JSON.stringify(platforms));
     }
-  }, [platforms]); // Save platforms
+  }, [platforms]);
+  
+  useEffect(() => {
+    if (strategies.length > 0) {
+      localStorage.setItem(STRATEGY_STORAGE_KEY, JSON.stringify(strategies));
+    }
+  }, [strategies]); // Save strategies
   
   useEffect(() => {
     localStorage.setItem(FREEDOM_THRESHOLD_KEY, freedomThreshold.toString());
@@ -221,6 +234,29 @@ export function useSettings(): SettingsContextType {
     localStorage.removeItem(PLATFORM_STORAGE_KEY);
   }, []);
   
+  // --- Strategy Management ---
+  const addStrategy = useCallback((strategy: string) => {
+    const normalizedStrategy = strategy.trim();
+    if (!normalizedStrategy) return;
+    
+    setStrategies(prev => {
+      if (prev.some(s => s.toLowerCase() === normalizedStrategy.toLowerCase())) {
+        return prev;
+      }
+      const newStrategies = [...prev, normalizedStrategy].sort();
+      return newStrategies;
+    });
+  }, []);
+
+  const removeStrategy = useCallback((strategy: string) => {
+    setStrategies(prev => prev.filter(s => s !== strategy).sort());
+  }, []);
+
+  const resetStrategies = useCallback(() => {
+    setStrategies(defaultStrategies.sort());
+    localStorage.removeItem(STRATEGY_STORAGE_KEY);
+  }, []);
+  
   // --- Freedom Threshold Management ---
   const setFreedomThreshold = useCallback((value: number) => {
     setFreedomThresholdState(value);
@@ -237,7 +273,8 @@ export function useSettings(): SettingsContextType {
     productTypes,
     incomeSources,
     expenseSources,
-    platforms, // Export platforms
+    platforms,
+    strategies, // Export strategies
     freedomThreshold,
     addNiche,
     removeNiche,
@@ -251,9 +288,12 @@ export function useSettings(): SettingsContextType {
     addExpenseSource,
     removeExpenseSource,
     resetExpenseSources,
-    addPlatform, // Export platform functions
-    removePlatform, // Export platform functions
-    resetPlatforms, // Export platform functions
+    addPlatform,
+    removePlatform,
+    resetPlatforms,
+    addStrategy, // Export strategy functions
+    removeStrategy, // Export strategy functions
+    resetStrategies, // Export strategy functions
     setFreedomThreshold,
     resetFreedomThreshold,
   };
