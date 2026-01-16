@@ -250,7 +250,23 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
 
   // Special rendering for badges/notes when not editing
   const renderDisplay = () => {
-    if (field === 'type' || field === 'niche' || field === 'platform' || field === 'country') {
+    if (field === 'type' || field === 'niche' || field === 'platform') {
+      // Fields requested to be displayed as plain text
+      const displayValue = String(product[field] || 'Não Definido');
+      const isDefault = displayValue === 'Não Definido' || displayValue === '';
+      
+      return (
+        <span className={cn(
+          "text-sm font-medium cursor-pointer hover:opacity-80 transition-opacity",
+          isDefault ? 'text-muted-foreground' : 'text-foreground'
+        )}>
+          {displayValue}
+        </span>
+      );
+    }
+    
+    if (field === 'country') {
+      // Country still uses Badge for visual distinction
       const displayValue = String(product[field] || 'Não Definido');
       const isDefault = displayValue === 'Não Definido' || displayValue === '';
       
@@ -260,7 +276,7 @@ const InlineProductEditor: React.FC<InlineProductEditorProps> = ({
 
       if (isDefault) {
         variantClass = 'bg-muted/50 text-muted-foreground border-muted';
-      } else if (field === 'country') {
+      } else {
         variantClass = displayValue === 'Brasil' 
           ? "bg-success/10 text-success border-success/20" 
           : "bg-info/10 text-info border-info/20";
