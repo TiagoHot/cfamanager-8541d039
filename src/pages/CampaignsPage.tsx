@@ -4,7 +4,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Download, Upload, Pencil, Trash2, MoreHorizontal } from "lucide-react";
-import { formatCurrency, formatNumber, formatPercent, getProfitLossColor, getROIColor, normalizeMonthToAbbreviation } from "@/lib/formatters";
+import { formatCurrency, formatNumber, formatPercent, getProfitLossColor, getROIColor, normalizeMonthToAbbreviation, formatMonthName } from "@/lib/formatters";
 import { CampaignResult, MONTHS } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -353,7 +353,7 @@ export default function CampaignsPage() {
             <Card key={`${year}-${month}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl">
-                  {month} de {year}
+                  {formatMonthName(month)} de {year}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {campaigns.length} campanhas registradas

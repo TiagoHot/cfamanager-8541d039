@@ -51,6 +51,12 @@ const FULL_MONTH_TO_ABBR_MAP: { [key: string]: string } = {
   'setembro': 'Set', 'outubro': 'Out', 'novembro': 'Nov', 'dezembro': 'Dez',
 };
 
+const ABBR_TO_FULL_MONTH_MAP: { [key: string]: string } = {
+  'Jan': 'Janeiro', 'Fev': 'Fevereiro', 'Mar': 'Março', 'Abr': 'Abril',
+  'Mai': 'Maio', 'Jun': 'Junho', 'Jul': 'Julho', 'Ago': 'Agosto',
+  'Set': 'Setembro', 'Out': 'Outubro', 'Nov': 'Novembro', 'Dez': 'Dezembro',
+};
+
 /**
  * Normaliza uma string de mês para sua abreviação padrão (ex: 'Jan', 'Fev').
  * Lida com nomes completos (ex: 'Janeiro' -> 'Jan') e strings compostas (ex: 'Mar/Abr' -> 'Mar').
@@ -68,4 +74,23 @@ export function normalizeMonthToAbbreviation(monthStr: string): string {
   }
   // Caso contrário, assume que já é uma abreviação ou uma string composta e capitaliza a primeira parte
   return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join('/');
+}
+
+/**
+ * Converte uma abreviação de mês (ou string composta) para o nome completo do(s) mês(es).
+ * Ex: 'Dez' -> 'Dezembro', 'Jan/Fev' -> 'Janeiro/Fevereiro'.
+ * @param monthAbbr A abreviação ou string composta do mês.
+ * @returns O nome completo do(s) mês(es).
+ */
+export function formatMonthName(monthAbbr: string): string {
+  if (!monthAbbr) return '';
+  
+  const parts = monthAbbr.split('/');
+  
+  const fullNames = parts.map(part => {
+    const trimmedPart = part.trim();
+    return ABBR_TO_FULL_MONTH_MAP[trimmedPart] || trimmedPart;
+  });
+  
+  return fullNames.join('/');
 }
