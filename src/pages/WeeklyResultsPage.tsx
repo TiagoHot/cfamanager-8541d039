@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-// import { useCurrencyRates } from "@/hooks/useCurrencyRates"; // Não é mais necessário aqui
+import { useSettings } from "@/hooks/useSettings"; // Import useSettings
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -42,10 +42,9 @@ const getMonthNumber = (month: string): number => {
   return index >= 0 ? index + 1 : 0;
 };
 
-// O componente CurrencyRateDisplay foi movido para AppLayout.
-
 export default function WeeklyResultsPage() {
   const { weeklyResults, importData, addWeeklyResult, updateWeeklyResult, removeWeeklyResult } = useData();
+  const { adsenseLabel } = useSettings(); // Get adsenseLabel
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
@@ -128,7 +127,7 @@ export default function WeeklyResultsPage() {
     },
     {
       key: 'adsenseEarnings',
-      header: 'Adsense',
+      header: adsenseLabel, // Use configurable label here
       className: 'text-right bg-success/5',
       render: (item: WeeklyResult) => (
         <span className="text-foreground">{formatCurrency(item.adsenseEarnings)}</span>
@@ -206,7 +205,7 @@ export default function WeeklyResultsPage() {
         </DropdownMenu>
       ),
     },
-  ], [updateWeeklyResult, removeWeeklyResult, maxSales]);
+  ], [updateWeeklyResult, removeWeeklyResult, maxSales, adsenseLabel]);
 
   // Get unique years for filters
   const years = useMemo(() => {

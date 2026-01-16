@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { WeeklyResult, MONTHS } from '@/types';
 import { toast } from 'sonner';
 import { startOfWeek, endOfWeek, addWeeks, format, parseISO, isValid, addDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useSettings } from '@/hooks/useSettings';
 
 interface AddWeeklyResultDialogProps {
   onAdd: (result: WeeklyResult) => void;
@@ -29,11 +29,6 @@ const getLatestEndDate = (results: WeeklyResult[]): Date | null => {
   results.forEach(r => {
     if (r.period) {
       // Assuming period format is "DD/MM - DD/MM" or similar, we need the end date.
-      // Since the period string is user-defined, relying on it is risky.
-      // A safer approach is to rely on the latest recorded year/week number, 
-      // but since the user wants to auto-fill the period, we must try to parse it.
-      
-      // Let's assume the period is always "DD/MM - DD/MM" or "DD/MM/YYYY - DD/MM/YYYY"
       const parts = r.period.split(' - ');
       if (parts.length === 2) {
         const endDateStr = parts[1].trim();
@@ -81,6 +76,7 @@ const parseDateString = (dateStr: string, year: number): Date | null => {
 
 
 export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWeeklyResultDialogProps) {
+  const { adsenseLabel } = useSettings(); // Use adsenseLabel
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
@@ -255,7 +251,6 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
             </div>
           </div>
 
-          {/* Seção de Valores com fundo contrastante */}
           <div className="border-t pt-4 bg-muted/50 p-4 rounded-lg">
             <h4 className="font-medium mb-3">Valores</h4>
             <div className="grid grid-cols-2 gap-4">
@@ -307,7 +302,7 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="adsenseEarnings">Ganhos Adsense (R$)</Label>
+                <Label htmlFor="adsenseEarnings">{adsenseLabel} (R$)</Label>
                 <Input
                   id="adsenseEarnings"
                   type="number"

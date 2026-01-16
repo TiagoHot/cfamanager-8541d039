@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { WeeklyResult, MONTHS } from '@/types';
 import { toast } from 'sonner';
 import { Pencil, Save } from 'lucide-react';
+import { useSettings } from '@/hooks/useSettings';
 
 interface EditWeeklyResultDialogProps {
   result: WeeklyResult;
@@ -21,6 +22,7 @@ const getWeekNumber = (week: string): number => {
 };
 
 export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeeklyResultDialogProps) {
+  const { adsenseLabel } = useSettings(); // Use adsenseLabel
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     week: result.week,
@@ -203,7 +205,7 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="adsenseEarnings">Ganhos Adsense (R$)</Label>
+                <Label htmlFor="adsenseEarnings">{adsenseLabel} (R$)</Label>
                 <Input
                   id="adsenseEarnings"
                   type="number"
