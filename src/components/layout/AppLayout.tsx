@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, DollarSign, Euro } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useCurrencyRates } from "@/hooks/useCurrencyRates"; // Import hook
+import { formatCurrency } from "@/lib/formatters"; // Import formatter
+import { Card } from "@/components/ui/card"; // Import Card
+import { cn } from "@/lib/utils"; // Import cn
+
+// Componente para exibir as taxas de câmbio (movido para AppLayout)
+const CurrencyRateDisplay = () => {
+  const { rates } = useCurrencyRates();
+  
+  // Format the rates to BRL currency display, removing the R$ symbol for cleaner display
+  const formatRate = (rate: number) => formatCurrency(rate, 'BRL').replace('R$', '').trim();
+
+  return (
+    <div className="flex items-center gap-4 text-sm">
+      <div className={cn("flex items-center gap-1 p-2 rounded-lg transition-colors", "bg-info/10 text-info hover:bg-info/20")}>
+        <DollarSign className="w-4 h-4" />
+        <span className="font-medium">USD:</span>
+        <span className="font-bold">R$ {formatRate(rates.Dollar)}</span>
+      </div>
+      <div className={cn("flex items-center gap-1 p-2 rounded-lg transition-colors", "bg-chart-5/10 text-chart-5 hover:bg-chart-5/20")}>
+        <Euro className="w-4 h-4" />
+        <span className="font-medium">EUR:</span>
+        <span className="font-bold">R$ {formatRate(rates.Euro)}</span>
+      </div>
+    </div>
+  );
+};
+
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -31,10 +59,12 @@ export function AppLayout() {
         <SidebarInset className="flex-1">
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
             <SidebarTrigger className="-ml-2" />
+            
+            {/* Adicionando a exibição das taxas de câmbio aqui */}
+            <CurrencyRateDisplay />
+
             <div className="flex-1" />
             
-            <ThemeToggle />
-
             {isLoading && (
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -42,7 +72,7 @@ export function AppLayout() {
               </div>
             )}
 
-            
+            <ThemeToggle />
 
             {user && (
               <DropdownMenu>
