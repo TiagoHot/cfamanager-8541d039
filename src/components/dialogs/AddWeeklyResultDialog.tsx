@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { WeeklyResult, MONTHS } from '@/types';
+import { WeeklyResult, MONTHS, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { startOfWeek, endOfWeek, addWeeks, format, parseISO, isValid, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useCurrencyRates } from '@/hooks/useCurrencyRates';
+import { formatCurrency } from '@/lib/formatters';
+import { DollarSign, Euro, BadgeCent } from 'lucide-react';
 
 interface AddWeeklyResultDialogProps {
   onAdd: (result: WeeklyResult) => void;
@@ -84,6 +87,7 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
+  const { rates } = useCurrencyRates();
   
   const [formData, setFormData] = useState({
     week: 'S01', // Default, will be updated in useEffect
@@ -92,10 +96,24 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
     period: '', // Auto-calculated
     campaignCosts: '',
     sales: '',
-    campaignEarnings: '',
+    campaignEarningsBRL: '',
+    campaignEarningsUSD: '',
+    campaignEarningsEUR: '',
     organicEarnings: '',
     adsenseEarnings: '',
   });
+
+  // Calculate converted campaign earnings in BRL
+  const campaignEarningsTotal = useMemo(() => {
+    const brl = parseFloat(formData.campaignEarningsBRL) || 0;
+    const usd = parseFloat(formData.campaignEarningsUSD) || 0;
+    const eur = parseFloat(formData.campaignEarningsEUR) || 0;
+    
+    const usdToBrl = usd * rates.Dollar;
+    const eurToBrl = eur * rates.Euro;
+    
+    return brl + usdToBrl + eurToBrl;
+  }, [formData.campaignEarningsBRL, formData.campaignEarningsUSD, formData.campaignEarningsEUR, rates]);
 
   // Calculate next week number and period
   useEffect(() => {
@@ -164,7 +182,7 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
     }
 
     const campaignCosts = parseFloat(formData.campaignCosts) || 0;
-    const campaignEarnings = parseFloat(formData.campaignEarnings) || 0;
+    const campaignEarnings = campaignEarningsTotal; // Use calculated total from all currencies
     const organicEarnings = parseFloat(formData.organicEarnings) || 0;
     const adsenseEarnings = parseFloat(formData.adsenseEarnings) || 0;
     const revenue = campaignEarnings + organicEarnings + adsenseEarnings;
@@ -282,16 +300,68 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
                 />
               </div>
 
-              <div>
-                <Label htmlFor="campaignEarnings">Ganhos Campanhas (R$)</Label>
-                <Input
-                  id="campaignEarnings"
-                  type="number"
-                  step="0.01"
-                  value={formData.campaignEarnings}
-                  onChange={(e) => setFormData(prev => ({ ...prev, campaignEarnings: e.target.value }))}
-                  placeholder="0.00"
-                />
+              {/* Ganhos Campanhas - Multi-currency inputs */}
+              <div className="col-span-2 space-y-3">
+                <Label className="text-sm font-medium">Ganhos Campanhas</Label>
+                
+                {/* BRL Input */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-md bg-success/10 text-success">
+                    <BadgeCent className="w-4 h-4" />
+                  </div>
+                  <Input
+                    id="campaignEarningsBRL"
+                    type="number"
+                    step="0.01"
+                    value={formData.campaignEarningsBRL}
+                    onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsBRL: e.target.value }))}
+                    placeholder="0.00"
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-muted-foreground w-10">BRL</span>
+                </div>
+                
+                {/* USD Input */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-md bg-info/10 text-info">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                  <Input
+                    id="campaignEarningsUSD"
+                    type="number"
+                    step="0.01"
+                    value={formData.campaignEarningsUSD}
+                    onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsUSD: e.target.value }))}
+                    placeholder="0.00"
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-muted-foreground w-10">USD</span>
+                </div>
+                
+                {/* EUR Input */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-md bg-chart-5/10 text-chart-5">
+                    <Euro className="w-4 h-4" />
+                  </div>
+                  <Input
+                    id="campaignEarningsEUR"
+                    type="number"
+                    step="0.01"
+                    value={formData.campaignEarningsEUR}
+                    onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsEUR: e.target.value }))}
+                    placeholder="0.00"
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-muted-foreground w-10">EUR</span>
+                </div>
+                
+                {/* Total converted */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
+                  <span className="text-sm font-medium">Total em R$:</span>
+                  <span className="text-lg font-bold text-primary">
+                    {formatCurrency(campaignEarningsTotal, 'BRL')}
+                  </span>
+                </div>
               </div>
 
               <div>
