@@ -87,7 +87,8 @@ export interface CashFlowMonth {
 export type BusinessLevel = 'INVESTIDOR' | 'BREAKEVEN' | 'PAYBACK' | 'RETIRADA';
 
 // Default lists moved to useSettings, but keeping CURRENCY_RATES and MONTHS here
-export const CURRENCY_RATES = {
+// NOTE: This object is intentionally mutable so it can be updated by useCurrencyRates hook.
+export const CURRENCY_RATES: { [key: string]: number } = {
   'Real': 1,
   'Dólar': 5.4059,
   'Euro': 6.3384

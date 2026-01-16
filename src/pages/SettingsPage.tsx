@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight, Trash2 } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
+import { useCurrencyRates } from "@/hooks/useCurrencyRates"; // Import new hook
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -159,6 +160,8 @@ export default function SettingsPage() {
     resetFreedomThreshold,
   } = useSettings();
   
+  const { rates, updateRate, saveRates } = useCurrencyRates(); // Use new hook
+
   // Temporary effect to ensure default types are loaded correctly after the last change
   useEffect(() => {
     const needsReset = productTypes.some(t => 
@@ -196,9 +199,9 @@ export default function SettingsPage() {
                   id="dollar" 
                   type="number" 
                   step="0.0001" 
-                  defaultValue={CURRENCY_RATES['Dólar']} 
+                  value={rates.Dollar}
+                  onChange={(e) => updateRate('Dollar', parseFloat(e.target.value) || 0)}
                   className="w-32"
-                  disabled // Disable editing since we don't have persistence for this yet
                 />
                 <span className="text-muted-foreground">R$</span>
               </div>
@@ -211,13 +214,17 @@ export default function SettingsPage() {
                   id="euro" 
                   type="number" 
                   step="0.0001" 
-                  defaultValue={CURRENCY_RATES['Euro']} 
+                  value={rates.Euro}
+                  onChange={(e) => updateRate('Euro', parseFloat(e.target.value) || 0)}
                   className="w-32"
-                  disabled // Disable editing since we don't have persistence for this yet
                 />
                 <span className="text-muted-foreground">R$</span>
               </div>
             </div>
+            <Button onClick={saveRates} className="w-full">
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Taxas
+            </Button>
           </CardContent>
         </Card>
         
