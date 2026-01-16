@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WeeklyResult, MONTHS } from '@/types';
 import { toast } from 'sonner';
+import { startOfWeek, endOfWeek, addWeeks, format, parseISO, isValid, addDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface AddWeeklyResultDialogProps {
   onAdd: (result: WeeklyResult) => void;
@@ -19,6 +21,65 @@ const getWeekNumber = (week: string): number => {
   return match ? parseInt(match[1], 10) : 0;
 };
 
+// Helper to find the latest end date from existing results
+const getLatestEndDate = (results: WeeklyResult[]): Date | null => {
+  let latestDate: Date | null = null;
+  
+  // Iterate through results and parse the end date from the 'period' string
+  results.forEach(r => {
+    if (r.period) {
+      // Assuming period format is "DD/MM - DD/MM" or similar, we need the end date.
+      // Since the period string is user-defined, relying on it is risky.
+      // A safer approach is to rely on the latest recorded year/week number, 
+      // but since the user wants to auto-fill the period, we must try to parse it.
+      
+      // Let's assume the period is always "DD/MM - DD/MM" or "DD/MM/YYYY - DD/MM/YYYY"
+      const parts = r.period.split(' - ');
+      if (parts.length === 2) {
+        const endDateStr = parts[1].trim();
+        
+        // Try parsing DD/MM/YYYY
+        let date = parseDateString(endDateStr, r.year);
+        
+        if (date && isValid(date)) {
+          if (!latestDate || date.getTime() > latestDate.getTime()) {
+            latestDate = date;
+          }
+        }
+      }
+    }
+  });
+  
+  // Fallback: If no valid period is found, use the start of the current week.
+  if (!latestDate) {
+    return startOfWeek(new Date(), { weekStartsOn: 0 }); // Default to Sunday of current week
+  }
+  
+  return latestDate;
+};
+
+// Helper to parse DD/MM/YY or DD/MM/YYYY string into a Date object
+const parseDateString = (dateStr: string, year: number): Date | null => {
+  const parts = dateStr.split('/');
+  if (parts.length >= 2) {
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    let y = parts.length === 3 ? parseInt(parts[2], 10) : year;
+    
+    // Handle 2-digit year
+    if (y < 100) {
+      y = y + (y > 50 ? 1900 : 2000);
+    }
+    
+    const date = new Date(y, month - 1, day);
+    if (isValid(date) && date.getFullYear() === y && date.getMonth() === month - 1 && date.getDate() === day) {
+      return date;
+    }
+  }
+  return null;
+};
+
+
 export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWeeklyResultDialogProps) {
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
@@ -28,7 +89,7 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
     week: 'S01', // Default, will be updated in useEffect
     year: currentYear.toString(),
     month: MONTHS[currentMonth],
-    period: '',
+    period: '', // Auto-calculated
     campaignCosts: '',
     sales: '',
     campaignEarnings: '',
@@ -36,12 +97,12 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
     adsenseEarnings: '',
   });
 
-  // Calculate next week number for the current year
+  // Calculate next week number and period
   useEffect(() => {
     if (open) {
       const currentYearInt = parseInt(formData.year);
       
-      // Find the highest week number for the selected year
+      // 1. Calculate Next Week Number
       const maxWeek = weeklyResults
         .filter(r => r.year === currentYearInt)
         .reduce((max, r) => Math.max(max, getWeekNumber(r.week)), 0);
@@ -49,10 +110,42 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
       const nextWeekNumber = maxWeek >= 52 ? 1 : maxWeek + 1;
       const nextWeekString = `S${String(nextWeekNumber).padStart(2, '0')}`;
       
+      // 2. Calculate Next Period (Sunday to Saturday)
+      let nextPeriodString = '';
+      
+      // Find the latest recorded end date
+      const latestEndDate = getLatestEndDate(weeklyResults);
+      
+      let nextSunday: Date;
+      
+      if (latestEndDate) {
+        // Start date of the next week is the day after the latest recorded end date
+        nextSunday = addDays(latestEndDate, 1);
+      } else {
+        // If no data, use the start of the current week (Sunday)
+        nextSunday = startOfWeek(new Date(), { weekStartsOn: 0 });
+      }
+      
+      // Ensure nextSunday is a Sunday (0)
+      if (nextSunday.getDay() !== 0) {
+          nextSunday = startOfWeek(nextSunday, { weekStartsOn: 0 });
+      }
+      
+      const nextSaturday = endOfWeek(nextSunday, { weekStartsOn: 0 });
+      
+      // Format period as DD/MM - DD/MM
+      const startFormatted = format(nextSunday, 'dd/MM');
+      const endFormatted = format(nextSaturday, 'dd/MM');
+      nextPeriodString = `${startFormatted} - ${endFormatted}`;
+      
+      // Determine the month based on the start date of the period
+      const nextMonthAbbr = MONTHS[nextSunday.getMonth()];
+      
       setFormData(prev => ({
         ...prev,
         week: nextWeekString,
-        month: MONTHS[currentMonth], // Reset month to current month abbreviation
+        month: nextMonthAbbr,
+        period: nextPeriodString,
       }));
     }
   }, [open, weeklyResults, currentYear, currentMonth, formData.year]);
@@ -62,6 +155,11 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
     
     if (!formData.month.trim()) {
       toast.error('Mês é obrigatório');
+      return;
+    }
+    
+    if (!formData.period.trim()) {
+      toast.error('Período é obrigatório');
       return;
     }
 
@@ -150,6 +248,7 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
                 value={formData.period}
                 onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value }))}
                 placeholder="Ex: 01/01 - 07/01"
+                required
               />
             </div>
           </div>
