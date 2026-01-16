@@ -255,7 +255,8 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
             </div>
           </div>
 
-          <div className="border-t pt-4">
+          {/* Seção de Valores com fundo contrastante */}
+          <div className="border-t pt-4 bg-muted/50 p-4 rounded-lg">
             <h4 className="font-medium mb-3">Valores</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
