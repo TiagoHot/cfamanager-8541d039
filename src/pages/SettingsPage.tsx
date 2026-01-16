@@ -222,8 +222,19 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+        
+        {/* 2. Strategies (Moved to position 2) */}
+        <ListManager
+          title="Estratégias de Campanha"
+          description="Gerencie as estratégias de tráfego pago (Pesquisa, Display, etc.)."
+          items={strategies}
+          onAdd={addStrategy}
+          onRemove={removeStrategy}
+          onReset={resetStrategies}
+          badgeColor="default"
+        />
 
-        {/* 2. Income Sources */}
+        {/* 3. Income Sources (Moved from 2 to 3) */}
         <ListManager
           title="Fontes de Receita"
           description="Gerencie as categorias de entrada de dinheiro."
@@ -234,7 +245,7 @@ export default function SettingsPage() {
           badgeColor="success"
         />
 
-        {/* 3. Expense Sources */}
+        {/* 4. Expense Sources (Moved from 3 to 4) */}
         <ListManager
           title="Fontes de Despesa"
           description="Gerencie as categorias de saída de dinheiro."
@@ -245,7 +256,7 @@ export default function SettingsPage() {
           badgeColor="destructive"
         />
 
-        {/* 4. Product Types */}
+        {/* 5. Product Types (Moved from 4 to 5) */}
         <ListManager
           title="Tipos de Produto"
           description="Gerencie a lista de tipos de produtos (Nutra, Digital, etc.)."
@@ -256,7 +267,7 @@ export default function SettingsPage() {
           badgeColor="default"
         />
 
-        {/* 5. Niches */}
+        {/* 6. Niches (Moved from 5 to 6) */}
         <ListManager
           title="Nichos de Produtos"
           description="Gerencie a lista de nichos disponíveis para categorização de produtos."
@@ -267,7 +278,7 @@ export default function SettingsPage() {
           badgeColor="default"
         />
 
-        {/* 6. Platforms */}
+        {/* 7. Platforms (Moved from 6 to 7) */}
         <ListManager
           title="Plataformas de Afiliados"
           description="Gerencie a lista de plataformas disponíveis para cadastro."
@@ -278,18 +289,7 @@ export default function SettingsPage() {
           badgeColor="default"
         />
         
-        {/* 7. Strategies (NEW) */}
-        <ListManager
-          title="Estratégias de Campanha"
-          description="Gerencie as estratégias de tráfego pago (Pesquisa, Display, etc.)."
-          items={strategies}
-          onAdd={addStrategy}
-          onRemove={removeStrategy}
-          onReset={resetStrategies}
-          badgeColor="default"
-        />
-        
-        {/* 8. Business Level Thresholds (Moved to the end) */}
+        {/* 8. Business Level Thresholds (Position 8, unchanged) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Níveis do Negócio</CardTitle>
