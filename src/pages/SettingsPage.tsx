@@ -158,22 +158,9 @@ export default function SettingsPage() {
     freedomThreshold,
     setFreedomThreshold,
     resetFreedomThreshold,
-    adsenseLabel, // New: Adsense label
-    setAdsenseLabel, // New: Adsense label functions
-    resetAdsenseLabel, // New: Adsense label functions
   } = useSettings();
   
   const { rates, updateRate, saveRates } = useCurrencyRates(); // Use new hook
-  const [localAdsenseLabel, setLocalAdsenseLabel] = useState(adsenseLabel);
-
-  useEffect(() => {
-    setLocalAdsenseLabel(adsenseLabel);
-  }, [adsenseLabel]);
-
-  const handleSaveAdsenseLabel = () => {
-    setAdsenseLabel(localAdsenseLabel);
-    toast.success('Rótulo de ganhos salvo.');
-  };
 
   // Temporary effect to ensure default types are loaded correctly after the last change
   useEffect(() => {
@@ -241,52 +228,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
         
-        {/* 2. Adsense/Outros Label Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Rótulo de Ganhos Adicionais</CardTitle>
-            <CardDescription>Defina o nome para a coluna de ganhos 'Adsense/Outros' nos resultados semanais.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="adsense-label">Nome do Rótulo</Label>
-              <Input 
-                id="adsense-label" 
-                value={localAdsenseLabel}
-                onChange={(e) => setLocalAdsenseLabel(e.target.value)}
-                placeholder="Ex: Adsense, Outros, Receitas Extras"
-              />
-            </div>
-            <Button onClick={handleSaveAdsenseLabel} className="w-full">
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Rótulo
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="link" size="sm" className="mt-2 p-0 text-xs text-muted-foreground">
-                  Restaurar padrão ("Outros")
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Restaurar Padrão?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja restaurar o rótulo de ganhos adicionais para o padrão ("Outros")?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={resetAdsenseLabel}>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Restaurar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardContent>
-        </Card>
-
-        {/* 3. Strategies (Laranja/Warning) */}
+        {/* 2. Strategies (Laranja/Warning) */}
         <ListManager
           title="Estratégias de Campanha"
           description="Gerencie as estratégias de tráfego pago (Pesquisa, Display, etc.)."
@@ -297,7 +239,7 @@ export default function SettingsPage() {
           badgeClass="bg-warning/10 text-warning border-warning/20 hover:bg-warning/20"
         />
 
-        {/* 4. Income Sources (Verde/Success) */}
+        {/* 3. Income Sources (Verde/Success) */}
         <ListManager
           title="Fontes de Receita"
           description="Gerencie as categorias de entrada de dinheiro."
@@ -308,7 +250,7 @@ export default function SettingsPage() {
           badgeClass="bg-success/10 text-success border-success/20 hover:bg-success/20"
         />
 
-        {/* 5. Expense Sources (Vermelho/Destructive) */}
+        {/* 4. Expense Sources (Vermelho/Destructive) */}
         <ListManager
           title="Fontes de Despesa"
           description="Gerencie as categorias de saída de dinheiro."
@@ -319,7 +261,7 @@ export default function SettingsPage() {
           badgeClass="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20"
         />
 
-        {/* 6. Product Types (Rosa/Chart-7) */}
+        {/* 5. Product Types (Rosa/Chart-7) */}
         <ListManager
           title="Tipos de Produto"
           description="Gerencie a lista de tipos de produtos (Nutra, Digital, etc.)."
@@ -330,7 +272,7 @@ export default function SettingsPage() {
           badgeClass="bg-chart-7/10 text-chart-7 border-chart-7/20 hover:bg-chart-7/20"
         />
 
-        {/* 7. Niches (Lilás/Chart-5) */}
+        {/* 6. Niches (Lilás/Chart-5) */}
         <ListManager
           title="Nichos de Produtos"
           description="Gerencie a lista de nichos disponíveis para categorização de produtos."
@@ -341,7 +283,7 @@ export default function SettingsPage() {
           badgeClass="bg-chart-5/10 text-chart-5 border-chart-5/20 hover:bg-chart-5/20"
         />
 
-        {/* 8. Platforms (Azul/Chart-1) */}
+        {/* 7. Platforms (Azul/Chart-1) */}
         <ListManager
           title="Plataformas de Afiliados"
           description="Gerencie a lista de plataformas disponíveis para cadastro."
@@ -352,7 +294,7 @@ export default function SettingsPage() {
           badgeClass="bg-chart-1/10 text-chart-1 border-chart-1/20 hover:bg-chart-1/20"
         />
         
-        {/* 9. Business Level Thresholds */}
+        {/* 8. Business Level Thresholds */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Níveis do Negócio</CardTitle>

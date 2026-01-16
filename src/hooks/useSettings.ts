@@ -8,9 +8,7 @@ const EXPENSE_SOURCE_STORAGE_KEY = 'app_settings_expense_sources';
 const PLATFORM_STORAGE_KEY = 'app_settings_platforms';
 const STRATEGY_STORAGE_KEY = 'app_settings_strategies'; // New key
 const FREEDOM_THRESHOLD_KEY = 'app_settings_freedom_threshold';
-const ADSENSE_LABEL_KEY = 'app_settings_adsense_label'; // New key
 const DEFAULT_FREEDOM_THRESHOLD = 60000;
-const DEFAULT_ADSENSE_LABEL = 'Outros';
 
 interface SettingsContextType {
   niches: string[];
@@ -20,7 +18,6 @@ interface SettingsContextType {
   platforms: string[];
   strategies: string[]; // New field
   freedomThreshold: number;
-  adsenseLabel: string; // New field
   addNiche: (niche: string) => void;
   removeNiche: (niche: string) => void;
   resetNiches: () => void;
@@ -41,8 +38,6 @@ interface SettingsContextType {
   resetStrategies: () => void; // New function
   setFreedomThreshold: (value: number) => void;
   resetFreedomThreshold: () => void;
-  setAdsenseLabel: (label: string) => void; // New function
-  resetAdsenseLabel: () => void; // New function
 }
 
 export function useSettings(): SettingsContextType {
@@ -53,7 +48,6 @@ export function useSettings(): SettingsContextType {
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [strategies, setStrategies] = useState<string[]>([]); // New state
   const [freedomThreshold, setFreedomThresholdState] = useState<number>(DEFAULT_FREEDOM_THRESHOLD);
-  const [adsenseLabel, setAdsenseLabelState] = useState<string>(DEFAULT_ADSENSE_LABEL); // New state
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -74,12 +68,6 @@ export function useSettings(): SettingsContextType {
       const parsed = stored ? parseFloat(stored) : defaultValue;
       setter(isNaN(parsed) ? defaultValue : parsed);
     };
-    
-    // Helper function to load and set state for string
-    const loadAndSetString = (key: string, defaultValue: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
-      const stored = localStorage.getItem(key);
-      setter(stored || defaultValue);
-    };
 
     loadAndSetArray(NICHE_STORAGE_KEY, defaultNiches, setNiches);
     loadAndSetArray(TYPE_STORAGE_KEY, defaultProductTypes, setProductTypes);
@@ -88,7 +76,6 @@ export function useSettings(): SettingsContextType {
     loadAndSetArray(PLATFORM_STORAGE_KEY, defaultPlatforms, setPlatforms);
     loadAndSetArray(STRATEGY_STORAGE_KEY, defaultStrategies, setStrategies); // Load strategies
     loadAndSetNumber(FREEDOM_THRESHOLD_KEY, DEFAULT_FREEDOM_THRESHOLD, setFreedomThresholdState);
-    loadAndSetString(ADSENSE_LABEL_KEY, DEFAULT_ADSENSE_LABEL, setAdsenseLabelState); // Load adsense label
   }, []);
 
   // Save to localStorage whenever state changes
@@ -131,10 +118,6 @@ export function useSettings(): SettingsContextType {
   useEffect(() => {
     localStorage.setItem(FREEDOM_THRESHOLD_KEY, freedomThreshold.toString());
   }, [freedomThreshold]);
-  
-  useEffect(() => {
-    localStorage.setItem(ADSENSE_LABEL_KEY, adsenseLabel);
-  }, [adsenseLabel]); // Save adsense label
 
   // --- Niche Management ---
   const addNiche = useCallback((niche: string) => {
@@ -283,16 +266,6 @@ export function useSettings(): SettingsContextType {
     setFreedomThresholdState(DEFAULT_FREEDOM_THRESHOLD);
     localStorage.removeItem(FREEDOM_THRESHOLD_KEY);
   }, []);
-  
-  // --- Adsense Label Management ---
-  const setAdsenseLabel = useCallback((label: string) => {
-    setAdsenseLabelState(label.trim() || DEFAULT_ADSENSE_LABEL);
-  }, []);
-  
-  const resetAdsenseLabel = useCallback(() => {
-    setAdsenseLabelState(DEFAULT_ADSENSE_LABEL);
-    localStorage.removeItem(ADSENSE_LABEL_KEY);
-  }, []);
 
 
   return {
@@ -303,7 +276,6 @@ export function useSettings(): SettingsContextType {
     platforms,
     strategies, // Export strategies
     freedomThreshold,
-    adsenseLabel, // Export adsense label
     addNiche,
     removeNiche,
     resetNiches,
@@ -324,7 +296,5 @@ export function useSettings(): SettingsContextType {
     resetStrategies, // Export strategy functions
     setFreedomThreshold,
     resetFreedomThreshold,
-    setAdsenseLabel, // Export adsense label functions
-    resetAdsenseLabel, // Export adsense label functions
   };
 }
