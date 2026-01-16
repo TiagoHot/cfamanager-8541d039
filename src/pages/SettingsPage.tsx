@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
 import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight, Trash2 } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
@@ -160,7 +161,7 @@ export default function SettingsPage() {
     resetFreedomThreshold,
   } = useSettings();
   
-  const { rates, updateRate, saveRates } = useCurrencyRates(); // Use new hook
+  const { rates, updateRate, saveRates, fetchRatesFromAPI, isLoading, lastUpdate } = useCurrencyRates();
 
   // Temporary effect to ensure default types are loaded correctly after the last change
   useEffect(() => {
@@ -188,7 +189,14 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Taxas de Câmbio</CardTitle>
-            <CardDescription>Configure as taxas de conversão para o Real</CardDescription>
+            <CardDescription>
+              Cotações atualizadas via Banco Central do Brasil
+              {lastUpdate && (
+                <span className="block text-xs text-muted-foreground mt-1">
+                  Última atualização: {lastUpdate}
+                </span>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -202,6 +210,7 @@ export default function SettingsPage() {
                   value={rates.Dollar}
                   onChange={(e) => updateRate('Dollar', parseFloat(e.target.value) || 0)}
                   className="w-32"
+                  disabled={isLoading}
                 />
                 <span className="text-muted-foreground">R$</span>
               </div>
@@ -217,14 +226,35 @@ export default function SettingsPage() {
                   value={rates.Euro}
                   onChange={(e) => updateRate('Euro', parseFloat(e.target.value) || 0)}
                   className="w-32"
+                  disabled={isLoading}
                 />
                 <span className="text-muted-foreground">R$</span>
               </div>
             </div>
-            <Button onClick={saveRates} className="w-full">
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Taxas
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={fetchRatesFromAPI} 
+                variant="outline"
+                className="flex-1"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Buscando...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Atualizar via BCB
+                  </>
+                )}
+              </Button>
+              <Button onClick={saveRates} disabled={isLoading}>
+                <Save className="w-4 h-4 mr-2" />
+                Salvar
+              </Button>
+            </div>
           </CardContent>
         </Card>
         
