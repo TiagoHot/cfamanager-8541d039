@@ -201,7 +201,9 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
           <DialogTitle>Adicionar Resultado Semanal</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          
+          {/* Seção de Metadados da Semana com fundo contrastante */}
+          <div className="grid grid-cols-2 gap-4 bg-muted/50 p-4 rounded-lg">
             <div>
               <Label htmlFor="week">Semana</Label>
               <Select value={formData.week} onValueChange={(v) => setFormData(prev => ({ ...prev, week: v }))}>
