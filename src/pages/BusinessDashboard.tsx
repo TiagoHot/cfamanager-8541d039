@@ -19,7 +19,7 @@ import {
   Legend
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MONTHS } from "@/types"; // Import MONTHS
 import { useSettings } from "@/hooks/useSettings"; // Import useSettings
 
@@ -56,7 +56,7 @@ const getBusinessLevel = (profit: number, threshold: number): { level: string; m
   } else if (profit > 0 && profit < threshold) {
     return { 
       level: 'NÍVEL PAYBACK', 
-      message: 'Parabéns! Seus resultados cobrem todos os custos e geram um pequeno lucro. Mas tenha em mente que você ainda não atingiu a independência financeira!',
+      message: 'Parabéns! Seus resultados cobrem todos os custos e geram lucro. Mas tenha em mente que você ainda não atingiu a independência financeira!',
       color: 'info'
     };
   } else {
