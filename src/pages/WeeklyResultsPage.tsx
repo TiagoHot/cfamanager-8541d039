@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Plus, Download, Upload, Pencil, Trash2, MoreHorizontal } from "lucide-react";
+import { Plus, Download, Upload, Pencil, Trash2, MoreHorizontal, DollarSign, Euro } from "lucide-react";
 import { formatCurrency, getProfitLossColor, normalizeMonthToAbbreviation } from "@/lib/formatters";
 import { WeeklyResult, MONTHS } from "@/types";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageContent } from "@/components/PageContent";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useCurrencyRates } from "@/hooks/useCurrencyRates"; // Import useCurrencyRates
 
 // Extract week number from week string (e.g., "S01" -> 1, "S52" -> 52)
 const getWeekNumber = (week: string): number => {
@@ -40,6 +41,42 @@ const getMonthNumber = (month: string): number => {
   // Return 1-based month number (1 for Jan, 12 for Dez). If not found, return 0.
   return index >= 0 ? index + 1 : 0;
 };
+
+// Componente para exibir as taxas de câmbio
+const CurrencyRateDisplay = () => {
+  const { rates } = useCurrencyRates();
+  
+  // Format the rates to BRL currency display
+  const formatRate = (rate: number) => formatCurrency(rate, 'BRL').replace('R$', '');
+
+  return (
+    <div className="flex gap-4 mb-6 flex-shrink-0">
+      <Card className="flex-1 p-3 bg-info/5 border-info/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-medium text-info">
+            <DollarSign className="w-4 h-4" />
+            Dólar (USD)
+          </div>
+          <span className="text-lg font-bold text-info">
+            R$ {formatRate(rates.Dollar)}
+          </span>
+        </div>
+      </Card>
+      <Card className="flex-1 p-3 bg-chart-5/5 border-chart-5/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-medium text-chart-5">
+            <Euro className="w-4 h-4" />
+            Euro (EUR)
+          </div>
+          <span className="text-lg font-bold text-chart-5">
+            R$ {formatRate(rates.Euro)}
+          </span>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
 
 export default function WeeklyResultsPage() {
   const { weeklyResults, importData, addWeeklyResult, updateWeeklyResult, removeWeeklyResult } = useData();
@@ -254,6 +291,9 @@ export default function WeeklyResultsPage() {
 
   return (
     <div className="animate-fade-in">
+      
+      <CurrencyRateDisplay />
+
       <PageHeader 
         title="Resultados Semanais" 
         description="Acompanhe seus resultados semana a semana"
