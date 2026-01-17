@@ -115,17 +115,17 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Pencil className="w-5 h-5" />
-            Editar Resultado: {result.week} / {result.year}
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Pencil className="w-4 h-4" />
+            Editar: {result.week} / {result.year}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-4 bg-muted/50 p-4 rounded-lg">
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <div className="grid grid-cols-2 gap-2 bg-muted/50 p-3 rounded-lg">
             <div>
-              <Label htmlFor="week">Semana</Label>
+              <Label htmlFor="week" className="text-xs">Semana</Label>
               <Select value={formData.week} onValueChange={(v) => setFormData(prev => ({ ...prev, week: v }))}>
-                <SelectTrigger>
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -137,9 +137,9 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
             </div>
 
             <div>
-              <Label htmlFor="year">Ano</Label>
+              <Label htmlFor="year" className="text-xs">Ano</Label>
               <Select value={formData.year} onValueChange={(v) => setFormData(prev => ({ ...prev, year: v }))}>
-                <SelectTrigger>
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,32 +151,34 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
             </div>
 
             <div>
-              <Label htmlFor="month">Mês (Ex: Jan ou Jan/Fev)</Label>
+              <Label htmlFor="month" className="text-xs">Mês</Label>
               <Input
                 id="month"
                 value={formData.month}
                 onChange={(e) => setFormData(prev => ({ ...prev, month: e.target.value }))}
-                placeholder="Ex: Jan/Fev"
+                placeholder="Jan/Fev"
                 required
+                className="h-8"
               />
             </div>
 
             <div>
-              <Label htmlFor="period">Período</Label>
+              <Label htmlFor="period" className="text-xs">Período</Label>
               <Input
                 id="period"
                 value={formData.period}
                 onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value }))}
-                placeholder="Ex: 01/01 - 07/01"
+                placeholder="01/01 - 07/01"
+                className="h-8"
               />
             </div>
           </div>
 
-          <div className="border-t pt-4 bg-muted/50 p-4 rounded-lg">
-            <h4 className="font-medium mb-3">Valores</h4>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="bg-muted/50 p-3 rounded-lg space-y-2">
+            <h4 className="font-medium text-sm">Valores</h4>
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label htmlFor="campaignCosts">Custo Campanhas (R$)</Label>
+                <Label htmlFor="campaignCosts" className="text-xs">Custo Campanhas (R$)</Label>
                 <Input
                   id="campaignCosts"
                   type="number"
@@ -184,85 +186,79 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
                   value={formData.campaignCosts}
                   onChange={(e) => setFormData(prev => ({ ...prev, campaignCosts: e.target.value }))}
                   placeholder="0.00"
+                  className="h-8"
                 />
               </div>
 
               <div>
-                <Label htmlFor="sales">N° de Vendas</Label>
+                <Label htmlFor="sales" className="text-xs">N° de Vendas</Label>
                 <Input
                   id="sales"
                   type="number"
                   value={formData.sales}
                   onChange={(e) => setFormData(prev => ({ ...prev, sales: e.target.value }))}
                   placeholder="0"
+                  className="h-8"
                 />
               </div>
 
-              {/* Ganhos Campanhas - Multi-currency inputs in a single row */}
-              <div className="col-span-2 space-y-2">
-                <Label className="text-sm font-medium">Ganhos Campanhas</Label>
-                
+              {/* Ganhos Campanhas - Multi-currency */}
+              <div className="col-span-2 space-y-1">
+                <Label className="text-xs font-medium">Ganhos Campanhas</Label>
                 <div className="grid grid-cols-3 gap-2">
-                  {/* BRL Input */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1">
+                  <div>
+                    <div className="flex items-center gap-1 mb-0.5">
                       <BadgeCent className="w-3 h-3 text-success" />
                       <span className="text-xs text-muted-foreground">BRL</span>
                     </div>
                     <Input
-                      id="campaignEarningsBRL"
                       type="number"
                       step="0.01"
                       value={formData.campaignEarningsBRL}
                       onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsBRL: e.target.value }))}
                       placeholder="0.00"
+                      className="h-8"
                     />
                   </div>
-                  
-                  {/* USD Input */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1">
+                  <div>
+                    <div className="flex items-center gap-1 mb-0.5">
                       <DollarSign className="w-3 h-3 text-info" />
                       <span className="text-xs text-muted-foreground">USD</span>
                     </div>
                     <Input
-                      id="campaignEarningsUSD"
                       type="number"
                       step="0.01"
                       value={formData.campaignEarningsUSD}
                       onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsUSD: e.target.value }))}
                       placeholder="0.00"
+                      className="h-8"
                     />
                   </div>
-                  
-                  {/* EUR Input */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1">
+                  <div>
+                    <div className="flex items-center gap-1 mb-0.5">
                       <Euro className="w-3 h-3 text-chart-5" />
                       <span className="text-xs text-muted-foreground">EUR</span>
                     </div>
                     <Input
-                      id="campaignEarningsEUR"
                       type="number"
                       step="0.01"
                       value={formData.campaignEarningsEUR}
                       onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsEUR: e.target.value }))}
                       placeholder="0.00"
+                      className="h-8"
                     />
                   </div>
                 </div>
-                
-                {/* Total converted */}
-                <div className="flex items-center justify-between p-2 rounded-lg bg-primary/10 border border-primary/20">
-                  <span className="text-sm font-medium">Total em R$:</span>
-                  <span className="text-base font-bold text-primary">
+                <div className="flex items-center justify-between px-2 py-1 rounded bg-primary/10 border border-primary/20">
+                  <span className="text-xs font-medium">Total R$:</span>
+                  <span className="text-sm font-bold text-primary">
                     {formatCurrency(campaignEarningsTotal, 'BRL')}
                   </span>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="organicEarnings">Orgânico (R$)</Label>
+                <Label htmlFor="organicEarnings" className="text-xs">Orgânico (R$)</Label>
                 <Input
                   id="organicEarnings"
                   type="number"
@@ -270,11 +266,12 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
                   value={formData.organicEarnings}
                   onChange={(e) => setFormData(prev => ({ ...prev, organicEarnings: e.target.value }))}
                   placeholder="0.00"
+                  className="h-8"
                 />
               </div>
 
               <div>
-                <Label htmlFor="adsenseEarnings">Adsense (R$)</Label>
+                <Label htmlFor="adsenseEarnings" className="text-xs">Adsense (R$)</Label>
                 <Input
                   id="adsenseEarnings"
                   type="number"
@@ -282,18 +279,19 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
                   value={formData.adsenseEarnings}
                   onChange={(e) => setFormData(prev => ({ ...prev, adsenseEarnings: e.target.value }))}
                   placeholder="0.00"
+                  className="h-8"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button type="submit">
-              <Save className="w-4 h-4 mr-2" />
-              Salvar Alterações
+            <Button type="submit" size="sm">
+              <Save className="w-3 h-3 mr-1" />
+              Salvar
             </Button>
           </div>
         </form>
