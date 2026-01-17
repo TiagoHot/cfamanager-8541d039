@@ -8,7 +8,7 @@ import { WeeklyResult, MONTHS, CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { startOfWeek, endOfWeek, addWeeks, format, parseISO, isValid, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useCurrencyRates } from '@/hooks/useCurrencyRates';
+import { useCurrencyRates } from '@/contexts/CurrencyRatesContext';
 import { formatCurrency } from '@/lib/formatters';
 import { DollarSign, Euro, BadgeCent } from 'lucide-react';
 
@@ -109,6 +109,7 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
     const usd = parseFloat(formData.campaignEarningsUSD) || 0;
     const eur = parseFloat(formData.campaignEarningsEUR) || 0;
     
+    // Use rates from context state
     const usdToBrl = usd * rates.Dollar;
     const eurToBrl = eur * rates.Euro;
     

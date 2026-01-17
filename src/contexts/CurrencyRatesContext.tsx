@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { CURRENCY_RATES } from '@/types';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,13 +21,16 @@ interface CurrencyRatesContextType {
   lastUpdate: string | null;
 }
 
-export function useCurrencyRates(): CurrencyRatesContextType {
+const CurrencyRatesContext = createContext<CurrencyRatesContextType | undefined>(undefined);
+
+export function CurrencyRatesProvider({ children }: { children: ReactNode }) {
+  // State for the currently displayed rates (used by AppLayout and Settings inputs)
   const [rates, setRates] = useState<CurrencyRates>({
     Dollar: CURRENCY_RATES['Dólar'],
     Euro: CURRENCY_RATES['Euro'],
   });
   
-  const [localRates, setLocalRates] = useState<CurrencyRates>(rates);
+  // State for loading and last update time
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
@@ -45,28 +48,35 @@ export function useCurrencyRates(): CurrencyRatesContextType {
       Euro: isNaN(euroRate) ? CURRENCY_RATES['Euro'] : euroRate,
     };
     
+    // Update global mutable object immediately on load
+    CURRENCY_RATES['Dólar'] = loadedRates.Dollar;
+    CURRENCY_RATES['Euro'] = loadedRates.Euro;
+    
     setRates(loadedRates);
-    setLocalRates(loadedRates);
     setLastUpdate(storedLastUpdate);
   }, []);
 
+  // Function to update rates temporarily (used by input fields in Settings)
   const updateRate = useCallback((currency: 'Dollar' | 'Euro', rate: number) => {
-    setLocalRates(prev => ({
+    setRates(prev => ({
       ...prev,
       [currency]: rate,
     }));
   }, []);
 
+  // Function to save rates permanently (updates localStorage and global object)
   const saveRates = useCallback(() => {
-    localStorage.setItem(DOLLAR_RATE_KEY, localRates.Dollar.toString());
-    localStorage.setItem(EURO_RATE_KEY, localRates.Euro.toString());
+    // Use current state 'rates' for saving
+    localStorage.setItem(DOLLAR_RATE_KEY, rates.Dollar.toString());
+    localStorage.setItem(EURO_RATE_KEY, rates.Euro.toString());
     
-    CURRENCY_RATES['Dólar'] = localRates.Dollar;
-    CURRENCY_RATES['Euro'] = localRates.Euro;
+    // Update global CURRENCY_RATES object
+    CURRENCY_RATES['Dólar'] = rates.Dollar;
+    CURRENCY_RATES['Euro'] = rates.Euro;
     
-    setRates(localRates);
+    // Since 'rates' state is already updated via updateRate, we just toast success.
     toast.success('Taxas de câmbio salvas com sucesso!');
-  }, [localRates]);
+  }, [rates]);
 
   const fetchRatesFromAPI = useCallback(async () => {
     setIsLoading(true);
@@ -86,8 +96,7 @@ export function useCurrencyRates(): CurrencyRatesContextType {
         Euro: data.rates.EUR,
       };
       
-      // Update local state
-      setLocalRates(newRates);
+      // Update state (triggers re-render in all consumers)
       setRates(newRates);
       
       // Persist to localStorage
@@ -113,14 +122,28 @@ export function useCurrencyRates(): CurrencyRatesContextType {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [rates]);
 
-  return {
-    rates: localRates,
+  const value = {
+    rates,
     updateRate,
     saveRates,
     fetchRatesFromAPI,
     isLoading,
     lastUpdate,
   };
+
+  return (
+    <CurrencyRatesContext.Provider value={value}>
+      {children}
+    </CurrencyRatesContext.Provider>
+  );
+}
+
+export function useCurrencyRates() {
+  const context = useContext(CurrencyRatesContext);
+  if (context === undefined) {
+    throw new Error('useCurrencyRates must be used within a CurrencyRatesProvider');
+  }
+  return context;
 }

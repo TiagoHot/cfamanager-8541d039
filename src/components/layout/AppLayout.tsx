@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useCurrencyRates } from "@/hooks/useCurrencyRates"; // Import hook
+import { useCurrencyRates } from "@/contexts/CurrencyRatesContext"; // Import hook from context
 import { formatCurrency } from "@/lib/formatters"; // Import formatter
 import { Card } from "@/components/ui/card"; // Import Card
 import { cn } from "@/lib/utils"; // Import cn

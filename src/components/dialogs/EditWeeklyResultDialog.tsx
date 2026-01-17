@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { WeeklyResult, MONTHS } from '@/types';
 import { toast } from 'sonner';
 import { Pencil, Save, DollarSign, Euro, BadgeCent } from 'lucide-react';
-import { useCurrencyRates } from '@/hooks/useCurrencyRates';
+import { useCurrencyRates } from '@/contexts/CurrencyRatesContext';
 import { formatCurrency } from '@/lib/formatters';
 
 interface EditWeeklyResultDialogProps {
@@ -46,6 +46,7 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
     const usd = parseFloat(formData.campaignEarningsUSD) || 0;
     const eur = parseFloat(formData.campaignEarningsEUR) || 0;
     
+    // Use rates from context state
     const usdToBrl = usd * rates.Dollar;
     const eurToBrl = eur * rates.Euro;
     
@@ -55,6 +56,9 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
   // Reset form data when dialog opens or result changes
   useEffect(() => {
     if (open) {
+      // NOTE: When editing, we assume the stored campaignEarnings is the BRL total.
+      // We reset USD/EUR inputs to empty strings unless we implement reverse calculation/storage, 
+      // which is complex and usually unnecessary for editing aggregated weekly results.
       setFormData({
         week: result.week,
         year: result.year.toString(),

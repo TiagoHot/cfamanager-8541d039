@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
+import { CurrencyRatesProvider } from "@/contexts/CurrencyRatesContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import AuthPage from "@/pages/AuthPage";
@@ -27,31 +28,33 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <DataProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Navigate to="/dashboard/negocio" replace />} />
-                <Route path="produtos" element={<ProductsPage />} />
-                <Route path="campanhas" element={<CampaignsPage />} />
-                <Route path="semanal" element={<WeeklyResultsPage />} />
-                <Route path="financeiro" element={<FinancialPage />} />
-                <Route path="fluxo-caixa" element={<CashFlowPage />} />
-                <Route path="dashboard/produtos" element={<ProductDashboard />} />
-                <Route path="dashboard/campanhas" element={<CampaignDashboard />} />
-                <Route path="dashboard/negocio" element={<BusinessDashboard />} />
-                <Route path="configuracoes" element={<SettingsPage />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <CurrencyRatesProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Navigate to="/dashboard/negocio" replace />} />
+                  <Route path="produtos" element={<ProductsPage />} />
+                  <Route path="campanhas" element={<CampaignsPage />} />
+                  <Route path="semanal" element={<WeeklyResultsPage />} />
+                  <Route path="financeiro" element={<FinancialPage />} />
+                  <Route path="fluxo-caixa" element={<CashFlowPage />} />
+                  <Route path="dashboard/produtos" element={<ProductDashboard />} />
+                  <Route path="dashboard/campanhas" element={<CampaignDashboard />} />
+                  <Route path="dashboard/negocio" element={<BusinessDashboard />} />
+                  <Route path="configuracoes" element={<SettingsPage />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </CurrencyRatesProvider>
           </DataProvider>
         </AuthProvider>
       </BrowserRouter>

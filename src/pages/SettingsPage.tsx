@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { Save, RefreshCw, X, ArrowUpRight, ArrowDownRight, Trash2 } from "lucide-react";
 import { CURRENCY_RATES } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
-import { useCurrencyRates } from "@/hooks/useCurrencyRates"; // Import new hook
+import { useCurrencyRates } from "@/contexts/CurrencyRatesContext"; // Import new hook from context
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
