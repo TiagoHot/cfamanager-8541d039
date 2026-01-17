@@ -113,14 +113,14 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="w-5 h-5" />
             Editar Resultado: {result.week} / {result.year}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-2 flex-1">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-2 gap-4 bg-muted/50 p-4 rounded-lg">
             <div>
               <Label htmlFor="week">Semana</Label>
@@ -262,7 +262,7 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
               </div>
 
               <div>
-                <Label htmlFor="organicEarnings">Ganhos Orgânico (R$)</Label>
+                <Label htmlFor="organicEarnings">Orgânico (R$)</Label>
                 <Input
                   id="organicEarnings"
                   type="number"
@@ -274,7 +274,7 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
               </div>
 
               <div>
-                <Label htmlFor="adsenseEarnings">Ganhos Adsense (R$)</Label>
+                <Label htmlFor="adsenseEarnings">Adsense (R$)</Label>
                 <Input
                   id="adsenseEarnings"
                   type="number"

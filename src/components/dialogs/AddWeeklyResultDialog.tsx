@@ -214,11 +214,11 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Adicionar Resultado Semanal</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-2 flex-1">
+        <form onSubmit={handleSubmit} className="space-y-3">
           
           {/* Seção de Metadados da Semana com fundo contrastante */}
           <div className="grid grid-cols-2 gap-4 bg-muted/50 p-4 rounded-lg">
@@ -375,7 +375,7 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
                 />
               </div>
 
-              <div className="col-span-2">
+              <div>
                 <Label htmlFor="adsenseEarnings">Ganhos Adsense (R$)</Label>
                 <Input
                   id="adsenseEarnings"
