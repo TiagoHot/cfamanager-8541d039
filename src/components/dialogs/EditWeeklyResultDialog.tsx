@@ -113,14 +113,14 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="w-5 h-5" />
             Editar Resultado: {result.week} / {result.year}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-2 flex-1">
           <div className="grid grid-cols-2 gap-4 bg-muted/50 p-4 rounded-lg">
             <div>
               <Label htmlFor="week">Semana</Label>
@@ -198,65 +198,64 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
                 />
               </div>
 
-              {/* Ganhos Campanhas - Multi-currency inputs */}
-              <div className="col-span-2 space-y-3">
+              {/* Ganhos Campanhas - Multi-currency inputs in a single row */}
+              <div className="col-span-2 space-y-2">
                 <Label className="text-sm font-medium">Ganhos Campanhas</Label>
                 
-                {/* BRL Input */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-md bg-success/10 text-success">
-                    <BadgeCent className="w-4 h-4" />
+                <div className="grid grid-cols-3 gap-2">
+                  {/* BRL Input */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1">
+                      <BadgeCent className="w-3 h-3 text-success" />
+                      <span className="text-xs text-muted-foreground">BRL</span>
+                    </div>
+                    <Input
+                      id="campaignEarningsBRL"
+                      type="number"
+                      step="0.01"
+                      value={formData.campaignEarningsBRL}
+                      onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsBRL: e.target.value }))}
+                      placeholder="0.00"
+                    />
                   </div>
-                  <Input
-                    id="campaignEarningsBRL"
-                    type="number"
-                    step="0.01"
-                    value={formData.campaignEarningsBRL}
-                    onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsBRL: e.target.value }))}
-                    placeholder="0.00"
-                    className="flex-1"
-                  />
-                  <span className="text-sm text-muted-foreground w-10">BRL</span>
-                </div>
-                
-                {/* USD Input */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-md bg-info/10 text-info">
-                    <DollarSign className="w-4 h-4" />
+                  
+                  {/* USD Input */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="w-3 h-3 text-info" />
+                      <span className="text-xs text-muted-foreground">USD</span>
+                    </div>
+                    <Input
+                      id="campaignEarningsUSD"
+                      type="number"
+                      step="0.01"
+                      value={formData.campaignEarningsUSD}
+                      onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsUSD: e.target.value }))}
+                      placeholder="0.00"
+                    />
                   </div>
-                  <Input
-                    id="campaignEarningsUSD"
-                    type="number"
-                    step="0.01"
-                    value={formData.campaignEarningsUSD}
-                    onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsUSD: e.target.value }))}
-                    placeholder="0.00"
-                    className="flex-1"
-                  />
-                  <span className="text-sm text-muted-foreground w-10">USD</span>
-                </div>
-                
-                {/* EUR Input */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-md bg-chart-5/10 text-chart-5">
-                    <Euro className="w-4 h-4" />
+                  
+                  {/* EUR Input */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1">
+                      <Euro className="w-3 h-3 text-chart-5" />
+                      <span className="text-xs text-muted-foreground">EUR</span>
+                    </div>
+                    <Input
+                      id="campaignEarningsEUR"
+                      type="number"
+                      step="0.01"
+                      value={formData.campaignEarningsEUR}
+                      onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsEUR: e.target.value }))}
+                      placeholder="0.00"
+                    />
                   </div>
-                  <Input
-                    id="campaignEarningsEUR"
-                    type="number"
-                    step="0.01"
-                    value={formData.campaignEarningsEUR}
-                    onChange={(e) => setFormData(prev => ({ ...prev, campaignEarningsEUR: e.target.value }))}
-                    placeholder="0.00"
-                    className="flex-1"
-                  />
-                  <span className="text-sm text-muted-foreground w-10">EUR</span>
                 </div>
                 
                 {/* Total converted */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <div className="flex items-center justify-between p-2 rounded-lg bg-primary/10 border border-primary/20">
                   <span className="text-sm font-medium">Total em R$:</span>
-                  <span className="text-lg font-bold text-primary">
+                  <span className="text-base font-bold text-primary">
                     {formatCurrency(campaignEarningsTotal, 'BRL')}
                   </span>
                 </div>
