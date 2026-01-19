@@ -152,56 +152,36 @@ export default function BusinessDashboard() {
     return Array.from(allYears).sort((a, b) => b - a);
   }, [incomeExpenses, campaigns, weeklyResults]);
   
-  const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "all"); // Default to 'all' if no data, otherwise latest year
+  const [selectedYear, setSelectedYear] = useState<string>(years[0]?.toString() || "2025");
   
-  // Ensure selectedYear is set to 'all' if no years exist, or the latest year if data exists
-  useEffect(() => {
-    if (years.length > 0 && selectedYear === "all") {
-      setSelectedYear(years[0].toString());
-    } else if (years.length === 0 && selectedYear !== "all") {
-      setSelectedYear("all");
-    }
-  }, [years, selectedYear]);
-
   const yearData = useMemo(() => {
-    const year = selectedYear === "all" ? null : parseInt(selectedYear);
-    
-    const filteredIncomes = incomeExpenses.filter(ie => 
-      ie.type === 'income' && (year === null || ie.year === year)
-    );
-    const filteredExpenses = incomeExpenses.filter(ie => 
-      ie.type === 'expense' && (year === null || ie.year === year)
-    );
+    const year = parseInt(selectedYear);
+    const yearIncomes = incomeExpenses.filter(ie => ie.year === year && ie.type === 'income');
+    const yearExpenses = incomeExpenses.filter(ie => ie.year === year && ie.type === 'expense');
     
     // Calculate totals
-    const totalIncome = filteredIncomes.reduce((sum, ie) => sum + ie.amount, 0);
-    const totalExpenses = filteredExpenses.reduce((sum, ie) => sum + ie.amount, 0);
+    const totalIncome = yearIncomes.reduce((sum, ie) => sum + ie.amount, 0);
+    const totalExpenses = yearExpenses.reduce((sum, ie) => sum + ie.amount, 0);
     const totalProfit = totalIncome - totalExpenses;
     
-    // Group by month (only relevant if a single year is selected, but we calculate it anyway)
+    // Group by month
     const monthlyMap = new Map<string, { income: number; expenses: number }>();
+    // Use MONTH_ORDER (which is MONTHS) for initialization
+    MONTH_ORDER.forEach(month => monthlyMap.set(month, { income: 0, expenses: 0 }));
     
-    // If 'all' years are selected, we group by 'Month Year' for the chart, 
-    // but since the chart is designed for monthly evolution, we only show monthly data if a single year is selected.
-    // If 'all' is selected, we aggregate all data but the monthly chart will be empty/irrelevant.
-    // For simplicity in this dashboard, we will only populate the monthly chart if a specific year is chosen.
+    yearIncomes.forEach(ie => {
+      // Normaliza o nome do mês para abreviação antes de usar como chave
+      const monthKey = normalizeMonthToAbbreviation(ie.month); 
+      const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
+      monthlyMap.set(monthKey, { ...current, income: current.income + ie.amount });
+    });
     
-    // If a specific year is selected, populate monthly data
-    if (year !== null) {
-        MONTH_ORDER.forEach(month => monthlyMap.set(month, { income: 0, expenses: 0 }));
-        
-        filteredIncomes.forEach(ie => {
-          const monthKey = normalizeMonthToAbbreviation(ie.month); 
-          const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
-          monthlyMap.set(monthKey, { ...current, income: current.income + ie.amount });
-        });
-        
-        filteredExpenses.forEach(ie => {
-          const monthKey = normalizeMonthToAbbreviation(ie.month); 
-          const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
-          monthlyMap.set(monthKey, { ...current, expenses: current.expenses + ie.amount });
-        });
-    }
+    yearExpenses.forEach(ie => {
+      // Normaliza o nome do mês para abreviação antes de usar como chave
+      const monthKey = normalizeMonthToAbbreviation(ie.month); 
+      const current = monthlyMap.get(monthKey) || { income: 0, expenses: 0 };
+      monthlyMap.set(monthKey, { ...current, expenses: current.expenses + ie.amount });
+    });
     
     const months = MONTH_ORDER.map(month => {
       const data = monthlyMap.get(month) || { income: 0, expenses: 0 };
@@ -215,14 +195,14 @@ export default function BusinessDashboard() {
     
     // Income breakdown by source
     const incomeBySource = new Map<string, number>();
-    filteredIncomes.forEach(ie => {
+    yearIncomes.forEach(ie => {
       const source = ie.source || 'Outros';
       incomeBySource.set(source, (incomeBySource.get(source) || 0) + ie.amount);
     });
     
     // Expense breakdown by source
     const expenseBySource = new Map<string, number>();
-    filteredExpenses.forEach(ie => {
+    yearExpenses.forEach(ie => {
       const source = ie.source || 'Outros';
       expenseBySource.set(source, (expenseBySource.get(source) || 0) + ie.amount);
     });
@@ -297,7 +277,6 @@ export default function BusinessDashboard() {
                 <SelectValue placeholder="Ano" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os Anos</SelectItem>
                 {years.map(year => (
                   <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                 ))}
@@ -350,12 +329,12 @@ export default function BusinessDashboard() {
       </div>
 
       {/* Monthly Bar Chart */}
-      {selectedYear !== "all" && monthlyChartData.length > 0 ? (
+      {monthlyChartData.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <BarChart2 className="w-5 h-5" />
-              Receitas e Despesas por Mês (Ano {selectedYear})
+              Receitas e Despesas por Mês
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -382,13 +361,7 @@ export default function BusinessDashboard() {
             </div>
           </CardContent>
         </Card>
-      ) : selectedYear !== "all" ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <p>Não há dados de receitas/despesas para o ano de {selectedYear}.</p>
-          </CardContent>
-        </Card>
-      ) : null}
+      )}
 
       {/* Pie Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
