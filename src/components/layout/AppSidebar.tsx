@@ -9,15 +9,15 @@ const dataItems = [{
   icon: Package,
   color: "text-chart-1"
 }, {
-  title: "Resultados de Campanhas",
-  url: "/campanhas",
-  icon: Target,
-  color: "text-chart-2"
-}, {
   title: "Resultados Semanais",
   url: "/semanal",
   icon: Calendar,
   color: "text-chart-3"
+}, {
+  title: "Resultados de Campanhas",
+  url: "/campanhas",
+  icon: Target,
+  color: "text-chart-2"
 }, {
   title: "Receitas & Despesas",
   url: "/financeiro",
