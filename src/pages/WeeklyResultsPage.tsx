@@ -84,10 +84,9 @@ export default function WeeklyResultsPage() {
     {
       key: 'campaignCosts',
       header: 'Custo Campanhas',
-      // Removendo text-right do header, mas mantendo no render
       className: 'text-left', 
       render: (item: WeeklyResult) => (
-        <span className="text-high-contrast text-right block">{formatCurrency(item.campaignCosts)}</span>
+        <span className="text-high-contrast">{formatCurrency(item.campaignCosts)}</span>
       ),
     },
     {
@@ -114,46 +113,41 @@ export default function WeeklyResultsPage() {
     {
       key: 'campaignEarnings',
       header: 'Ganhos Campanhas',
-      // Removendo text-right do header, mas mantendo no render
       className: 'text-left bg-success/5',
       render: (item: WeeklyResult) => (
-        <span className="text-foreground text-right block">{formatCurrency(item.campaignEarnings)}</span>
+        <span className="text-foreground">{formatCurrency(item.campaignEarnings)}</span>
       ),
     },
     {
       key: 'organicEarnings',
       header: 'Ganhos Orgânico',
-      // Removendo text-right do header, mas mantendo no render
       className: 'text-left bg-success/5',
       render: (item: WeeklyResult) => (
-        <span className="text-foreground text-right block">{formatCurrency(item.organicEarnings)}</span>
+        <span className="text-foreground">{formatCurrency(item.organicEarnings)}</span>
       ),
     },
     {
       key: 'adsenseEarnings',
       header: 'Adsense',
-      // Removendo text-right do header, mas mantendo no render
       className: 'text-left bg-success/5',
       render: (item: WeeklyResult) => (
-        <span className="text-foreground text-right block">{formatCurrency(item.adsenseEarnings)}</span>
+        <span className="text-foreground">{formatCurrency(item.adsenseEarnings)}</span>
       ),
     },
     {
       key: 'revenue',
       header: 'Faturamento',
-      // Removendo text-right do header, mas mantendo no render
       className: 'text-left',
       render: (item: WeeklyResult) => (
-        <span className="font-medium text-primary text-right block">{formatCurrency(item.revenue)}</span>
+        <span className="font-medium text-primary">{formatCurrency(item.revenue)}</span>
       ),
     },
     {
       key: 'profitLoss',
       header: 'Lucro/Prejuízo',
-      // Removendo text-right do header, mas mantendo no render
       className: 'text-left',
       render: (item: WeeklyResult) => (
-        <span className={cn("font-bold text-right block", getProfitLossColor(item.profitLoss))}>
+        <span className={cn("font-bold", getProfitLossColor(item.profitLoss))}>
           {formatCurrency(item.profitLoss)}
         </span>
       ),
