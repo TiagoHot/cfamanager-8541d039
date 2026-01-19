@@ -271,7 +271,7 @@ export default function FinancialPage() {
           <SelectContent>
             <SelectItem value="all">Todos os Meses</SelectItem>
             {MONTHS.map(m => (
-              <SelectItem key={m} value={m}>{m}</SelectItem>
+              <SelectItem key={m} value={m}>{formatMonthName(m)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
