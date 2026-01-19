@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, Upload, Pencil, Trash2, MoreHorizontal } from "lucide-react";
-import { formatCurrency, getProfitLossColor, normalizeMonthToAbbreviation } from "@/lib/formatters";
+import { formatCurrency, getProfitLossColor, normalizeMonthToAbbreviation, formatMonthName } from "@/lib/formatters";
 import { WeeklyResult, MONTHS } from "@/types";
 import { cn } from "@/lib/utils";
 import { useData } from "@/contexts/DataContext";
@@ -283,7 +283,7 @@ export default function WeeklyResultsPage() {
           <SelectContent>
             <SelectItem value="all">Todos os Meses</SelectItem>
             {MONTHS.map(m => (
-              <SelectItem key={m} value={m}>{m}</SelectItem>
+              <SelectItem key={m} value={m}>{formatMonthName(m)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
