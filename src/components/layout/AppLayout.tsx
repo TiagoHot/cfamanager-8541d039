@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useData } from "@/contexts/DataContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2, DollarSign, Euro } from "lucide-react";
+import { LogOut, Loader2, DollarSign, Euro, RefreshCw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils"; // Import cn
 
 // Componente para exibir as taxas de câmbio (movido para AppLayout)
 const CurrencyRateDisplay = () => {
-  const { rates } = useCurrencyRates();
+  const { rates, fetchRatesFromAPI, isLoading } = useCurrencyRates();
   
   // Format the rates to BRL currency display, removing the R$ symbol for cleaner display
   const formatRate = (rate: number) => formatCurrency(rate, 'BRL').replace('R$', '').trim();
@@ -39,6 +39,20 @@ const CurrencyRateDisplay = () => {
         <span className="font-medium">EUR:</span>
         <span className="font-bold">R$ {formatRate(rates.Euro)}</span>
       </div>
+      
+      <Button 
+        onClick={fetchRatesFromAPI} 
+        variant="outline"
+        size="sm"
+        className="h-9 px-3"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <RefreshCw className="w-4 h-4" />
+        )}
+      </Button>
     </div>
   );
 };
