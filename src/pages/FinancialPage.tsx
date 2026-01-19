@@ -4,7 +4,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Download, ArrowUpRight, ArrowDownRight, Upload, Pencil, Trash2, MoreHorizontal } from "lucide-react";
-import { formatCurrency, formatDate, normalizeMonthToAbbreviation } from "@/lib/formatters";
+import { formatCurrency, formatDate, normalizeMonthToAbbreviation, formatMonthName } from "@/lib/formatters";
 import { IncomeExpense, MONTHS } from "@/types";
 import { useData } from "@/contexts/DataContext";
 import { ImportExcelDialog } from "@/components/ImportExcelDialog";
@@ -321,6 +321,7 @@ export default function FinancialPage() {
           </Card>
         ) : (
           groupedItems.map(([monthYear, items]) => {
+            const [monthAbbr, year] = monthYear.split(' ');
             const monthlyIncomes = items.filter(i => i.type === 'income');
             const monthlyExpenses = items.filter(i => i.type === 'expense');
             const monthlyIncomeTotal = monthlyIncomes.reduce((sum, i) => sum + i.amount, 0);
@@ -331,7 +332,7 @@ export default function FinancialPage() {
               <Card key={monthYear}>
                 <CardHeader className="pb-3 border-b">
                   <CardTitle className="text-xl flex items-center justify-between">
-                    <span>{monthYear}</span>
+                    <span>{formatMonthName(monthAbbr)} de {year}</span>
                     <div className="text-sm font-medium">
                       Saldo: 
                       <span className={cn("ml-2", monthlyBalance >= 0 ? 'text-success' : 'text-destructive')}>
