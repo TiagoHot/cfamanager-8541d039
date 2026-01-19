@@ -60,7 +60,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'week',
       header: 'Semana',
-      className: 'text-left bg-warning/5', // Fundo amarelo suave
+      className: 'text-left bg-warning/5 w-20', // Fundo amarelo suave
       render: (item: WeeklyResult) => (
         <span className="font-bold">{item.week}</span>
       ),
@@ -68,7 +68,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'period',
       header: 'Período',
-      className: 'text-left bg-warning/5', // Fundo amarelo suave
+      className: 'text-left bg-warning/5 w-32', // Fundo amarelo suave
       render: (item: WeeklyResult) => (
         <span className="text-sm">{item.period}</span>
       ),
@@ -76,7 +76,8 @@ export default function WeeklyResultsPage() {
     {
       key: 'month',
       header: 'Mês',
-      className: 'text-left bg-warning/5', // Fundo amarelo suave
+      // Aumentando a largura para dar mais espaço
+      className: 'text-left bg-warning/5 w-28', 
       render: (item: WeeklyResult) => (
         <span className="font-medium">{item.month}</span>
       ),
@@ -92,7 +93,6 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      // Removendo w-28 e text-left para deixar o alinhamento padrão (left)
       className: '', 
       render: (item: WeeklyResult) => {
         const barWidth = (item.sales / maxSales) * 100;
@@ -297,7 +297,7 @@ export default function WeeklyResultsPage() {
         </ImportExcelDialog>
         <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="w-4 h-4 mr-2" />
-            Exportar
+          Exportar
         </Button>
         <AddWeeklyResultDialog onAdd={addWeeklyResult} weeklyResults={weeklyResults}>
           <Button size="sm">
