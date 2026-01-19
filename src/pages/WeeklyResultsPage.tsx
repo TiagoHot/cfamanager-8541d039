@@ -92,7 +92,8 @@ export default function WeeklyResultsPage() {
     {
       key: 'sales',
       header: 'Vendas',
-      className: 'w-28 text-left', // Keeping sales bar aligned left
+      // Removendo w-28 e text-left para deixar o alinhamento padrão (left)
+      className: '', 
       render: (item: WeeklyResult) => {
         const barWidth = (item.sales / maxSales) * 100;
         return (
@@ -155,7 +156,7 @@ export default function WeeklyResultsPage() {
     {
       key: 'actions',
       header: 'Ações',
-      className: 'w-16 text-center',
+      className: 'w-16 text-left', // Alterando para text-left
       render: (item: WeeklyResult) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -296,7 +297,7 @@ export default function WeeklyResultsPage() {
         </ImportExcelDialog>
         <Button variant="outline" size="sm" onClick={handleExport}>
           <Download className="w-4 h-4 mr-2" />
-          Exportar
+            Exportar
         </Button>
         <AddWeeklyResultDialog onAdd={addWeeklyResult} weeklyResults={weeklyResults}>
           <Button size="sm">
