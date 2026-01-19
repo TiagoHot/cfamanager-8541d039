@@ -357,6 +357,9 @@ export default function SettingsPage() {
                 <div>
                   <Badge className="bg-success text-success-foreground">NÍVEL DE LIBERDADE</Badge>
                   <p className="text-sm text-muted-foreground mt-1">Parabéns! Você atingiu sua independência financeira!</p>
+                  <p className="text-xs text-muted-foreground mt-1 italic">
+                    Obs: Defina o lucro anual que você acha ideal para atingir a "independência financeira" e adicione na caixa acima.
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono">&gt;</span>
