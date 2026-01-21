@@ -54,10 +54,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     saveCampaigns,
     saveWeeklyResults,
     saveIncomeExpenses,
-    updateCampaignInDB, // NEW
-    deleteCampaignFromDB, // NEW
-    updateIncomeExpenseInDB, // NEW
-    deleteIncomeExpenseFromDB, // NEW
+    updateCampaignInDB,
+    deleteCampaignFromDB,
+    insertIncomeExpenseInDB,
+    updateIncomeExpenseInDB,
+    deleteIncomeExpenseFromDB,
   } = useSupabaseData();
 
   const loadData = useCallback(async () => {
@@ -207,10 +208,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [weeklyResults, setWeeklyResults]);
 
   const addIncomeExpense = useCallback(async (item: IncomeExpense) => {
-    const newItems = [...incomeExpenses, item];
-    setIncomeExpensesState(newItems);
-    // If we were using individual inserts, we would call an `insertIncomeExpenseInDB` here.
-  }, [incomeExpenses]);
+    // Insert into database first to get the real ID
+    const insertedItem = await insertIncomeExpenseInDB(item);
+    
+    if (insertedItem) {
+      setIncomeExpensesState(prev => [...prev, insertedItem]);
+      toast.success(`${item.type === 'income' ? 'Receita' : 'Despesa'} adicionada com sucesso!`);
+    } else {
+      toast.error('Erro ao salvar registro financeiro');
+    }
+  }, [insertIncomeExpenseInDB]);
   
   const updateIncomeExpense = useCallback(async (updatedItem: IncomeExpense) => {
     const newItems = incomeExpenses.map(i => 

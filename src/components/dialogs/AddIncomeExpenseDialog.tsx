@@ -56,7 +56,6 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
     };
 
     onAdd(newItem);
-    toast.success(`${type === 'income' ? 'Receita' : 'Despesa'} adicionada com sucesso!`);
     setOpen(false);
     resetForm();
   };
