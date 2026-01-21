@@ -325,6 +325,41 @@ export function useSupabaseData() {
     return true;
   }, [user]);
   
+  const insertIncomeExpenseInDB = useCallback(async (item: IncomeExpense): Promise<IncomeExpense | null> => {
+    if (!user) return null;
+    
+    const { data, error } = await supabase
+      .from('income_expenses')
+      .insert({
+        user_id: user.id,
+        type: item.type,
+        year: item.year,
+        month: item.month,
+        date: formatDateToISO(item.date) || new Date().toISOString().split('T')[0],
+        source: item.source || null,
+        details: item.details || null,
+        amount: item.amount,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error inserting income/expense:', error);
+      return null;
+    }
+    
+    return {
+      id: data.id,
+      type: data.type as 'income' | 'expense',
+      year: data.year,
+      month: data.month,
+      date: data.date,
+      source: data.source || '',
+      details: data.details || '',
+      amount: data.amount,
+    };
+  }, [user]);
+
   const updateIncomeExpenseInDB = useCallback(async (item: IncomeExpense): Promise<boolean> => {
     if (!user) return false;
     
@@ -376,6 +411,7 @@ export function useSupabaseData() {
     saveIncomeExpenses,
     updateCampaignInDB,
     deleteCampaignFromDB,
+    insertIncomeExpenseInDB,
     updateIncomeExpenseInDB,
     deleteIncomeExpenseFromDB,
   };
