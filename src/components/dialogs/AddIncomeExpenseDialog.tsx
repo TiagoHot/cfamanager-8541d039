@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,8 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { IncomeExpense, MONTHS } from '@/types';
 import { toast } from 'sonner';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { useSettings } from '@/hooks/useSettings'; // Import useSettings
-import { setDate, setMonth, setYear, format, endOfMonth } from 'date-fns'; // Import endOfMonth
+import { useSettings } from '@/hooks/useSettings';
+import { setDate, setMonth, setYear, format, endOfMonth } from 'date-fns';
+import { useData } from '@/contexts/DataContext'; // Import useData
+import { normalizeMonthToAbbreviation } from '@/lib/formatters'; // Import normalizeMonthToAbbreviation
 
 interface AddIncomeExpenseDialogProps {
   onAdd: (item: IncomeExpense) => void;
@@ -17,14 +19,14 @@ interface AddIncomeExpenseDialogProps {
 }
 
 export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDialogProps) {
-  const { incomeSources, expenseSources } = useSettings(); // Use dynamic sources
+  const { incomeSources, expenseSources } = useSettings();
+  const { campaigns } = useData(); // Get campaigns data
   const [open, setOpen] = useState(false);
   
   const getInitialFormData = () => {
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth(); // 0-indexed
-    // Set to the last day of the current month
     const defaultDate = format(endOfMonth(setMonth(setYear(today, currentYear), currentMonth)), 'yyyy-MM-dd');
 
     return {
@@ -33,19 +35,47 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
       date: defaultDate,
       source: '',
       details: '',
-      amount: '',
+      amount: '', // Keep amount empty initially
     };
   };
 
   const [type, setType] = useState<'income' | 'expense'>('income');
   const [formData, setFormData] = useState(getInitialFormData());
 
-  // Reset form data when dialog opens
-  useState(() => {
+  // Calculate monthly campaign totals for the selected year/month
+  const monthlyCampaignTotals = useMemo(() => {
+    const yearInt = parseInt(formData.year);
+    const monthAbbr = normalizeMonthToAbbreviation(formData.month);
+
+    const campaignsInMonth = campaigns.filter(c => 
+      c.year === yearInt && normalizeMonthToAbbreviation(c.month) === monthAbbr
+    );
+
+    const totalEarnings = campaignsInMonth.reduce((sum, c) => sum + c.earnings, 0);
+    const totalCosts = campaignsInMonth.reduce((sum, c) => sum + c.costs, 0);
+    
+    return { totalEarnings, totalCosts };
+  }, [campaigns, formData.year, formData.month]);
+
+  // Effect to reset form data when dialog opens
+  useEffect(() => {
     if (open) {
       setFormData(getInitialFormData());
+      setType('income'); // Reset type to income
     }
   }, [open]);
+
+  // Effect to pre-fill amount based on type, source, year, and month
+  useEffect(() => {
+    let newAmount = '';
+    if (type === 'income' && formData.source === 'Campanhas') {
+      newAmount = monthlyCampaignTotals.totalEarnings.toFixed(2);
+    } else if (type === 'expense' && formData.source === 'Tráfego Pago') {
+      newAmount = monthlyCampaignTotals.totalCosts.toFixed(2);
+    }
+    setFormData(prev => ({ ...prev, amount: newAmount }));
+  }, [type, formData.source, monthlyCampaignTotals]);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +103,6 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
 
     onAdd(newItem);
     setOpen(false);
-    // No need to call resetForm here, as the useState effect handles it when dialog re-opens
   };
 
   const handleMonthChange = (newMonth: string) => {
@@ -86,7 +115,7 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
         let dateObj = new Date();
         dateObj = setYear(dateObj, yearInt);
         dateObj = setMonth(dateObj, monthIndex);
-        dateObj = endOfMonth(dateObj); // Set to the last day of the month
+        dateObj = endOfMonth(dateObj);
         newDate = format(dateObj, 'yyyy-MM-dd');
       }
 
@@ -108,7 +137,7 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
         let dateObj = new Date();
         dateObj = setYear(dateObj, yearInt);
         dateObj = setMonth(dateObj, monthIndex);
-        dateObj = endOfMonth(dateObj); // Set to the last day of the month
+        dateObj = endOfMonth(dateObj);
         newDate = format(dateObj, 'yyyy-MM-dd');
       }
 
@@ -132,7 +161,7 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
         
         <Tabs value={type} onValueChange={(v) => {
           setType(v as 'income' | 'expense');
-          setFormData(prev => ({ ...prev, source: '' }));
+          setFormData(prev => ({ ...prev, source: '' })); // Clear source when type changes
         }}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="income" className="data-[state=active]:bg-success/10 data-[state=active]:text-success">
