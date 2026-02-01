@@ -31,12 +31,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const despesa = payload.find((p: any) => p.dataKey === 'despesa')?.value || 0;
     const lucroPrejuizo = receita - despesa;
 
+    // Apply specific colors for this tooltip
+    const profitLossColorClass = lucroPrejuizo > 0 ? 'text-info' : (lucroPrejuizo < 0 ? 'text-warning' : 'text-muted-foreground');
+
     return (
       <div className="p-3 bg-card border border-border rounded-lg shadow-lg text-sm">
         <p className="font-semibold mb-1">{label}</p>
         <p className="text-success">Receita : {formatCurrency(receita)}</p>
         <p className="text-destructive">Despesa : {formatCurrency(despesa)}</p>
-        <p className={getProfitLossColor(lucroPrejuizo)}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
+        <p className={profitLossColorClass}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
       </div>
     );
   }
