@@ -36,7 +36,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     monthNumber: currentMonth + 1,
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
-    location: 'Brasil', // Default location
+    location: 'Gringa', // Alterado para 'Gringa'
     strategy: defaultStrategy,
     impressions: '',
     clicks: '',
@@ -72,7 +72,8 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
   // Reset product name if the selected location changes and the current product is no longer valid
   const handleLocationChange = (newLocation: string) => {
     setFormData(prev => {
-      const isCurrentProductValid = filteredProducts.some(p => p.name === prev.productName);
+      const productsInNewLocation = products.filter(p => p.country === newLocation);
+      const isCurrentProductValid = productsInNewLocation.some(p => p.name === prev.productName);
       return {
         ...prev,
         location: newLocation,
@@ -151,7 +152,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
       monthNumber: currentMonth + 1,
       startDate: new Date().toISOString().split('T')[0],
       endDate: '',
-      location: 'Brasil',
+      location: 'Gringa', // Alterado para 'Gringa'
       strategy: currentDefaultStrategy,
       impressions: '',
       clicks: '',
