@@ -9,7 +9,7 @@ import { CampaignResult, MONTHS, Product } from '@/types';
 import { toast } from 'sonner';
 import { Globe, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, setDate, setMonth, setYear, format } from 'date-fns';
 import { useSettings } from '@/hooks/useSettings'; // Import useSettings
 
 interface AddCampaignDialogProps {
@@ -157,10 +157,50 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
 
   const handleMonthChange = (month: string) => {
     const monthIndex = MONTHS.findIndex(m => m === month);
-    setFormData(prev => ({
-      ...prev,
-      month,
-      monthNumber: monthIndex + 1,
+    const yearInt = parseInt(formData.year);
+    
+    if (monthIndex !== -1) {
+      // Calculate the first day of the selected month/year
+      let date = new Date();
+      date = setYear(date, yearInt);
+      date = setMonth(date, monthIndex);
+      date = setDate(date, 1); // Set day to 1
+      
+      const newStartDate = format(date, 'yyyy-MM-dd');
+
+      setFormData(prev => ({
+        ...prev,
+        month,
+        monthNumber: monthIndex + 1,
+        startDate: newStartDate, // Update start date
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        month,
+        monthNumber: 0,
+      }));
+    }
+  };
+  
+  // Handle Year change to update startDate
+  const handleYearChange = (yearStr: string) => {
+    const yearInt = parseInt(yearStr);
+    const monthIndex = MONTHS.findIndex(m => m === formData.month);
+    
+    let newStartDate = formData.startDate;
+    if (monthIndex !== -1) {
+      let date = new Date();
+      date = setYear(date, yearInt);
+      date = setMonth(date, monthIndex);
+      date = setDate(date, 1);
+      newStartDate = format(date, 'yyyy-MM-dd');
+    }
+    
+    setFormData(prev => ({ 
+      ...prev, 
+      year: yearStr,
+      startDate: newStartDate,
     }));
   };
 
@@ -221,7 +261,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
             
             <div>
               <Label htmlFor="year">Ano</Label>
-              <Select value={formData.year} onValueChange={(v) => setFormData(prev => ({ ...prev, year: v }))}>
+              <Select value={formData.year} onValueChange={handleYearChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
