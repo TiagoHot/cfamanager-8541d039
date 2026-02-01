@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatCurrency } from "@/lib/formatters";
+import { formatCurrency, getProfitLossColor } from "@/lib/formatters";
 import { DollarSign, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { 
   BarChart, 
@@ -21,6 +21,26 @@ import { useMemo, useState } from "react";
 import { useCashFlowData } from "@/hooks/useCashFlowData";
 import { cn } from "@/lib/utils";
 import { PageContent } from "@/components/PageContent"; // Import PageContent
+
+// Custom Tooltip Component for Monthly Bar Chart
+const CustomCashFlowTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    // payload contains data for all bars at this index (month)
+    const receitas = payload.find((p: any) => p.dataKey === 'receitas')?.value || 0;
+    const despesas = payload.find((p: any) => p.dataKey === 'despesas')?.value || 0;
+    const lucroPrejuizo = receitas - despesas;
+
+    return (
+      <div className="p-3 bg-card border border-border rounded-lg shadow-lg text-sm">
+        <p className="font-semibold mb-1">{label}</p>
+        <p className="text-success">Receitas : {formatCurrency(receitas)}</p>
+        <p className="text-destructive">Despesas : {formatCurrency(despesas)}</p>
+        <p className={getProfitLossColor(lucroPrejuizo)}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function CashFlowPage() {
   const { incomeExpenses } = useData();
@@ -147,11 +167,12 @@ export default function CashFlowPage() {
                       <XAxis dataKey="month" className="text-xs" />
                       <YAxis className="text-xs" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
                       <Tooltip 
-                        formatter={(value: number) => formatCurrency(value)}
-                        contentStyle={{ 
+                        content={<CustomCashFlowTooltip />} // Use o componente de tooltip personalizado
+                        wrapperStyle={{ 
                           backgroundColor: 'hsl(var(--card))', 
                           border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
+                          borderRadius: '8px',
+                          outline: 'none' // Remove default focus outline
                         }}
                       />
                       <Legend />
