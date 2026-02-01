@@ -356,7 +356,7 @@ export default function CampaignsPage() {
                   {formatMonthName(month)} de {year}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  {campaigns.length} campanhas registradas
+                  {campaigns.length} produtos registrados
                 </p>
               </CardHeader>
               <CardContent className="p-0">
