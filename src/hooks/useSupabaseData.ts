@@ -214,6 +214,64 @@ export function useSupabaseData() {
     return true;
   }, [user]);
   
+  const insertCampaignInDB = useCallback(async (campaign: CampaignResult): Promise<CampaignResult | null> => {
+    if (!user) return null;
+    
+    const { data, error } = await supabase
+      .from('campaign_results')
+      .insert({
+        user_id: user.id,
+        year: campaign.year,
+        month_number: campaign.monthNumber,
+        month: campaign.month,
+        start_date: formatDateToISO(campaign.startDate),
+        end_date: formatDateToISO(campaign.endDate),
+        days_running: campaign.daysRunning ? Math.round(campaign.daysRunning) : null,
+        product_name: campaign.productName,
+        location: campaign.location || null,
+        strategy: campaign.strategy || null,
+        commission_brl: campaign.commissionBRL || null,
+        impressions: campaign.impressions ? Math.round(campaign.impressions) : null,
+        clicks: campaign.clicks ? Math.round(campaign.clicks) : null,
+        sales: campaign.sales ? Math.round(campaign.sales) : null,
+        cpc: campaign.cpc || null,
+        earnings: campaign.earnings || null,
+        costs: campaign.costs || null,
+        profit_loss: campaign.profitLoss || null,
+        roi: campaign.roi || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error inserting campaign:', error);
+      return null;
+    }
+    
+    // Map the returned data back to CampaignResult type
+    return {
+      id: data.id,
+      year: data.year,
+      monthNumber: data.month_number,
+      month: data.month,
+      startDate: data.start_date || '',
+      endDate: data.end_date || '',
+      daysRunning: data.days_running || 0,
+      productName: data.product_name,
+      location: data.location || '',
+      strategy: data.strategy || '',
+      commissionBRL: data.commission_brl || 0,
+      impressions: data.impressions || 0,
+      clicks: data.clicks || 0,
+      sales: data.sales || 0,
+      cpc: data.cpc || 0,
+      earnings: data.earnings || 0,
+      costs: data.costs || 0,
+      profitLoss: data.profit_loss || 0,
+      roi: data.roi || 0,
+    };
+  }, [user]);
+  
   const updateCampaignInDB = useCallback(async (campaign: CampaignResult): Promise<boolean> => {
     if (!user) return false;
     
@@ -409,6 +467,7 @@ export function useSupabaseData() {
     saveCampaigns,
     saveWeeklyResults,
     saveIncomeExpenses,
+    insertCampaignInDB, // Exporting new function
     updateCampaignInDB,
     deleteCampaignFromDB,
     insertIncomeExpenseInDB,

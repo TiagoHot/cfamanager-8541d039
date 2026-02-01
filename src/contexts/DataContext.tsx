@@ -54,6 +54,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     saveCampaigns,
     saveWeeklyResults,
     saveIncomeExpenses,
+    insertCampaignInDB, // NEW
     updateCampaignInDB,
     deleteCampaignFromDB,
     insertIncomeExpenseInDB,
@@ -151,15 +152,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [products, setProducts]);
 
   const addCampaign = useCallback(async (campaign: CampaignResult) => {
-    const newCampaigns = [...campaigns, campaign];
-    // Since addCampaign is called from a dialog, we assume it's a new item and needs full save/refresh or individual insert.
-    // For simplicity and consistency with existing save logic (which overwrites all), we'll rely on the full save during import, 
-    // but for individual additions, we'll just update the local state for now, assuming the user will eventually import/save all data.
-    // However, since we are adding update/delete, let's ensure we use the full save for consistency if we modify the list.
-    // For now, let's update the local state and rely on the user's next full save/import to persist.
-    setCampaignsState(newCampaigns);
-    // If we were using individual inserts, we would call an `insertCampaignInDB` here.
-  }, [campaigns]);
+    // Insert into database first to get the real ID
+    const insertedCampaign = await insertCampaignInDB(campaign);
+    
+    if (insertedCampaign) {
+      setCampaignsState(prev => [...prev, insertedCampaign]);
+      toast.success('Campanha adicionada com sucesso!');
+    } else {
+      toast.error('Erro ao salvar campanha');
+    }
+  }, [insertCampaignInDB]);
   
   const updateCampaign = useCallback(async (updatedCampaign: CampaignResult) => {
     const newCampaigns = campaigns.map(c => 
