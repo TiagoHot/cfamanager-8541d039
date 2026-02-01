@@ -17,14 +17,23 @@ export function formatPercent(value: number): string {
 
 export function formatDate(dateString: string): string {
   if (!dateString) return '-';
-  const date = new Date(dateString);
+  
+  // Parse YYYY-MM-DD string as a local date to avoid timezone issues
+  const parts = dateString.split('-').map(Number);
+  // Date constructor: new Date(year, monthIndex, day)
+  // monthIndex is 0-based, so subtract 1 from the month part
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+
   if (isNaN(date.getTime())) return '-';
   return new Intl.DateTimeFormat('pt-BR').format(date);
 }
 
 export function formatDateShort(dateString: string): string {
   if (!dateString) return '-';
-  const date = new Date(dateString);
+  // Parse YYYY-MM-DD string as a local date
+  const parts = dateString.split('-').map(Number);
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+
   if (isNaN(date.getTime())) return '-';
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
