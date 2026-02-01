@@ -26,6 +26,9 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
   
+  // Determine the default strategy: prioritize 'Pesquisa' if it exists, otherwise use the first available or 'Pesquisa' as fallback.
+  const defaultStrategy = strategies.includes('Pesquisa') ? 'Pesquisa' : strategies[0] || 'Pesquisa';
+
   const [formData, setFormData] = useState({
     productName: '',
     year: currentYear.toString(),
@@ -34,7 +37,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     location: 'Brasil', // Default location
-    strategy: strategies[0] || 'Pesquisa', // Use first strategy or default
+    strategy: defaultStrategy,
     impressions: '',
     clicks: '',
     sales: '',
@@ -138,6 +141,9 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
   };
 
   const resetForm = () => {
+    // Recalculate default strategy on reset
+    const currentDefaultStrategy = strategies.includes('Pesquisa') ? 'Pesquisa' : strategies[0] || 'Pesquisa';
+
     setFormData({
       productName: '',
       year: currentYear.toString(),
@@ -146,7 +152,7 @@ export function AddCampaignDialog({ onAdd, children, products }: AddCampaignDial
       startDate: new Date().toISOString().split('T')[0],
       endDate: '',
       location: 'Brasil',
-      strategy: strategies[0] || 'Pesquisa',
+      strategy: currentDefaultStrategy,
       impressions: '',
       clicks: '',
       sales: '',
