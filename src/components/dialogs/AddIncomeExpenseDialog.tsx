@@ -9,6 +9,7 @@ import { IncomeExpense, MONTHS } from '@/types';
 import { toast } from 'sonner';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings'; // Import useSettings
+import { setDate, setMonth, setYear, format } from 'date-fns'; // Import date-fns utilities
 
 interface AddIncomeExpenseDialogProps {
   onAdd: (item: IncomeExpense) => void;
@@ -18,18 +19,32 @@ interface AddIncomeExpenseDialogProps {
 export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDialogProps) {
   const { incomeSources, expenseSources } = useSettings(); // Use dynamic sources
   const [open, setOpen] = useState(false);
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth();
   
+  const getInitialFormData = () => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0-indexed
+    const defaultDate = format(setDate(setMonth(setYear(today, currentYear), currentMonth), 1), 'yyyy-MM-dd');
+
+    return {
+      year: currentYear.toString(),
+      month: MONTHS[currentMonth],
+      date: defaultDate,
+      source: '',
+      details: '',
+      amount: '',
+    };
+  };
+
   const [type, setType] = useState<'income' | 'expense'>('income');
-  const [formData, setFormData] = useState({
-    year: currentYear.toString(),
-    month: MONTHS[currentMonth],
-    date: new Date().toISOString().split('T')[0],
-    source: '',
-    details: '',
-    amount: '',
-  });
+  const [formData, setFormData] = useState(getInitialFormData());
+
+  // Reset form data when dialog opens
+  useState(() => {
+    if (open) {
+      setFormData(getInitialFormData());
+    }
+  }, [open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,17 +72,50 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
 
     onAdd(newItem);
     setOpen(false);
-    resetForm();
+    // No need to call resetForm here, as the useState effect handles it when dialog re-opens
   };
 
-  const resetForm = () => {
-    setFormData({
-      year: currentYear.toString(),
-      month: MONTHS[currentMonth],
-      date: new Date().toISOString().split('T')[0],
-      source: '',
-      details: '',
-      amount: '',
+  const handleMonthChange = (newMonth: string) => {
+    setFormData(prev => {
+      const monthIndex = MONTHS.findIndex(m => m === newMonth);
+      const yearInt = parseInt(prev.year);
+
+      let newDate = prev.date;
+      if (monthIndex !== -1) {
+        let dateObj = new Date();
+        dateObj = setYear(dateObj, yearInt);
+        dateObj = setMonth(dateObj, monthIndex);
+        dateObj = setDate(dateObj, 1); // Set day to 1
+        newDate = format(dateObj, 'yyyy-MM-dd');
+      }
+
+      return {
+        ...prev,
+        month: newMonth,
+        date: newDate,
+      };
+    });
+  };
+
+  const handleYearChange = (newYearStr: string) => {
+    setFormData(prev => {
+      const yearInt = parseInt(newYearStr);
+      const monthIndex = MONTHS.findIndex(m => m === prev.month);
+
+      let newDate = prev.date;
+      if (monthIndex !== -1) {
+        let dateObj = new Date();
+        dateObj = setYear(dateObj, yearInt);
+        dateObj = setMonth(dateObj, monthIndex);
+        dateObj = setDate(dateObj, 1); // Set day to 1
+        newDate = format(dateObj, 'yyyy-MM-dd');
+      }
+
+      return {
+        ...prev,
+        year: newYearStr,
+        date: newDate,
+      };
     });
   };
 
@@ -101,12 +149,12 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="year">Ano</Label>
-              <Select value={formData.year} onValueChange={(v) => setFormData(prev => ({ ...prev, year: v }))}>
+              <Select value={formData.year} onValueChange={handleYearChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {[currentYear, currentYear - 1, currentYear - 2].map(y => (
+                  {[new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() - 2].map(y => (
                     <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
                   ))}
                 </SelectContent>
@@ -115,7 +163,7 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
 
             <div>
               <Label htmlFor="month">Mês</Label>
-              <Select value={formData.month} onValueChange={(v) => setFormData(prev => ({ ...prev, month: v }))}>
+              <Select value={formData.month} onValueChange={handleMonthChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
