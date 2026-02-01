@@ -30,12 +30,15 @@ const CustomCashFlowTooltip = ({ active, payload, label }: any) => {
     const despesas = payload.find((p: any) => p.dataKey === 'despesas')?.value || 0;
     const lucroPrejuizo = receitas - despesas;
 
+    // Apply specific colors for this tooltip
+    const profitLossColorClass = lucroPrejuizo > 0 ? 'text-info' : (lucroPrejuizo < 0 ? 'text-warning' : 'text-muted-foreground');
+
     return (
       <div className="p-3 bg-card border border-border rounded-lg shadow-lg text-sm">
         <p className="font-semibold mb-1">{label}</p>
         <p className="text-success">Receitas : {formatCurrency(receitas)}</p>
         <p className="text-destructive">Despesas : {formatCurrency(despesas)}</p>
-        <p className={getProfitLossColor(lucroPrejuizo)}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
+        <p className={profitLossColorClass}>Lucro/Prejuízo : {formatCurrency(lucroPrejuizo)}</p>
       </div>
     );
   }

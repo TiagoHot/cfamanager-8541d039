@@ -42,8 +42,8 @@ export function formatDateShort(dateString: string): string {
 }
 
 export function getProfitLossColor(value: number): string {
-  if (value > 0) return 'text-info'; // Azul para lucro
-  if (value < 0) return 'text-warning'; // Amarelo para prejuízo
+  if (value > 0) return 'text-success'; // Verde para lucro
+  if (value < 0) return 'text-destructive'; // Vermelho para prejuízo
   return 'text-muted-foreground';
 }
 
