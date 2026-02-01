@@ -9,7 +9,7 @@ import { IncomeExpense, MONTHS } from '@/types';
 import { toast } from 'sonner';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings'; // Import useSettings
-import { setDate, setMonth, setYear, format } from 'date-fns'; // Import date-fns utilities
+import { setDate, setMonth, setYear, format, endOfMonth } from 'date-fns'; // Import endOfMonth
 
 interface AddIncomeExpenseDialogProps {
   onAdd: (item: IncomeExpense) => void;
@@ -24,7 +24,8 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth(); // 0-indexed
-    const defaultDate = format(setDate(setMonth(setYear(today, currentYear), currentMonth), 1), 'yyyy-MM-dd');
+    // Set to the last day of the current month
+    const defaultDate = format(endOfMonth(setMonth(setYear(today, currentYear), currentMonth)), 'yyyy-MM-dd');
 
     return {
       year: currentYear.toString(),
@@ -85,7 +86,7 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
         let dateObj = new Date();
         dateObj = setYear(dateObj, yearInt);
         dateObj = setMonth(dateObj, monthIndex);
-        dateObj = setDate(dateObj, 1); // Set day to 1
+        dateObj = endOfMonth(dateObj); // Set to the last day of the month
         newDate = format(dateObj, 'yyyy-MM-dd');
       }
 
@@ -107,7 +108,7 @@ export function AddIncomeExpenseDialog({ onAdd, children }: AddIncomeExpenseDial
         let dateObj = new Date();
         dateObj = setYear(dateObj, yearInt);
         dateObj = setMonth(dateObj, monthIndex);
-        dateObj = setDate(dateObj, 1); // Set day to 1
+        dateObj = endOfMonth(dateObj); // Set to the last day of the month
         newDate = format(dateObj, 'yyyy-MM-dd');
       }
 
