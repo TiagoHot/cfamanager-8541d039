@@ -353,6 +353,10 @@ export default function CampaignsPage() {
         ) : (
           groupedCampaigns.map(({ year, month, campaigns }) => {
             const profitableProductsCount = campaigns.filter(c => c.profitLoss > 0).length;
+            const monthlyTotalEarnings = campaigns.reduce((sum, c) => sum + c.earnings, 0);
+            const monthlyTotalCosts = campaigns.reduce((sum, c) => sum + c.costs, 0);
+            const monthlyTotalProfitLoss = monthlyTotalEarnings - monthlyTotalCosts;
+
             return (
               <Card key={`${year}-${month}`}>
                 <CardHeader className="pb-3">
@@ -369,6 +373,23 @@ export default function CampaignsPage() {
                   </p>
                 </CardHeader>
                 <CardContent className="p-0">
+                  {/* Monthly Totals Summary */}
+                  <div className="grid grid-cols-3 gap-4 p-4 border-b bg-muted/50">
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground">Ganhos Totais</p>
+                      <p className="text-lg font-bold text-success">{formatCurrency(monthlyTotalEarnings)}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground">Custos Totais</p>
+                      <p className="text-lg font-bold text-destructive">{formatCurrency(monthlyTotalCosts)}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground">Lucro/Prejuízo</p>
+                      <p className={cn("text-lg font-bold", getProfitLossColor(monthlyTotalProfitLoss))}>
+                        {formatCurrency(monthlyTotalProfitLoss)}
+                      </p>
+                    </div>
+                  </div>
                   <DataTable 
                     data={campaigns} 
                     columns={columns}
