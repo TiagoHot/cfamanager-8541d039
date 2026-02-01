@@ -351,25 +351,33 @@ export default function CampaignsPage() {
             </CardContent>
           </Card>
         ) : (
-          groupedCampaigns.map(({ year, month, campaigns }) => (
-            <Card key={`${year}-${month}`}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-xl">
-                  {formatMonthName(month)} de {year}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {campaigns.length} produtos registrados
-                </p>
-              </CardHeader>
-              <CardContent className="p-0">
-                <DataTable 
-                  data={campaigns} 
-                  columns={columns}
-                  // Removendo sticky header, pois o PageContent já gerencia a rolagem
-                />
-              </CardContent>
-            </Card>
-          ))
+          groupedCampaigns.map(({ year, month, campaigns }) => {
+            const profitableProductsCount = campaigns.filter(c => c.profitLoss > 0).length;
+            return (
+              <Card key={`${year}-${month}`}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl">
+                    {formatMonthName(month)} de {year}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {campaigns.length} produtos registrados 
+                    {profitableProductsCount > 0 && (
+                      <span className="ml-2 text-success font-medium">
+                        ({profitableProductsCount} com lucro)
+                      </span>
+                    )}
+                  </p>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <DataTable 
+                    data={campaigns} 
+                    columns={columns}
+                    // Removendo sticky header, pois o PageContent já gerencia a rolagem
+                  />
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </PageContent>
     </div>
