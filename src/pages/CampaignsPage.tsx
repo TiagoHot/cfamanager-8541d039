@@ -270,10 +270,12 @@ export default function CampaignsPage() {
         );
         
         for (const month of sortedMonths) {
+            // Sort campaigns within each month by profitLoss descending
+            const sortedCampaignsInMonth = monthMap.get(month)!.sort((a, b) => b.profitLoss - a.profitLoss);
             finalGroups.push({
                 year,
                 month,
-                campaigns: monthMap.get(month)!
+                campaigns: sortedCampaignsInMonth
             });
         }
     }
