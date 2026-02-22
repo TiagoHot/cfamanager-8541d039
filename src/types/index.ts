@@ -46,6 +46,8 @@ export interface WeeklyResult {
   campaignCosts: number;
   sales: number;
   campaignEarnings: number;
+  campaignEarningsUSD: number;
+  campaignEarningsEUR: number;
   organicEarnings: number;
   adsenseEarnings: number;
   revenue: number;

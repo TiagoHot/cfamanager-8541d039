@@ -184,6 +184,8 @@ export type Database = {
           adsense_earnings: number | null
           campaign_costs: number | null
           campaign_earnings: number | null
+          campaign_earnings_eur: number | null
+          campaign_earnings_usd: number | null
           created_at: string | null
           id: string
           month: string
@@ -200,6 +202,8 @@ export type Database = {
           adsense_earnings?: number | null
           campaign_costs?: number | null
           campaign_earnings?: number | null
+          campaign_earnings_eur?: number | null
+          campaign_earnings_usd?: number | null
           created_at?: string | null
           id?: string
           month: string
@@ -216,6 +220,8 @@ export type Database = {
           adsense_earnings?: number | null
           campaign_costs?: number | null
           campaign_earnings?: number | null
+          campaign_earnings_eur?: number | null
+          campaign_earnings_usd?: number | null
           created_at?: string | null
           id?: string
           month?: string

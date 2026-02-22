@@ -447,6 +447,8 @@ export const useExcelImport = () => {
         campaignCosts,
         sales: parseNumber(row[5]),
         campaignEarnings,
+        campaignEarningsUSD: 0,
+        campaignEarningsEUR: 0,
         organicEarnings,
         adsenseEarnings,
         revenue,

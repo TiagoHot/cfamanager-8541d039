@@ -67,8 +67,8 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
         campaignCosts: result.campaignCosts.toString(),
         sales: result.sales.toString(),
         campaignEarningsBRL: result.campaignEarnings.toString(),
-        campaignEarningsUSD: '',
-        campaignEarningsEUR: '',
+        campaignEarningsUSD: result.campaignEarningsUSD?.toString() || '',
+        campaignEarningsEUR: result.campaignEarningsEUR?.toString() || '',
         organicEarnings: result.organicEarnings.toString(),
         adsenseEarnings: result.adsenseEarnings.toString(),
       });
@@ -84,10 +84,10 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
     }
 
     const campaignCosts = parseFloat(formData.campaignCosts) || 0;
-    const campaignEarnings = campaignEarningsTotal; // Use calculated total from all currencies
+    const campaignEarningsBRL = parseFloat(formData.campaignEarningsBRL) || 0;
     const organicEarnings = parseFloat(formData.organicEarnings) || 0;
     const adsenseEarnings = parseFloat(formData.adsenseEarnings) || 0;
-    const revenue = campaignEarnings + organicEarnings + adsenseEarnings;
+    const revenue = campaignEarningsTotal + organicEarnings + adsenseEarnings;
     const profitLoss = revenue - campaignCosts;
 
     const updatedResult: WeeklyResult = {
@@ -98,7 +98,9 @@ export function EditWeeklyResultDialog({ result, onUpdate, children }: EditWeekl
       period: formData.period,
       campaignCosts,
       sales: parseInt(formData.sales) || 0,
-      campaignEarnings,
+      campaignEarnings: campaignEarningsBRL,
+      campaignEarningsUSD: parseFloat(formData.campaignEarningsUSD) || 0,
+      campaignEarningsEUR: parseFloat(formData.campaignEarningsEUR) || 0,
       organicEarnings,
       adsenseEarnings,
       revenue,
