@@ -183,21 +183,23 @@ export function AddWeeklyResultDialog({ onAdd, children, weeklyResults }: AddWee
     }
 
     const campaignCosts = parseFloat(formData.campaignCosts) || 0;
-    const campaignEarnings = campaignEarningsTotal; // Use calculated total from all currencies
+    const campaignEarningsBRL = parseFloat(formData.campaignEarningsBRL) || 0;
     const organicEarnings = parseFloat(formData.organicEarnings) || 0;
     const adsenseEarnings = parseFloat(formData.adsenseEarnings) || 0;
-    const revenue = campaignEarnings + organicEarnings + adsenseEarnings;
+    const revenue = campaignEarningsTotal + organicEarnings + adsenseEarnings;
     const profitLoss = revenue - campaignCosts;
 
     const newResult: WeeklyResult = {
       id: `week-new-${Date.now()}`,
       week: formData.week.toUpperCase(),
       year: parseInt(formData.year),
-      month: formData.month.trim(), // Allow composite month string
+      month: formData.month.trim(),
       period: formData.period,
       campaignCosts,
       sales: parseInt(formData.sales) || 0,
-      campaignEarnings,
+      campaignEarnings: campaignEarningsBRL,
+      campaignEarningsUSD: parseFloat(formData.campaignEarningsUSD) || 0,
+      campaignEarningsEUR: parseFloat(formData.campaignEarningsEUR) || 0,
       organicEarnings,
       adsenseEarnings,
       revenue,

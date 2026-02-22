@@ -23,12 +23,12 @@ export const mockCampaignResults: CampaignResult[] = [
 ];
 
 export const mockWeeklyResults: WeeklyResult[] = [
-  { id: '1', week: 'S3', year: 2025, month: 'Jan', period: '19/01 - 25/01', campaignCosts: 635.31, sales: 8, campaignEarnings: 1014.74, organicEarnings: 876.08, adsenseEarnings: 130.00, revenue: 2020.82, profitLoss: 1385.51 },
-  { id: '2', week: 'S2', year: 2025, month: 'Jan', period: '12/01 - 18/01', campaignCosts: 1179.33, sales: 9, campaignEarnings: 562.74, organicEarnings: 718.44, adsenseEarnings: 126.00, revenue: 1407.18, profitLoss: 227.85 },
-  { id: '3', week: 'S1', year: 2025, month: 'Jan', period: '05/01 - 11/01', campaignCosts: 2128.94, sales: 28, campaignEarnings: 5538.22, organicEarnings: 932.39, adsenseEarnings: 100.00, revenue: 6570.61, profitLoss: 4441.67 },
-  { id: '4', week: 'S14', year: 2024, month: 'Mar/Abr', period: '31/03 - 06/04', campaignCosts: 3526.47, sales: 12, campaignEarnings: 6862.84, organicEarnings: 163.46, adsenseEarnings: 75.00, revenue: 7101.31, profitLoss: 3574.84 },
-  { id: '5', week: 'S13', year: 2024, month: 'Mar', period: '24/03 - 30/03', campaignCosts: 2696.45, sales: 9, campaignEarnings: 7078.50, organicEarnings: 97.80, adsenseEarnings: 65.00, revenue: 7241.30, profitLoss: 4544.85 },
-  { id: '6', week: 'S12', year: 2024, month: 'Mar', period: '17/03 - 23/03', campaignCosts: 6041.25, sales: 15, campaignEarnings: 9001.70, organicEarnings: 462.76, adsenseEarnings: 0, revenue: 9464.46, profitLoss: 3423.21 },
+  { id: '1', week: 'S3', year: 2025, month: 'Jan', period: '19/01 - 25/01', campaignCosts: 635.31, sales: 8, campaignEarnings: 1014.74, campaignEarningsUSD: 0, campaignEarningsEUR: 0, organicEarnings: 876.08, adsenseEarnings: 130.00, revenue: 2020.82, profitLoss: 1385.51 },
+  { id: '2', week: 'S2', year: 2025, month: 'Jan', period: '12/01 - 18/01', campaignCosts: 1179.33, sales: 9, campaignEarnings: 562.74, campaignEarningsUSD: 0, campaignEarningsEUR: 0, organicEarnings: 718.44, adsenseEarnings: 126.00, revenue: 1407.18, profitLoss: 227.85 },
+  { id: '3', week: 'S1', year: 2025, month: 'Jan', period: '05/01 - 11/01', campaignCosts: 2128.94, sales: 28, campaignEarnings: 5538.22, campaignEarningsUSD: 0, campaignEarningsEUR: 0, organicEarnings: 932.39, adsenseEarnings: 100.00, revenue: 6570.61, profitLoss: 4441.67 },
+  { id: '4', week: 'S14', year: 2024, month: 'Mar/Abr', period: '31/03 - 06/04', campaignCosts: 3526.47, sales: 12, campaignEarnings: 6862.84, campaignEarningsUSD: 0, campaignEarningsEUR: 0, organicEarnings: 163.46, adsenseEarnings: 75.00, revenue: 7101.31, profitLoss: 3574.84 },
+  { id: '5', week: 'S13', year: 2024, month: 'Mar', period: '24/03 - 30/03', campaignCosts: 2696.45, sales: 9, campaignEarnings: 7078.50, campaignEarningsUSD: 0, campaignEarningsEUR: 0, organicEarnings: 97.80, adsenseEarnings: 65.00, revenue: 7241.30, profitLoss: 4544.85 },
+  { id: '6', week: 'S12', year: 2024, month: 'Mar', period: '17/03 - 23/03', campaignCosts: 6041.25, sales: 15, campaignEarnings: 9001.70, campaignEarningsUSD: 0, campaignEarningsEUR: 0, organicEarnings: 462.76, adsenseEarnings: 0, revenue: 9464.46, profitLoss: 3423.21 },
 ];
 
 export const mockIncomeExpenses: IncomeExpense[] = [

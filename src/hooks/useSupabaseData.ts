@@ -100,7 +100,7 @@ export function useSupabaseData() {
       return [];
     }
 
-    return data.map((w) => ({
+    return data.map((w: any) => ({
       id: w.id,
       week: w.week,
       year: w.year,
@@ -109,6 +109,8 @@ export function useSupabaseData() {
       campaignCosts: w.campaign_costs || 0,
       sales: w.sales || 0,
       campaignEarnings: w.campaign_earnings || 0,
+      campaignEarningsUSD: w.campaign_earnings_usd || 0,
+      campaignEarningsEUR: w.campaign_earnings_eur || 0,
       organicEarnings: w.organic_earnings || 0,
       adsenseEarnings: w.adsense_earnings || 0,
       revenue: w.revenue || 0,
@@ -341,6 +343,8 @@ export function useSupabaseData() {
         campaign_costs: w.campaignCosts || null,
         sales: w.sales ? Math.round(w.sales) : null,
         campaign_earnings: w.campaignEarnings || null,
+        campaign_earnings_usd: w.campaignEarningsUSD || null,
+        campaign_earnings_eur: w.campaignEarningsEUR || null,
         organic_earnings: w.organicEarnings || null,
         adsense_earnings: w.adsenseEarnings || null,
         revenue: w.revenue || null,
