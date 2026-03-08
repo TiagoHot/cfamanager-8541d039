@@ -118,9 +118,13 @@ export default function WeeklyResultsPage() {
       key: 'campaignEarnings',
       header: 'Ganhos Campanhas',
       className: 'text-left bg-success/5',
-      render: (item: WeeklyResult) => (
-        <span className="text-foreground">{formatCurrency(item.campaignEarnings)}</span>
-      ),
+      render: (item: WeeklyResult) => {
+        const totalBRL =
+          item.campaignEarnings +
+          item.campaignEarningsUSD * rates.Dollar +
+          item.campaignEarningsEUR * rates.Euro;
+        return <span className="text-foreground">{formatCurrency(totalBRL)}</span>;
+      },
     },
     {
       key: 'organicEarnings',
