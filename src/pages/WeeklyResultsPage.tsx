@@ -214,7 +214,7 @@ export default function WeeklyResultsPage() {
         </DropdownMenu>
       ),
     },
-  ], [updateWeeklyResult, removeWeeklyResult, maxSales]);
+  ], [updateWeeklyResult, removeWeeklyResult, maxSales, rates]);
 
   // Get unique years for filters
   const years = useMemo(() => {
