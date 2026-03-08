@@ -59,6 +59,7 @@ export default function WeeklyResultsPage() {
 
   // Define columns inside the component to use updateWeeklyResult and removeWeeklyResult
   const columns = useMemo(() => [
+
     {
       key: 'week',
       header: 'Semana',
