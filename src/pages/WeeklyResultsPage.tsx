@@ -47,6 +47,7 @@ const getMonthNumber = (month: string): number => {
 
 export default function WeeklyResultsPage() {
   const { weeklyResults, importData, addWeeklyResult, updateWeeklyResult, removeWeeklyResult } = useData();
+  const { rates } = useCurrencyRates();
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
