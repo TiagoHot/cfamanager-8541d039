@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageContent } from "@/components/PageContent";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useCurrencyRates } from "@/contexts/CurrencyRatesContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -46,6 +47,7 @@ const getMonthNumber = (month: string): number => {
 
 export default function WeeklyResultsPage() {
   const { weeklyResults, importData, addWeeklyResult, updateWeeklyResult, removeWeeklyResult } = useData();
+  const { rates } = useCurrencyRates();
   
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [monthFilter, setMonthFilter] = useState<string>("all");
@@ -57,6 +59,7 @@ export default function WeeklyResultsPage() {
 
   // Define columns inside the component to use updateWeeklyResult and removeWeeklyResult
   const columns = useMemo(() => [
+
     {
       key: 'week',
       header: 'Semana',
@@ -115,9 +118,13 @@ export default function WeeklyResultsPage() {
       key: 'campaignEarnings',
       header: 'Ganhos Campanhas',
       className: 'text-left bg-success/5',
-      render: (item: WeeklyResult) => (
-        <span className="text-foreground">{formatCurrency(item.campaignEarnings)}</span>
-      ),
+      render: (item: WeeklyResult) => {
+        const totalBRL =
+          item.campaignEarnings +
+          item.campaignEarningsUSD * rates.Dollar +
+          item.campaignEarningsEUR * rates.Euro;
+        return <span className="text-foreground">{formatCurrency(totalBRL)}</span>;
+      },
     },
     {
       key: 'organicEarnings',
@@ -207,7 +214,7 @@ export default function WeeklyResultsPage() {
         </DropdownMenu>
       ),
     },
-  ], [updateWeeklyResult, removeWeeklyResult, maxSales]);
+  ], [updateWeeklyResult, removeWeeklyResult, maxSales, rates]);
 
   // Get unique years for filters
   const years = useMemo(() => {
